@@ -798,41 +798,52 @@ def filtered_loan_repayments(request):
 
 
 def admin_loan_reports(request):
-    """Generate loan reports"""
     # Default to current month
     month = request.GET.get('month', timezone.now().strftime('%Y-%m'))
     year, month_num = month.split('-')
-    
-    # Monthly statistics
+
+    # Get loan_type filter from query params
+    loan_type_id = request.GET.get('loan_type')
+
+    # Base queryset
     monthly_requests = LoanRequest.objects.filter(
         application_date__year=year,
         application_date__month=month_num
     )
-    
+
+    # Apply loan_type filter if specified
+    if loan_type_id:
+        monthly_requests = monthly_requests.filter(loan_type_id=loan_type_id)
+
     monthly_approvals = monthly_requests.filter(status='approved')
     monthly_rejections = monthly_requests.filter(status='rejected')
-    
-    # Repayment statistics
+
+    # Repayments (filter by loan_type if specified)
     monthly_repayments = LoanRepayback.objects.filter(
         repayment_date__year=year,
         repayment_date__month=month_num
+
     )
-    
-    # Loan type breakdown
+    if loan_type_id:
+        monthly_repayments = monthly_repayments.filter(loan_request__loan_type_id=loan_type_id)
+
+    # Loan type breakdown (for all types)
     loan_type_stats = LoanType.objects.annotate(
         total_requests=Count('loanrequest'),
         total_approved=Count('loanrequest', filter=Q(loanrequest__status='approved')),
         total_amount=Sum('loanrequest__approved_amount', filter=Q(loanrequest__status='approved'))
     )
-    
+
     context = {
         'selected_month': month,
+        'selected_loan_type': int(loan_type_id) if loan_type_id else None,
         'monthly_requests': monthly_requests.count(),
         'monthly_approvals': monthly_approvals.count(),
         'monthly_rejections': monthly_rejections.count(),
         'monthly_approved_amount': monthly_approvals.aggregate(Sum('approved_amount'))['approved_amount__sum'] or 0,
         'monthly_repayments': monthly_repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0,
         'loan_type_stats': loan_type_stats,
+        'loan_types': LoanType.objects.all(),  # For dropdown in the template
     }
     return render(request, 'loan/reports.html', context)
 

@@ -16,14 +16,9 @@
         --light-bg: #f8fafc;
         --dark-text: #1e293b;
         --border-color: #e2e8f0;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
     }
-
-    /* .report-body {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        padding: 1rem 0;
-    } */
 
     .main-container {
         background: white;
@@ -35,11 +30,12 @@
     }
 
     .header-section {
-        background: linear-gradient(135deg, var(--primary-color), #3b82f6);
-        color: white;
-        padding: 2rem;
+        /* background: linear-gradient(135deg, var(--primary-color), #3b82f6); */
+        color: rgb(0, 0, 0);
+        /* padding: 2rem; */
         position: relative;
         overflow: hidden;
+        text-align: center;
     }
 
     .header-section::before {
@@ -81,7 +77,7 @@
         border-radius: 15px;
         padding: 2rem;
         margin-bottom: 2rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
     }
 
     .filter-card h5 {
@@ -123,9 +119,13 @@
         font-weight: 600;
         color: white;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
         cursor: pointer;
         font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
     }
 
     .btn-filter:hover {
@@ -133,6 +133,31 @@
         box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
         background: linear-gradient(135deg, #1d4ed8, var(--primary-color));
         color: white;
+        text-decoration: none;
+    }
+
+    .btn-clear {
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-clear:hover {
+        background-color: #475569;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
     }
 
     .summary-cards {
@@ -147,7 +172,7 @@
         border-radius: 15px;
         padding: 1.5rem;
         text-align: center;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
         border: 1px solid var(--border-color);
         transition: all 0.3s ease;
         position: relative;
@@ -166,7 +191,7 @@
 
     .summary-card:hover {
         transform: translateY(-5px);
-        box-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--hover-shadow);
     }
 
     .summary-card.total { --card-color: var(--primary-color); }
@@ -175,6 +200,7 @@
     .summary-card.pending { --card-color: var(--warning-color); }
     .summary-card.approved { --card-color: var(--primary-color); }
     .summary-card.paid-count { --card-color: var(--success-color); }
+    .summary-card.declined { --card-color: var(--danger-color); }
 
     .summary-card .icon {
         font-size: 2.5rem;
@@ -201,7 +227,7 @@
     .table-container {
         background: white;
         border-radius: 15px;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        box-shadow: var(--card-shadow);
         border: 1px solid var(--border-color);
         overflow: hidden;
     }
@@ -230,7 +256,6 @@
 
     .report-table tbody tr:hover {
         background: rgba(37, 99, 235, 0.05);
-        transform: scale(1.01);
     }
 
     .report-table tbody td {
@@ -313,9 +338,48 @@
 
     .filter-row {
         display: grid;
-        grid-template-columns: 1fr 1fr 1fr 1fr;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
         gap: 1rem;
         align-items: end;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
     }
 
     @media (max-width: 768px) {
@@ -333,13 +397,16 @@
             gap: 1rem;
         }
         
-        .table-container {
-            overflow-x: auto;
-        }
-
         .filter-row {
             grid-template-columns: 1fr;
-            gap: 1rem;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions > * {
+            width: 100%;
         }
     }
 
@@ -353,116 +420,150 @@
     }
 </style>
 
-<div class="report-body">
-    <div class="main-container animate-fade-in">
-        <!-- Header Section -->
-        <!-- <div class="header-section">
-            <div class="header-content">
-                <h1 class="page-title">
-                    <i class="fas fa-clipboard-list me-3"></i>
-                    📋 Consumable Request Status Report
-                </h1>
-                <p class="page-subtitle">Monitor and track all consumable requests across your organization</p>
-            </div>
-        </div> -->
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
 
-        <!-- Content Section -->
-        <div class="content-section">
-            <!-- Filter Form -->
-            <div class="filter-card">
-                <h5>
-                    <i class="fas fa-filter"></i>
-                    Filter Options
-                </h5>
-                <a href="{% url 'request_status_report' %}" class="btn btn-secondary align-items-end justify-content-end">Clear Filters</a>
+<div class="main-container animate-fade-in">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-clipboard-list me-3"></i>
+                Consumable Request Report
+            </h1>
+            <h6 class="page-subtitle text-primary">Monitor and track all consumable requests across your organization</h6>
+        </div>
+    </div>
 
-                <form method="get" class="filter-row">
+    <!-- Content Section -->
+    <div class="content-section">
+        <!-- Filter Form -->
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-filter"></i>
+                Filter Options
+            </h5>
+
+            <form method="get" id="filterForm">
+                <div class="filter-row">
                     <div>
-                        <label class="report-form-label">Status</label>
-                        <select class="report-form-select" name="status">
-                            <option value="all" {% if filters.status == 'all' %}selected{% endif %}>All Statuses</option>
-                            <option value="Pending" {% if filters.status == 'Pending' %}selected{% endif %}>Pending</option>
-                            <option value="Approved" {% if filters.status == 'Approved' %}selected{% endif %}>Approved</option>
-                            <option value="Paid" {% if filters.status == 'Paid' %}selected{% endif %}>Paid</option>
-                            <option value="Declined" {% if filters.status == 'Declined' %}selected{% endif %}>Declined</option>
+                        <label class="report-form-label" for="status">Status</label>
+                        <select class="report-form-select" name="status" id="status">
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
                         </select>
                     </div>
                     <div>
-                        <label class="report-form-label">Date From</label>
-                        <input type="date" class="report-form-control" name="date_from" value="{{ filters.date_from }}">
+                        <label class="report-form-label" for="date_from">Date From</label>
+                        <input type="date" class="report-form-control" name="date_from" id="date_from" value="{{ filters.date_from }}">
                     </div>
                     <div>
-                        <label class="report-form-label">Date To</label>
-                        <input type="date" class="report-form-control" name="date_to" value="{{ filters.date_to }}">
+                        <label class="report-form-label" for="date_to">Date To</label>
+                        <input type="date" class="report-form-control" name="date_to" id="date_to" value="{{ filters.date_to }}">
                     </div>
+                   
                     <div>
-                        <button type="submit" class="btn-filter" style="width: 100%;">
-                            <i class="fas fa-search"></i>
-                            🔍 Apply Filters
-                        </button>
+                        <label class="report-form-label" for="month">Filter by Month</label>
+                        <select name="month" id="month" class="report-form-select">
+                            <option value="">All Months</option>
+                            {% for m in months %}
+                                <option value="{{ m|date:"Y-m" }}" {% if filters.month == m|date:"Y-m" %}selected{% endif %}>
+                                    {{ m|date:"F Y" }}
+                                </option>
+                            {% endfor %}
+                        </select>
                     </div>
+                </div>
 
-                </form>
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-search"></i>
+                        Apply Filters
+                    </button>
+                    <a href="{% url 'request_status_report' %}" class="btn-clear">
+                        <i class="fas fa-times"></i>
+                        Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
 
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card total">
+                <div class="icon">
+                    <!-- <i class="fas fa-list-ul"></i> -->
+                </div>
+                <h6>Total Requests</h6>
+                <p class="value">{{ summary.total_requests }}</p>
             </div>
-
-            <!-- Summary Cards -->
-            <div class="summary-cards">
-                <div class="summary-card total">
-                    <div class="icon">
-                        <!-- <i class="fas fa-list-ul"></i> -->
-                    </div>
-                    <h6>Total Requests</h6>
-                    <p class="value">{{ summary.total_requests }}</p>
+            <div class="summary-card value">
+                <div class="icon">
+                    <!-- <i class="fas fa-money-bill-wave"></i> -->
                 </div>
-                <div class="summary-card value">
-                    <div class="icon">
-                        <!-- <i class="fas fa-money-bill-wave"></i> -->
-                    </div>
-                    <h6>Total Value</h6>
-                    <p class="value">₦{{ summary.total_value|floatformat:2|intcomma }}</p>
-                </div>
-                <div class="summary-card paid">
-                    <div class="icon">
-                        <!-- <i class="fas fa-check-circle"></i> -->
-                    </div>
-                    <h6>Total Paid</h6>
-                    <p class="value">₦{{ summary.total_paid|floatformat:2|intcomma }}</p>
-                </div>
-                <div class="summary-card pending">
-                    <div class="icon">
-                        <!-- <i class="fas fa-clock"></i> -->
-                    </div>
-                    <h6>Pending</h6>
-                    <p class="value">{{ summary.pending_count }}</p>
-                </div>
-                <div class="summary-card approved">
-                    <div class="icon">
-                        <!-- <i class="fas fa-thumbs-up"></i> -->
-                    </div>
-                    <h6>Approved</h6>
-                    <p class="value">{{ summary.approved_count }}</p>
-                </div>
-                <div class="summary-card paid-count">
-                    <div class="icon">
-                        <!-- <i class="fas fa-wallet"></i> -->
-                    </div>
-                    <h6>Paid</h6>
-                    <p class="value">{{ summary.paid_count }}</p>
-                </div>
+                <h6>Total Value</h6>
+                <p class="value">₦{{ summary.total_value|floatformat:2|intcomma }}</p>
             </div>
+            <div class="summary-card paid">
+                <div class="icon">
+                    <!-- <i class="fas fa-check-circle"></i> -->
+                </div>
+                <h6>Total Paid</h6>
+                <p class="value">₦{{ summary.total_paid|floatformat:2|intcomma }}</p>
+            </div>
+            <div class="summary-card pending">
+                <div class="icon">
+                    <!-- <i class="fas fa-clock"></i> -->
+                </div>
+                <h6>Balance Remaining</h6>
+                <p class="value">₦{{ summary.total_balance|floatformat:2|intcomma }}</p>
+            </div>
+            <div class="summary-card pending">
+                <div class="icon">
+                    <!-- <i class="fas fa-hourglass-half"></i> -->
+                </div>
+                <h6>Pending</h6>
+                <p class="value">{{ summary.pending_count }}</p>
+            </div>
+            <div class="summary-card approved">
+                <div class="icon">
+                    <!-- <i class="fas fa-thumbs-up"></i> -->
+                </div>
+                <h6>Approved</h6>
+                <p class="value">{{ summary.approved_count }}</p>
+            </div>
+            <div class="summary-card paid-count">
+                <div class="icon">
+                    <!-- <i class="fas fa-wallet"></i> -->
+                </div>
+                <h6>Paid</h6>
+                <p class="value">{{ summary.paid_count }}</p>
+            </div>
+            <div class="summary-card declined">
+                <div class="icon">
+                    <!-- <i class="fas fa-times-circle"></i> -->
+                </div>
+                <h6>Declined</h6>
+                <p class="value">{{ summary.declined_count }}</p>
+            </div>
+        </div>
 
-            <!-- Data Table -->
-            <div class="table-container">
+        <!-- Data Table -->
+        <div class="table-container">
+            <div class="table-responsive">
                 <table class="report-table">
                     <thead>
                         <tr>
                             <th>ID</th>
                             <th>Member</th>
-                            <th>Date Created</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Date Created</th>
                             <th>Status</th>
-                            <th>Total Price</th>
-                            <th>Total Paid</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Total Price</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Total Paid</th>
                             <th>Balance</th>
                             <th>Items</th>
                         </tr>
@@ -472,7 +573,7 @@
                         <tr>
                             <td><strong>#{{ req.id }}</strong></td>
                             <td>{{ req.user }}</td>
-                            <td>{{ req.date_created|date:"Y-m-d" }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ req.date_created|date:"Y-m-d H:i" }}</td>
                             <td>
                                 <span class="status-badge status-{{ req.status|lower }}">
                                     {{ req.status }}
@@ -481,7 +582,9 @@
                             <td>₦{{ req.total_price|floatformat:2|intcomma }}</td>
                             <td>₦{{ req.total_paid|floatformat:2|intcomma }}</td>
                             <td>₦{{ req.balance|floatformat:2|intcomma }}</td>
-                            <td>{{ req.items_count }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ req.items_count }}</span>
+                            </td>
                         </tr>
                         {% empty %}
                         <tr>
@@ -497,71 +600,104 @@
                     </tbody>
                 </table>
             </div>
-
-            <!-- Pagination -->
-            {% if requests.has_other_pages %}
-            <div class="pagination">
-                <ul>
-                    {% if requests.has_previous %}
-                    <li>
-                        <a class="page-link" href="?page={{ requests.previous_page_number }}&status={{ filters.status }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&user={{ filters.user }}">
-                            <i class="fas fa-chevron-left"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-
-                    {% for num in requests.paginator.page_range %}
-                        {% if requests.number == num %}
-                            <li class="page-item active">
-                                <span class="page-link">{{ num }}</span>
-                            </li>
-                        {% elif num > requests.number|add:'-3' and num < requests.number|add:'3' %}
-                            <li class="page-item">
-                                <a class="page-link" href="?page={{ num }}&status={{ filters.status }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&user={{ filters.user }}">{{ num }}</a>
-                            </li>
-                        {% endif %}
-                    {% endfor %}
-
-                    {% if requests.has_next %}
-                    <li>
-                        <a class="page-link" href="?page={{ requests.next_page_number }}&status={{ filters.status }}&date_from={{ filters.date_from }}&date_to={{ filters.date_to }}&user={{ filters.user }}">
-                            <i class="fas fa-chevron-right"></i>
-                        </a>
-                    </li>
-                    {% endif %}
-                </ul>
-            </div>
-            {% endif %}
         </div>
+
+        <!-- Pagination -->
+        {% if requests.has_other_pages %}
+        <div class="pagination">
+            <ul>
+                {% if requests.has_previous %}
+                <li>
+                    <a class="page-link" href="?page={{ requests.previous_page_number }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in requests.paginator.page_range %}
+                    {% if requests.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > requests.number|add:'-3' and num < requests.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if requests.has_next %}
+                <li>
+                    <a class="page-link" href="?page={{ requests.next_page_number }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
     </div>
 </div>
 
 <script>
-    // Add smooth scrolling and animations
-    document.addEventListener('DOMContentLoaded', function() {
-        // Add hover effects to table rows
-        const tableRows = document.querySelectorAll('.report-table tbody tr');
-        tableRows.forEach(row => {
-            if (!row.querySelector('.empty-state')) {
-                row.addEventListener('mouseenter', function() {
-                    this.style.transform = 'scale(1.02)';
-                });
-                row.addEventListener('mouseleave', function() {
-                    this.style.transform = 'scale(1)';
-                });
-            }
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    // Show loading overlay on form submission
+    if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+            loadingOverlay.style.display = 'flex';
         });
-
-        // Add loading effect to filter button
-        const filterBtn = document.querySelector('.btn-filter');
-        const filterForm = document.querySelector('form');
-        
-        if (filterForm && filterBtn) {
-            filterForm.addEventListener('submit', function() {
-                filterBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Loading...';
-                filterBtn.disabled = true;
+    }
+    
+    // Hide loading overlay when page loads
+    window.addEventListener('load', function() {
+        loadingOverlay.style.display = 'none';
+    });
+    
+    // Add smooth hover effects to table rows
+    const tableRows = document.querySelectorAll('.report-table tbody tr');
+    tableRows.forEach(row => {
+        if (!row.querySelector('.empty-state')) {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
             });
         }
     });
+    
+    // Auto-submit form when filters change (optional)
+    const autoSubmitElements = document.querySelectorAll('.report-form-select');
+    autoSubmitElements.forEach(element => {
+        element.addEventListener('change', function() {
+            // Uncomment the line below to enable auto-submit
+            // filterForm.submit();
+        });
+    });
+    
+    // Date validation
+    const dateFrom = document.getElementById('date_from');
+    const dateTo = document.getElementById('date_to');
+    
+    if (dateFrom && dateTo) {
+        dateFrom.addEventListener('change', function() {
+            dateTo.min = this.value;
+        });
+        
+        dateTo.addEventListener('change', function() {
+            dateFrom.max = this.value;
+        });
+    }
+    
+    // Add animation to summary cards
+    const summaryCards = document.querySelectorAll('.summary-card');
+    summaryCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+    });
+});
 </script>
 {% endblock %}

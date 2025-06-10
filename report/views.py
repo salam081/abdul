@@ -99,39 +99,154 @@ from datetime import timedelta, date, datetime
 from decimal import Decimal
 import json
 
-# from .models import ConsumableRequest, ConsumableRequestDetail, PaybackConsumable
+
+from collections import defaultdict
+from django.utils.dateparse import parse_date
+
+# @login_required
+# def request_status_report(request):
+#     # Get filter parameters
+#     status_filter = request.GET.get('status', 'all')
+#     date_from = request.GET.get('date_from')
+#     date_to = request.GET.get('date_to')
+#     user_filter = request.GET.get('user')
+#     selected_month = request.GET.get('month')  
+
+#     # Base queryset
+#     queryset = ConsumableRequest.objects.select_related('user', 'approved_by')
+
+#     # Apply filters
+#     if status_filter != 'all':
+#         queryset = queryset.filter(status=status_filter)
+
+#     if date_from:
+#         queryset = queryset.filter(date_created__gte=date_from)
+
+#     if date_to:
+#         queryset = queryset.filter(date_created__lte=date_to)
+
+#     if user_filter:
+#         queryset = queryset.filter(user_id=user_filter)
+
+#     if selected_month:
+#         year, month = map(int, selected_month.split('-'))
+#         queryset = queryset.filter(
+#             date_created__year=year,
+#             # date_created__month=month
+#         )
+
+#     # Prepare list of months with requests
+#     month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')
+    
 
 
+#     # Build request data
+#     requests_data = []
+#     for req in queryset:
+#         requests_data.append({
+#             'id': req.id,
+#             'user': req.user.username,
+#             'date_created': req.date_created,
+#             'status': req.status,
+#             'approved_by': req.approved_by.username if req.approved_by else None,
+#             'total_price': req.calculate_total_price(),
+#             'total_paid': req.total_paid(),
+#             'balance': req.balance(),
+#             'items_count': req.details.count()
+#         })
 
+#     # Pagination
+#     paginator = Paginator(requests_data, 25)
+#     page_number = request.GET.get('page')
+#     page_obj = paginator.get_page(page_number)
+
+#     # Summary
+#     summary = {
+#         'total_requests': queryset.count(),
+#         'total_value': sum(req.calculate_total_price() for req in queryset),
+#         'total_paid': sum(req.total_paid() for req in queryset),
+#         'total_balance': sum(req.balance() for req in queryset),
+#         'pending_count': queryset.filter(status='Pending').count(),
+#         'approved_count': queryset.filter(status='Approved').count(),
+#         'paid_count': queryset.filter(status='Paid').count(),
+#         'declined_count': queryset.filter(status='Declined').count(),
+#     }
+
+#     context = {
+#         'requests': page_obj,
+#         'summary': summary,
+#         'users': User.objects.all(),
+#         'months': month_list, 
+#         'filters': {
+#             'status': status_filter,
+#             'date_from': date_from,
+#             'date_to': date_to,
+#             'user': user_filter,
+#             'month': selected_month,
+#         }
+#     }
+
+#     return render(request, 'reports/consumable_request_status_report.html', context)
 
 
 @login_required
 def request_status_report(request):
-    """Detailed report of all requests grouped by status"""
-    
     # Get filter parameters
     status_filter = request.GET.get('status', 'all')
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
     user_filter = request.GET.get('user')
-    
-    # Base queryset
-    queryset = ConsumableRequest.objects.select_related('user', 'approved_by')
-    
+    selected_month = request.GET.get('month')
+
+    # Base queryset with optimized select_related and prefetch_related
+    queryset = ConsumableRequest.objects.select_related(
+        'user', 'approved_by'
+    ).prefetch_related('details')
+
     # Apply filters
     if status_filter != 'all':
         queryset = queryset.filter(status=status_filter)
-    
+
+    # Date filtering with proper date parsing
     if date_from:
-        queryset = queryset.filter(date_created__gte=date_from)
-    
+        try:
+            date_from_parsed = datetime.strptime(date_from, '%Y-%m-%d').date()
+            queryset = queryset.filter(date_created__gte=date_from_parsed)
+        except ValueError:
+            pass  # Invalid date format, ignore filter
+
     if date_to:
-        queryset = queryset.filter(date_created__lte=date_to)
-    
+        try:
+            date_to_parsed = datetime.strptime(date_to, '%Y-%m-%d').date()
+            queryset = queryset.filter(date_created__lte=date_to_parsed)
+        except ValueError:
+            pass  # Invalid date format, ignore filter
+
     if user_filter:
-        queryset = queryset.filter(user_id=user_filter)
-    
-    # Add calculated fields
+        try:
+            user_id = int(user_filter)
+            queryset = queryset.filter(user_id=user_id)
+        except (ValueError, TypeError):
+            pass  # Invalid user ID, ignore filter
+
+    # Month filtering - fixed to include month filter
+    if selected_month:
+        try:
+            year, month = map(int, selected_month.split('-'))
+            queryset = queryset.filter(
+                date_created__year=year,
+                date_created__month=month  # Uncommented this line
+            )
+        except ValueError:
+            pass  # Invalid month format, ignore filter
+
+    # Get list of months with requests (optimized)
+    month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')
+
+    # Order queryset for consistent results
+    queryset = queryset.order_by('-date_created')
+
+    # Build request data with optimized queries
     requests_data = []
     for req in queryset:
         requests_data.append({
@@ -143,38 +258,64 @@ def request_status_report(request):
             'total_price': req.calculate_total_price(),
             'total_paid': req.total_paid(),
             'balance': req.balance(),
-            'items_count': req.details.count()
+            'items_count': req.details.count()  # This will use prefetch_related
         })
-    
+
     # Pagination
     paginator = Paginator(requests_data, 25)
     page_number = request.GET.get('page')
     page_obj = paginator.get_page(page_number)
-    
-    # Summary statistics
+
+    # Summary with database aggregation for better performance
+    summary_data = queryset.aggregate(
+        total_requests=Count('id'),
+        pending_count=Count('id', filter=Q(status='Pending')),
+        approved_count=Count('id', filter=Q(status='Approved')),
+        paid_count=Count('id', filter=Q(status='Paid')),
+        declined_count=Count('id', filter=Q(status='Declined')),
+    )
+
+    # Calculate financial totals (these might need custom aggregation based on your model)
+    total_value = sum(req.calculate_total_price() for req in queryset)
+    total_paid = sum(req.total_paid() for req in queryset)
+    total_balance = sum(req.balance() for req in queryset)
+
     summary = {
-        'total_requests': queryset.count(),
-        'total_value': sum(req.calculate_total_price() for req in queryset),
-        'total_paid': sum(req.total_paid() for req in queryset),
-        'pending_count': queryset.filter(status='Pending').count(),
-        'approved_count': queryset.filter(status='Approved').count(),
-        'paid_count': queryset.filter(status='Paid').count(),
-        'declined_count': queryset.filter(status='Declined').count(),
+        **summary_data,
+        'total_value': total_value,
+        'total_paid': total_paid,
+        'total_balance': total_balance,
     }
-    
+
+    # Get users who have made requests for the dropdown
+    # users_with_requests = User.objects.filter(
+    #     consumablerequest__isnull=False
+    # ).distinct().order_by('username')
+
     context = {
         'requests': page_obj,
         'summary': summary,
-        'users': User.objects.all(),
+       
+        'months': month_list,
         'filters': {
             'status': status_filter,
             'date_from': date_from,
             'date_to': date_to,
-            'user': user_filter
-        }
+            'user': user_filter,
+            'month': selected_month,
+        },
+        'status_choices': [
+            ('all', 'All Statuses'),
+            ('Pending', 'Pending'),
+            ('Approved', 'Approved'),
+            ('Paid', 'Paid'),
+            ('Declined', 'Declined'),
+        ]
     }
-    
+
     return render(request, 'reports/consumable_request_status_report.html', context)
+
+
 
 
 @login_required
@@ -275,70 +416,267 @@ def item_popularity_report(request):
     return render(request, 'reports/item_popularity_report.html', context)
 
 
+from datetime import datetime, timedelta
+from django.db.models import Q, Sum, Avg, Count, Min, Max
+from django.db.models.functions import TruncMonth, TruncWeek
+from django.utils import timezone
+from django.contrib import messages
+from django.contrib.auth.decorators import login_required
+from django.shortcuts import render
+# from consumables.models import PaybackConsumable, ConsumableRequest
+from accounts.models import User
+
+
 @login_required
 def payment_analysis_report(request):
-    """Detailed payment analysis and trends"""
-    
+    """Detailed payment analysis and trends with enhanced filtering and performance"""
+
+    # Get filter parameters
     date_from = request.GET.get('date_from')
     date_to = request.GET.get('date_to')
-    
-    # Base queryset
-    queryset = PaybackConsumable.objects.select_related('consumable_request__user')
-    
-    # Apply date filters
-    if date_from:
-        queryset = queryset.filter(repayment_date__gte=date_from)
-    if date_to:
-        queryset = queryset.filter(repayment_date__lte=date_to)
-    
+    user_id = request.GET.get('user_id')
+    status_filter = request.GET.get('status', 'all')
+
+    # Validate and parse dates
+    parsed_date_from = None
+    parsed_date_to = None
+
+    try:
+        if date_from:
+            parsed_date_from = datetime.strptime(date_from, '%Y-%m-%d').date()
+        if date_to:
+            parsed_date_to = datetime.strptime(date_to, '%Y-%m-%d').date()
+
+        if parsed_date_from and parsed_date_to and parsed_date_from > parsed_date_to:
+            messages.error(request, "Start date cannot be after end date.")
+            parsed_date_from = parsed_date_to = None
+
+    except ValueError:
+        messages.error(request, "Invalid date format. Please use YYYY-MM-DD.")
+        parsed_date_from = parsed_date_to = None
+
+    # Base queryset with optimized select_related
+    queryset = PaybackConsumable.objects.select_related(
+        'consumable_request__user',
+        'consumable_request'
+    ).prefetch_related(
+        'consumable_request__details__item'  # ✅ fixed reverse relation
+    )
+
+    # Apply filters
+    if parsed_date_from:
+        queryset = queryset.filter(repayment_date__gte=parsed_date_from)
+    if parsed_date_to:
+        queryset = queryset.filter(repayment_date__lte=parsed_date_to)
+    if user_id:
+        queryset = queryset.filter(consumable_request__user_id=user_id)
+
     # Payment statistics
     payment_stats = queryset.aggregate(
         total_payments=Sum('amount_paid'),
         avg_payment=Avg('amount_paid'),
-        payment_count=Count('id')
+        payment_count=Count('id'),
+        min_payment=Min('amount_paid'),
+        max_payment=Max('amount_paid')
     )
-    
-    # Monthly payment trends
+    payment_stats = {k: v or 0 for k, v in payment_stats.items()}
+
+    # Monthly trends
     monthly_payments = queryset.annotate(
         month=TruncMonth('repayment_date')
     ).values('month').annotate(
         total_paid=Sum('amount_paid'),
-        payment_count=Count('id')
+        payment_count=Count('id'),
+        avg_payment=Avg('amount_paid')
     ).order_by('month')
-    
+
+    # Weekly trends for last 90 days
+    three_months_ago = timezone.now().date() - timedelta(days=90)
+    weekly_payments = queryset.filter(
+        repayment_date__gte=three_months_ago
+    ).annotate(
+        week=TruncWeek('repayment_date')
+    ).values('week').annotate(
+        total_paid=Sum('amount_paid'),
+        payment_count=Count('id')
+    ).order_by('week')
+
     # Outstanding balances
-    outstanding_requests = ConsumableRequest.objects.exclude(status='Paid').select_related('user')
+    outstanding_filter = Q(status__in=['Pending', 'Approved', 'Partially Paid'])
+    if status_filter != 'all':
+        outstanding_filter &= Q(status=status_filter)
+
+    outstanding_requests = ConsumableRequest.objects.filter(
+        outstanding_filter
+    ).select_related('user').prefetch_related(
+        'details__item',            # ✅ corrected reverse relation
+        'repayments'     # ✅ paybacks related to this request
+    )
 
     outstanding_data = []
+    total_outstanding = 0
+
     for req in outstanding_requests:
         total_price = req.calculate_total_price()
         total_paid = req.total_paid()
         balance = total_price - total_paid
 
         if balance > 0:
+            days_outstanding = (timezone.now().date() - req.date_created.date()).days
+
+            # Urgency levels
+            if days_outstanding > 90:
+                urgency = 'critical'
+            elif days_outstanding > 60:
+                urgency = 'high'
+            elif days_outstanding > 30:
+                urgency = 'medium'
+            else:
+                urgency = 'low'
+
             outstanding_data.append({
                 'request': req,
                 'total_price': total_price,
                 'total_paid': total_paid,
                 'balance': balance,
-                'days_outstanding': (timezone.now().date() - req.date_created.date()).days
+                'days_outstanding': days_outstanding,
+                'urgency': urgency,
+                'payment_percentage': (total_paid / total_price * 100) if total_price > 0 else 0
             })
 
-        # Sort by balance (highest first)
-        outstanding_data.sort(key=lambda x: x['balance'], reverse=True)
-        
+            total_outstanding += balance
+
+    # Sort by highest balance then by days outstanding
+    outstanding_data.sort(key=lambda x: (x['balance'], x['days_outstanding']), reverse=True)
+
+    # Payment method analysis (if field exists)
+    payment_methods = queryset.values('payment_method').annotate(
+        total_paid=Sum('amount_paid'),
+        count=Count('id')
+    ).order_by('-total_paid') if hasattr(PaybackConsumable, 'payment_method') else []
+
+    # Top 10 users
+    top_users = queryset.values(
+        'consumable_request__user__username',
+        'consumable_request__user__first_name',
+        'consumable_request__user__last_name'
+    ).annotate(
+        total_paid=Sum('amount_paid'),
+        payment_count=Count('id')
+    ).order_by('-total_paid')[:10]
+
+    # Outstanding summary by urgency
+    outstanding_summary = {
+        'critical': len([x for x in outstanding_data if x['urgency'] == 'critical']),
+        'high': len([x for x in outstanding_data if x['urgency'] == 'high']),
+        'medium': len([x for x in outstanding_data if x['urgency'] == 'medium']),
+        'low': len([x for x in outstanding_data if x['urgency'] == 'low']),
+    }
+
+    # Recent payments (last 30 days)
+    recent_payments = queryset.filter(
+        repayment_date__gte=timezone.now().date() - timedelta(days=30)
+    ).select_related('consumable_request__user').order_by('-repayment_date')[:10]
+
+    # Month filter options
+    month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')
+
+    # User filter dropdown
+    users_list = ConsumableRequest.objects.select_related('user').values(
+        'user__id', 'user__username', 'user__first_name', 'user__last_name'
+    ).distinct().order_by('user__username')
+
     context = {
         'payment_stats': payment_stats,
-        'monthly_payments': monthly_payments,
+        'monthly_payments': list(monthly_payments),
+        'weekly_payments': list(weekly_payments),
         'outstanding_data': outstanding_data,
-        'total_outstanding': sum(item['balance'] for item in outstanding_data),
+        'outstanding_summary': outstanding_summary,
+        'payment_methods': payment_methods,
+        'top_users': top_users,
+        'recent_payments': recent_payments,
+        'months': month_list,
+        'users_list': users_list,
+        'total_outstanding': total_outstanding,
         'filters': {
             'date_from': date_from,
-            'date_to': date_to
+            'date_to': date_to,
+            'user_id': user_id,
+            'status': status_filter
+        },
+        'date_range_summary': {
+            'start': parsed_date_from,
+            'end': parsed_date_to,
+            'days': (parsed_date_to - parsed_date_from).days if parsed_date_from and parsed_date_to else None
         }
     }
-    
+
     return render(request, 'reports/consumable_payment_analysis_report.html', context)
+
+
+# @login_required
+# def payment_analysis_report(request):
+#     """Detailed payment analysis and trends"""
+    
+#     date_from = request.GET.get('date_from')
+#     date_to = request.GET.get('date_to')
+    
+#     # Base queryset
+#     queryset = PaybackConsumable.objects.select_related('consumable_request__user')
+    
+#     # Apply date filters
+#     if date_from:
+#         queryset = queryset.filter(repayment_date__gte=date_from)
+#     if date_to:
+#         queryset = queryset.filter(repayment_date__lte=date_to)
+    
+#     # Payment statistics
+#     payment_stats = queryset.aggregate(
+#         total_payments=Sum('amount_paid'),
+#         avg_payment=Avg('amount_paid'),
+#         payment_count=Count('id')
+#     )
+    
+#     # Monthly payment trends
+#     monthly_payments = queryset.annotate(
+#         month=TruncMonth('repayment_date')
+#     ).values('month').annotate(
+#         total_paid=Sum('amount_paid'),
+#         payment_count=Count('id')
+#     ).order_by('month')
+    
+#     # Outstanding balances
+#     outstanding_requests = ConsumableRequest.objects.exclude(status='Paid').select_related('user')
+
+#     outstanding_data = []
+#     for req in outstanding_requests:
+#         total_price = req.calculate_total_price()
+#         total_paid = req.total_paid()
+#         balance = total_price - total_paid
+
+#         if balance > 0:
+#             outstanding_data.append({
+#                 'request': req,
+#                 'total_price': total_price,
+#                 'total_paid': total_paid,
+#                 'balance': balance,
+#                 'days_outstanding': (timezone.now().date() - req.date_created.date()).days
+#             })
+
+#         # Sort by balance (highest first)
+#         outstanding_data.sort(key=lambda x: x['balance'], reverse=True)
+#     month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')    
+#     context = {
+#         'payment_stats': payment_stats,
+#         'monthly_payments': monthly_payments,
+#         'outstanding_data': outstanding_data,
+#          'months': month_list,
+#         'total_outstanding': sum(item['balance'] for item in outstanding_data),
+#         'filters': {
+#             'date_from': date_from,'date_to': date_to}
+#     }
+    
+#     return render(request, 'reports/consumable_payment_analysis_report.html', context)
 
 
 @login_required
@@ -403,10 +741,7 @@ def approval_workflow_report(request):
     
     avg_approval_time = sum(approval_times) / len(approval_times) if approval_times else 0
     
-    context = {
-        'approval_stats': approval_stats,
-        'approver_stats': approver_stats,
-        'avg_approval_time': avg_approval_time,
+    context = { 'approval_stats': approval_stats, 'approver_stats': approver_stats,'avg_approval_time': avg_approval_time,
         'filters': {
             'date_from': date_from,
             'date_to': date_to

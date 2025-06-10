@@ -464,7 +464,7 @@ def consumable_details_by_month(request, month):
     # Get approved requests created in the selected month
     consumable_requests = ConsumableRequest.objects.filter(
         date_created__year=target_month.year,
-        date_created__month=target_month.month,
+        # date_created__month=target_month.month,
         status='Approved'
     ).select_related('user').prefetch_related('details__item')
 

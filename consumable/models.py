@@ -96,4 +96,8 @@ class PaybackConsumable(models.Model):
     def __str__(self):
         return f"₦{self.amount_paid} for Req#{self.consumable_request.id} on {self.repayment_date}"
 
-
+class ConsumableFormFee(models.Model):
+    form_fee = models.DecimalField(max_digits=10, decimal_places=2)  
+    paid_by = models.ForeignKey(User,on_delete=models.CASCADE)
+    def __str__(self):
+        return self.paid_by.first_name

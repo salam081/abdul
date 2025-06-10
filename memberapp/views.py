@@ -185,6 +185,7 @@ def loan_request_view(request):
         bank_code_id = request.POST.get('bank_code')
         account_number = request.POST.get('account_number')
         guarantor_ippis = request.POST.get('guarantor_ippis')
+        # form_fee = request.POST.get('form_fee')
 
         # Validate loan type
         try:
@@ -238,7 +239,8 @@ def loan_request_view(request):
             guarantor=guarantor_member,
             created_by=request.user,
         )
-
+        # LoanFormFee.objects.create(form_fee = '500',paid_by=request.user,)
+        
         messages.success(request, "Loan request submitted successfully!")
         return redirect('loan_request')
 
@@ -678,15 +680,6 @@ def cancel_consumable_request(request, request_id):
         return JsonResponse({'success': False, 'message': str(e)})
 
 
-# @require_POST
-# def cancel_consumable_request(request, request_id):
-#     """Cancel a pending consumable request"""
-#     consumable_request = get_object_or_404(ConsumableRequest,id=request_id, user=request.user,status='Pending' )
-#     # consumable_request.status = 'Declined'
-#     consumable_request.delete()
-#     # consumable_request.save()
-#     messages.success(request, 'Consumable request has been cancelled.')
-#     return redirect('consumable_requests_list')
 
 
 

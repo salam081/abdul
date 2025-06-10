@@ -4,7 +4,7 @@ from .models import *
 admin.site.register(LoanRequest)
 admin.site.register(LoanRepayback)
 admin.site.register(LoanType)
-# admin.site.register(ConsumableItem)
 admin.site.register(BankName)
 admin.site.register(BankCode)
 admin.site.register(LoanSettings)
+admin.site.register(LoanFormFee)

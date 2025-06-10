@@ -61,7 +61,7 @@
                     <a href="{% url 'upload_loan_payment' %}" class="dropdown-item mb-2">Upload Loan Payment</a>
                     <a href="{% url 'add_single_loan_payment' %}" class="dropdown-item mb-2">Add Single Loan Payment</a>
                     <a href="{% url 'admin_repayment_tracking' %}" class="dropdown-item mb-2">Tracking Repayments</a>
-                    <a href="{% url 'admin_loan_reports' %}" class="dropdown-item mb-2">Loan Report</a>
+                    
                      
                 </div>
             </div>
@@ -78,7 +78,21 @@
                      
                 </div>
             </div>
-           
+             <div class="nav-item dropdown">
+                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Report</a>
+                <div class="dropdown-menu bg-transparent border-0">
+                    <a href="{% url 'all_member_saving_search' %}" class="dropdown-item">Savings</a>
+                    <a href="{% url 'summary' %}" class="dropdown-item">Monthly Saving </a>
+                    <a href="{% url 'admin_loan_reports' %}" class="dropdown-item mb-2">Loan Request Report</a>
+                    <a href="{% url 'filtered_loan_repayments' %}" class="dropdown-item mb-2">Loan Repayments Report</a>
+
+                    <a href="{% url 'approval_workflow_report' %}" class="dropdown-item">Consumable </a>
+                    <a href="{% url 'request_status_report' %}" class="dropdown-item">Consumable Request Report   </a>
+                    <a href="{% url 'payment_analysis_report' %}" class="dropdown-item">Consumable Payment Report  </a>
+                    <a href="404.html" class="dropdown-item">404 Error</a>
+                    <a href="blank.html" class="dropdown-item">Blank Page</a>
+                </div>
+            </div>
             {% else %}
             <a href="{% url 'member_dashboard' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
             <a href="{% url 'member_savings' %}" class="nav-item nav-link active"><i class="fa fa-chart-bar me-2"></i>My Savings</a>
@@ -95,20 +109,7 @@
             <a href="form.html" class="nav-item nav-link"><i class="fa fa-keyboard me-2"></i>Forms</a>
             <a href="table.html" class="nav-item nav-link"><i class="fa fa-table me-2"></i>Tables</a>
             <a href="chart.html" class="nav-item nav-link"><i class="fa fa-chart-bar me-2"></i>Charts</a> -->
-            <div class="nav-item dropdown">
-                <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Report</a>
-                <div class="dropdown-menu bg-transparent border-0">
-                    <a href="{% url 'all_member_saving_search' %}" class="dropdown-item">Savings</a>
-                    <a href="{% url 'summary' %}" class="dropdown-item">Monthly Saving </a>
-                    <a href="{% url 'filtered_loan_repayments' %}" class="dropdown-item mb-2">Loan Repayments</a>
-
-                    <a href="{% url 'approval_workflow_report' %}" class="dropdown-item">Consumable </a>
-                    <a href="{% url 'request_status_report' %}" class="dropdown-item">Filter  </a>
-                    <a href="{% url 'payment_analysis_report' %}" class="dropdown-item">Consumable Payment  </a>
-                    <a href="404.html" class="dropdown-item">404 Error</a>
-                    <a href="blank.html" class="dropdown-item">Blank Page</a>
-                </div>
-            </div>
+          
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="far fa-file-alt me-2"></i>Pages</a>
                 <div class="dropdown-menu bg-transparent border-0">

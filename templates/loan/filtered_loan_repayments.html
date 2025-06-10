@@ -117,14 +117,8 @@
 <div class="container mt-4">
     <div class="card shadow col-md-12">
         <div class="card-body">
-           <h4 class="mb-3 text-center">
-     
-
-        {% if selected_type %}
-        {{ selected_type|title }}
-        {% endif %}
-         Repayments List
-    </h4>
+           <h3 class="mb-3 text-center">Loan Repayments Dashboard</h3>
+           <h5 class="mb-3 text-center text-success">{% if selected_type %}{{ selected_type|title }}{% endif %}</h5>
            <div class="stats-grid ">  
         <div class="stat-card">
             <div class="stat-header">
