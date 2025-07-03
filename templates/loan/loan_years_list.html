@@ -1,0 +1,49 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<style>
+    .card-header{
+       
+        background: linear-gradient(135deg, #8a2cb8, #b0469e);
+        color: white;
+        font-size: 2.1rem;
+        text-align: center;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .btn-primary{
+       background: linear-gradient(135deg, #8a2cb8, #b0469e);
+    }
+</style>
+<div class="container mt-4 justify-content center">
+    <div class="card-header   ">
+         Loans List By years
+        </div>
+    <div class="card ">
+        <div class="card-body">
+            {% for year, loan_types in year_to_loan_types.items %}
+
+            <h3>
+                <strong>{{ year }}</strong>:
+            </h3>
+
+            <ol>
+                {% for loan_type in loan_types %}
+                <li>
+
+                    <a href="{% url 'loans_by_year' year=year loan_type_filter=loan_type %}">{{ loan_type }}</a>
+                </li>
+
+                {% if not forloop.last %} {% endif %}
+                {% endfor %}
+
+            </ol>
+
+            {% endfor %}
+
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,0 +1,134 @@
+{% extends 'base/base.html' %}
+
+{% block title %}My Loan Requests{% endblock %}
+
+{% block content %}
+    <style>
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #198754; color: #fff; }
+        .status-rejected { background-color: #dc3545; color: #fff; }
+        .status-paid { background-color: #0d6efd; color: #fff; }
+
+        .request-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #dee2e6;
+        }
+
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+
+        .request-card.pending { border-left-color: #ffc107; }
+        .request-card.approved { border-left-color: #198754; }
+        .request-card.rejected { border-left-color: #dc3545; }
+        .request-card.paid { border-left-color: #0d6efd; }
+
+        .financial-summary {
+            background: linear-gradient(135deg, #d556e5 0%, #bdefa7 100%);
+            color: white;
+            border-radius: 10px;
+        }
+    </style>
+
+    <div class="container mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-hand-holding-usd me-2"></i>My Loan Requests</h2>
+                <p class="text-muted mb-0">Track and manage your loan requests</p>
+            </div>
+            <a href="{% url 'loan_request' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Loan Request
+            </a>
+        </div>
+
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        {% if loan_data %}
+            <div class="row">
+                {% for entry in loan_data %}
+                    {% with loan=entry.loan %}
+                    <div class="col-md-6 mb-4">
+                        <div class="card request-card {{ loan.status|lower }}">
+                            <div class="card-header d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="mb-0">
+                                        <i class="fas fa-hashtag me-1"></i>Loan #{{ loan.id }}
+                                    </h6>
+                                    <small class="text-muted">
+                                        <i class="fas fa-calendar me-1"></i>
+                                        {{ loan.date_created|date:"M d, Y - g:i A" }}
+                                    </small>
+                                </div>
+                                <span class="badge status-badge status-{{ loan.status|lower }}">
+                                    {{ loan.status|title }}
+                                </span>
+                            </div>
+
+                            <div class="card-body">
+                                <p><strong>Loan Type:</strong> {{ loan.loan_type.name }}</p>
+                                <p><strong>Loan Term:</strong> {{ loan.loan_term_months }} months</p>
+
+                                <div class="financial-summary p-4 mt-2 mb-3">
+                                    <div class="row text-center">
+                                        <div class="col-3">
+                                            <small>Approved</small>
+                                            <div><strong>₦{{ entry.approved_amount|floatformat:2 }}</strong></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Monthly</small>
+                                            <div><strong>₦{{ entry.monthly_payment|floatformat:2 }}</strong></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Paid</small>
+                                            <div><strong>₦{{ entry.total_paid|floatformat:2 }}</strong></div>
+                                        </div>
+                                        <div class="col-3">
+                                            <small>Balance</small>
+                                            <div><strong>₦{{ entry.balance|floatformat:2 }}</strong></div>
+                                        </div>
+                                    </div>
+                                </div>
+
+                                <div class="d-flex gap-2">
+                                  <a href="{% url 'member_loan_request_detail' entry.loan.id %}" class="btn btn-primary btn-sm flex-fill">
+                                        <i class="fas fa-eye me-1"></i>View Details
+                                    </a>
+
+                                    <!-- {% if loan.status == 'approved' %}
+                                        <button class="btn btn-success btn-sm">
+                                            <i class="fas fa-credit-card me-1"></i>Repay
+                                        </button>
+                                    {% endif %} -->
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    {% endwith %}
+                {% endfor %}
+            </div>
+        {% else %}
+            <div class="text-center py-5">
+                <div class="mb-4">
+                    <i class="fas fa-clipboard-list fa-5x text-muted"></i>
+                </div>
+                <h4 class="text-muted">No Loan Requests Yet</h4>
+                <p class="text-muted mb-4">You haven't made any loan requests yet.</p>
+                <a href="" class="btn btn-primary">
+                    <i class="fas fa-plus me-2"></i>Create Your First Loan Request
+                </a>
+            </div>
+        {% endif %}
+    </div>
+{% endblock content %}

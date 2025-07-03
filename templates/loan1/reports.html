@@ -1,0 +1,19 @@
+{% extends 'base/base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+    <div class="card">
+        <div class="card-body">
+            <h2>Loan Reports for {{ selected_month }}</h2>
+            <ul>
+                <li>Requests: {{ monthly_requests }}</li>
+                <li>Approvals: {{ monthly_approvals }}</li>
+                <li>Rejections: {{ monthly_rejections }}</li>
+                <li>Amount Approved: ₦{{ monthly_approved_amount }}</li>
+                <li>Amount Repaid: ₦{{ monthly_repayments }}</li>
+            </ul>
+        </div>
+    </div>
+</div>
+
+{% endblock content %}

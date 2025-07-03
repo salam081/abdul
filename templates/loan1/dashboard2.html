@@ -1,0 +1,158 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Admin Dashboard - Loan Requests{% endblock %}
+
+{% block content %}
+<div class="page-header">
+    <h1 class="mb-0">
+        <i class="fas fa-tachometer-alt me-2"></i>Loan Dashboard Overview
+    </h1>
+    <p class="text-muted mb-0">Monitor and manage loan requests</p>
+</div>
+
+<!-- Statistics Cards -->
+<div class="row mb-4 ">
+    <div class="col-md-2">
+        <div class="card stat-card">
+            <div class="card-body text-center">
+                <i class="fas fa-list-alt fa-2x mb-2"></i>
+                <h3>{{ total_requests }}</h3>
+                <p class="mb-0">Total Requests</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card pending mt-2">
+            <div class="card-body text-center">
+                <i class="fas fa-clock fa-2x mb-2"></i>
+                <h3>{{ pending_requests }}</h3>
+                <p class="mb-0">Pending</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card approved mt-2">
+            <div class="card-body text-center">
+                <i class="fas fa-check-circle fa-2x mb-2"></i>
+                <h3>{{ approved_requests }}</h3>
+                <p class="mb-0">Approved</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card declined mt-2">
+            <div class="card-body text-center">
+                <i class="fas fa-times-circle fa-2x mb-2"></i>
+                <h3>{{ rejected_requests }}</h3>
+                <p class="mb-0">Rejected</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card paid mt-2">
+            <div class="card-body text-center">
+                <i class="fas fa-money-bill-wave fa-2x mb-2"></i>
+                <h3>₦{{ total_repaid|floatformat:2 }}</h3>
+                <p class="mb-0">Total Repaid</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-2">
+        <div class="card stat-card mt-2">
+            <div class="card-body text-center">
+                <i class="fas fa-balance-scale fa-2x mb-2"></i>
+                <h3>₦{{ outstanding_balance|floatformat:2 }}</h3>
+                <p class="mb-0">Outstanding</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Recent Requests -->
+<div class="row">
+    <div class="col-md-8">
+        <div class="card">
+            <div class="card-header d-flex justify-content-between align-items-center">
+                <h5 class="mb-0">
+                    <i class="fas fa-clock text-warning me-2"></i>Recent Requests
+                </h5>
+                <a href="{% url 'admin_loan_requests' %}" class="btn btn-outline-primary btn-sm">
+                    View All
+                </a>
+            </div>
+            <div class="card-body">
+                {% if recent_requests %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Member</th>
+                                    <th>Loan Type</th>
+                                    <th>Amount</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in recent_requests %}
+                                <tr>
+                                    <td>#{{ request.id }}</td>
+                                    <td>{{ request.member.get_full_name }}</td>
+                                    <td>{{ request.loan_type.name }}</td>
+                                    <td>₦{{ request.amount|floatformat:2 }}</td>
+                                    <td>{{ request.date_created|date:"M d, Y" }}</td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if request.status == 'pending' %}bg-warning
+                                            {% elif request.status == 'approved' %}bg-success
+                                            {% elif request.status == 'rejected' %}bg-danger
+                                            {% endif %}">
+                                            {{ request.status|capfirst }}
+                                        </span>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                {% else %}
+                    <div class="text-center py-4">
+                        <i class="fas fa-inbox fa-3x text-muted mb-2"></i>
+                        <h5 class="mb-0">No recent requests</h5>
+                        <p class="text-muted">All loan activity will appear here.</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+
+    <!-- Recent Repayments -->
+    <div class="col-md-4">
+        <div class="card">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-history text-info me-2"></i>Recent Repayments
+                </h5>
+            </div>
+            <div class="card-body">
+                {% if recent_repayments %}
+                    <ul class="list-group list-group-flush">
+                        {% for repayment in recent_repayments %}
+                        <li class="list-group-item">
+                            <strong>{{ repayment.loan_request.member.get_full_name }}</strong><br>
+                            ₦{{ repayment.amount_paid|floatformat:2 }} on {{ repayment.repayment_date|date:"M d, Y" }}
+                        </li>
+                        {% endfor %}
+                    </ul>
+                {% else %}
+                    <div class="text-center py-3">
+                        <i class="fas fa-coins fa-2x text-muted mb-2"></i>
+                        <p class="text-muted mb-0">No recent repayments</p>
+                    </div>
+                {% endif %}
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,202 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}{{ month|date:'F Y' }} Details{% endblock %}
+
+{% block content %}
+<style>
+        .card-header {
+            background: linear-gradient(135deg, #73c68c 0%, #bbe948 100%);
+            color: white;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+        }
+        .btn-primary:hover {
+            background: linear-gradient(135deg, #94dd75 0%, #d47ab0 100%);
+        }
+        .status-badge {
+            font-size: 0.875rem;
+            padding: 0.375rem 0.75rem;
+        }
+        .table-responsive {
+            border-radius: 10px;
+            box-shadow: 0 0 20px rgba(0,0,0,0.1);
+        }
+        .modal-header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        .search-box {
+            background: #f8f9fa;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+    </style>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0">
+                        <i class="fas fa-chart-line me-2"></i>
+                        Consumables for {{ month|date:'F Y' }}
+                    </h4>
+                </div>
+                <div class="card-body">
+                    <!-- Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4>₦{{ approved_total|floatformat:0 }}</h4>
+                                    <p class="mb-0">Approved Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h4>₦{{ pending_total|floatformat:0 }}</h4>
+                                    <p class="mb-0">Pending Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-info text-white">
+                                <div class="card-body text-center">
+                                    <h4>₦{{ paid_total|floatformat:0 }}</h4>
+                                    <p class="mb-0">Paid Total</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="card bg-primary text-white">
+                                <div class="card-body text-center">
+                                    <h4>{{ grouped_data|length }}</h4>
+                                    <p class="mb-0">Total Member</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- User Details -->
+                   <!-- User Details -->
+{% if grouped_data %}
+<div class="table-responsive">
+    <table class="table table-hover">
+        <thead class="table-dark">
+            <tr>
+                <th>User</th>
+                <th>Items</th>
+                <th>Total Amount</th>
+                <th>Amount Paid</th>
+                <th>Current Payment</th>
+                <th>Balance</th>
+                <th>Actions</th>
+            </tr>
+        </thead>
+        <tbody>
+            {% for data in grouped_data %}
+            <tr>
+                <td>
+                    <strong>{{ data.user.full_name }}</strong>
+                    <br><small class="text-muted">IPPIS: {{ data.user.ippis }}</small>
+                </td>
+                <td>
+                    <button class="btn btn-sm btn-outline-info">
+                        <i class="fas fa-list me-1"></i>
+                        {{ data.items|length }} item{{ data.items|length|pluralize }}
+                    </button>
+                </td>
+                <td>₦{{ data.total|floatformat:2 }}</td>
+                <td>₦{{ data.amount_paid|floatformat:2 }}</td>
+         <td>
+            {% if data.current_payment > 0 %}
+                <span class="text-info fw-bold">₦{{ data.current_payment|floatformat:2 }}</span>
+            {% else %}
+                <span class="text-muted">₦0.00</span>
+            {% endif %}
+            </td>
+
+
+
+                <td>
+                    {% if data.balance > 0 %}
+                        <span class="text-danger fw-bold">₦{{ data.balance|floatformat:2 }}</span>
+                    {% else %}
+                        <span class="text-success fw-bold">₦0.00</span>
+                    {% endif %}
+                </td>
+                <td>
+                    <div class="btn-group" role="group">
+                        {% if data.request_id %}
+                        <a href="{% url 'admin_consumable_request_detail' data.request_id %}" class="btn btn-sm btn-outline-primary">
+                            <i class="fas fa-history"></i>
+                        </a>
+                        {% endif %}
+                        {% if data.user.ippis %}
+                        <a href="{% url 'add_single_consumable_payment' %}?ippis={{ data.user.ippis }}" class="btn btn-sm btn-outline-success">
+                            <i class="fas fa-plus"></i>
+                        </a>
+                        {% endif %}
+                    </div>
+                </td>
+            </tr>
+            {% endfor %}
+        </tbody>
+    </table>
+</div>
+{% else %}
+<div class="text-center py-5">
+    <i class="fas fa-users fa-5x text-muted mb-4"></i>
+    <h3 class="text-muted">No Data Found</h3>
+    <p class="text-muted">No consumable requests found for {{ month|date:'F Y' }}.</p>
+</div>
+{% endif %}
+
+                  
+
+                    <div class="mt-4">
+                        <a href="{% url 'consumable_requests_by_month' %}" class="btn btn-secondary">
+                            <i class="fas fa-arrow-left me-2"></i>Back to Monthly Summary
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Items Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-list me-2"></i>Requested Items</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="itemsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Payment History Modal -->
+<div class="modal fade" id="paymentHistoryModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-history me-2"></i>Payment History</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="paymentHistoryContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

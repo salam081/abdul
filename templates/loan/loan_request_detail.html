@@ -1,0 +1,694 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --success-gradient: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+            --warning-gradient: linear-gradient(135deg, #fa709a 0%, #fee140 100%);
+            --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ffa500 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        /* body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        } */
+
+        .page-header {
+            /* background: var(--primary-gradient); */
+            color: rgb(0, 0, 0);
+            padding: 1rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+        }
+
+        .custom-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            margin-bottom: 1.5rem;
+        }
+
+        .custom-card:hover {
+            box-shadow: var(--hover-shadow);
+        }
+
+        .status-badge {
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .status-pending {
+            background: var(--warning-gradient);
+            color: white;
+        }
+
+        .status-approved {
+            background: var(--success-gradient);
+            color: white;
+        }
+
+        .status-rejected {
+            background: var(--danger-gradient);
+            color: white;
+        }
+
+        .status-paid {
+            background: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+            color: white;
+        }
+
+        .info-item {
+            background: linear-gradient(45deg, #f8f9ff, #e8ecff);
+            border: 1px solid #e0e6ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+        }
+
+        .info-item:hover {
+            background: linear-gradient(45deg, #e8ecff, #d8e2ff);
+            transform: translateY(-2px);
+        }
+
+        .amount-display {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .progress-custom {
+            height: 12px;
+            border-radius: 10px;
+            background: rgba(0,0,0,0.1);
+        }
+
+        .progress-bar-custom {
+            background: var(--success-gradient);
+            border-radius: 10px;
+        }
+
+        .btn-action {
+            border-radius: 25px;
+            padding: 0.6rem 1.5rem;
+            font-weight: 600;
+            margin: 0.2rem;
+            transition: all 0.3s ease;
+        }
+
+        .btn-action:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+        }
+
+        .repayment-item {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .repayment-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--success-gradient);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .repayment-item:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transform: translateY(-2px);
+        }
+
+        .file-preview {
+            max-width: 200px;
+            border-radius: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+            transition: transform 0.3s ease;
+        }
+
+        .file-preview:hover {
+            transform: scale(1.05);
+        }
+
+        .icon-wrapper {
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: white;
+            margin-right: 1rem;
+        }
+
+        .member-info .icon-wrapper {
+            background: var(--primary-gradient);
+        }
+
+        .financial-info .icon-wrapper {
+            background: var(--success-gradient);
+        }
+
+        .bank-info .icon-wrapper {
+            background: var(--warning-gradient);
+        }
+
+        .guarantor-info .icon-wrapper {
+            background: var(--danger-gradient);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-left: 2rem;
+            padding-bottom: 1rem;
+        }
+
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: 8px;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+
+        .timeline-item::after {
+            content: '';
+            position: absolute;
+            left: 4px;
+            top: 6px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: var(--primary-gradient);
+        }
+
+        .timeline-item:last-child::before {
+            display: none;
+        }
+
+        @media (max-width: 768px) {
+            .amount-display {
+                font-size: 1.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+            
+            .btn-action {
+                width: 100%;
+                margin-bottom: 0.5rem;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .alert-custom {
+            border: none;
+            border-radius: 10px;
+            padding: 1rem;
+        }
+
+        .modal-content {
+            border-radius: 15px;
+            border: none;
+        }
+
+        .modal-header {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 15px 15px 0 0;
+        }
+    </style>
+</head>
+<body>
+    <!-- Page Header -->
+    <div class="page-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="mb-0">
+                        <i class="fas fa-file-contract me-3"></i>
+                        {{ title }}
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">Complete loan request details and repayment history</p>
+                </div>
+                <div class="col-auto">
+                    <a href="{% url 'admin_loan_requests' %}" class="btn btn-light btn-action">
+                        <i class="fas fa-arrow-left me-2"></i>Back to List
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container">
+        <!-- Quick Status Overview -->
+        <div class="row mb-4">
+            <div class="col-12">
+                <div class="custom-card animate-fade-in">
+                    <div class="card-body p-4">
+                        <div class="row align-items-center">
+                            <div class="col-md-6">
+                                <div class="d-flex align-items-center">
+                                    <div class="icon-wrapper financial-info">
+                                        <i class="fas fa-dollar-sign"></i>
+                                    </div>
+                                    <div>
+                                        <h3 class="amount-display mb-0">₦{{ loan_request.amount|floatformat:2 }}</h3>
+                                        <small class="text-muted">Requested Amount</small>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-3 text-center">
+                                <span class="status-badge status-{{ loan_request.status }}">
+                                    <i class="fas fa-circle me-2"></i>{{ loan_request.get_status_display }}
+                                </span>
+                            </div>
+                            <div class="col-md-3 text-end">
+                                <div class="dropdown">
+                                    <button class="btn btn-outline-primary dropdown-toggle btn-action" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-cog me-2"></i>Actions
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        {% if loan_request.status == 'pending' %}
+                                            <li><a class="dropdown-item" href="{% url 'approve_loan_request' loan_request.id %}">
+                                                <i class="fas fa-check text-success me-2"></i>Approve
+                                            </a></li>
+                                            <li><a class="dropdown-item" href="{% url 'reject_loan_request' loan_request.id %}">
+                                                <i class="fas fa-times text-danger me-2"></i>Reject
+                                            </a></li>
+                                        {% endif %}
+                                        <li><a class="dropdown-item" href="">
+                                            <i class="fas fa-edit me-2"></i>Edit
+                                        </a></li>
+                                        {% if loan_request.status == 'approved' %}
+                                            <li><a class="dropdown-item" href="{% url 'add_single_loan_payment'  %}">
+                                                <i class="fas fa-plus text-primary me-2"></i>Add Payment
+                                            </a></li>
+                                        {% endif %}
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="row">
+            <!-- Left Column - Loan Details -->
+            <div class="col-lg-8">
+                <!-- Member Information -->
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-user me-2" style="color: #667eea;"></i>
+                            Member Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <div class="d-flex align-items-center">
+                                        <div class="icon-wrapper member-info me-3" style="width: 50px; height: 50px;">
+                                            <i class="fas fa-user"></i>
+                                        </div>
+                                        <div>
+                                            <h6 class="mb-1">{{ loan_request.member.member.get_full_name }}</h6>
+                                            <!-- <small class="text-muted"> ID: {{ loan_request.member.id }} </small><br> -->
+                                            <small class="text-muted"> IPPIS:  {{ loan_request.member.ippis }}</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="info-item">
+                                    <strong>Email:</strong> {{ loan_request.member.email|default:"Not provided" }}<br>
+                                    <strong>Phone:</strong> {{ loan_request.user.phone1|default:"Not provided" }}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Financial Information -->
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-calculator me-2" style="color: #28a745;"></i>
+                            Financial Details
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-item text-center">
+                                    <i class="fas fa-hand-holding-usd fa-2x mb-2" style="color: #667eea;"></i>
+                                    <h4 class="amount-display">₦{{ loan_request.amount|floatformat:2 }}</h4>
+                                    <small class="text-muted">Requested Amount</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item text-center">
+                                    <i class="fas fa-check-circle fa-2x mb-2" style="color: #28a745;"></i>
+                                    <h4 class="amount-display">
+                                        {% if loan_request.approved_amount %}
+                                            ₦{{ loan_request.approved_amount|floatformat:2 }}
+                                        {% else %}
+                                            <span class="text-muted">Pending</span>
+                                        {% endif %}
+                                    </h4>
+                                    <small class="text-muted">Approved Amount</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item text-center">
+                                    <i class="fas fa-calendar-alt fa-2x mb-2" style="color: #ffc107;"></i>
+                                    <h4>{{ loan_request.loan_term_months }}</h4>
+                                    <small class="text-muted">Months Term</small>
+                                </div>
+                            </div>
+                        </div>
+
+                        {% if loan_request.approved_amount %}
+                        <div class="row mt-3">
+                            <div class="col-12">
+                                <div class="info-item">
+                                    <div class="d-flex justify-content-between mb-2">
+                                        <span><strong>Monthly Payment:</strong></span>
+                                        <span class="amount-highlight">₦{{ loan_request.monthly_payment|floatformat:2 }}</span>
+                                    </div>
+                                    <div class="d-flex justify-content-between">
+                                        <span><strong>Loan Type:</strong></span>
+                                        <span>{{ loan_request.loan_type.name|default:"Not specified" }}</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Bank Information -->
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-university me-2" style="color: #ffc107;"></i>
+                            Bank Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>Bank Name:</strong><br>
+                                    <span class="fs-6">{{ loan_request.bank_name.name }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>Bank Code:</strong><br>
+                                    <span class="fs-6">{{ loan_request.bank_code.name }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>Account Number:</strong><br>
+                                    <span class="fs-6 font-monospace">{{ loan_request.account_number }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Guarantor Information -->
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-handshake me-2" style="color: #dc3545;"></i>
+                            Guarantor Information
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>Name:</strong><br>
+                                    <span class="fs-6">{{ loan_request.guarantor_name }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>IPPIS:</strong><br>
+                                    <span class="fs-6 font-monospace">{{ loan_request.guarantor_ippis }}</span>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="info-item">
+                                    <strong>Phone:</strong><br>
+                                    <span class="fs-6">{{ loan_request.guarantor_phone }}</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Documents -->
+                {% if loan_request.file_one %}
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-paperclip me-2" style="color: #6f42c1;"></i>
+                            Supporting Documents
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <img src="{{ loan_request.file_one.url }}" alt="Supporting Document" class="file-preview img-fluid">
+                            <div class="mt-2">
+                                <a href="{{ loan_request.file_one.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>View Full Size
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+            </div>
+
+            <!-- Right Column - Repayment Details -->
+            <div class="col-lg-4">
+                <!-- Repayment Summary -->
+                {% if loan_request.approved_amount %}
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-chart-pie me-2" style="color: #28a745;"></i>
+                            Repayment Summary
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center mb-3">
+                            <div class="amount-display">₦{{ total_paid|floatformat:2 }}</div>
+                            <small class="text-muted">Total Paid</small>
+                        </div>
+                        
+                        {% widthratio total_paid loan_request.approved_amount 100 as progress_percentage %}
+
+                        <div class="progress progress-custom mb-3">
+                            <div class="progress-bar progress-bar-custom" 
+                                 style="width: {{ progress_percentage }}%"></div>
+                        </div>
+                        <div class="d-flex justify-content-between small text-muted">
+                            <span>{{ progress_percentage|floatformat:1 }}% Complete</span>
+                            <span>Remaining: ₦{{ balance|floatformat:2 }}</span>
+                        </div>
+                      
+
+                        <div class="row mt-3">
+                            <div class="col-6">
+                                <div class="info-item text-center p-2">
+                                    <h6 class="mb-1 text-success">₦{{ loan_request.approved_amount|floatformat:2 }}</h6>
+                                    <small class="text-muted">Total Loan</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="info-item text-center p-2">
+                                    <h6 class="mb-1 text-primary">{{ repayments.count }}</h6>
+                                    <small class="text-muted">Payments Made</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
+
+                <!-- Loan Timeline -->
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-history me-2" style="color: #6c757d;"></i>
+                            Timeline
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline-item">
+                            <div class="small text-muted">{{ loan_request.application_date }}</div>
+                            <div class="fw-bold">Application Submitted</div>
+                            <div class="small">Loan request created by {{ loan_request.created_by.get_full_name }}</div>
+                        </div>
+                        
+                        {% if loan_request.approval_date %}
+                        <div class="timeline-item">
+                            <div class="small text-muted">{{ loan_request.approval_date }}</div>
+                            <div class="fw-bold text-success">Loan Approved</div>
+                            <div class="small">Amount: ₦{{ loan_request.approved_amount|floatformat:2 }}</div>
+                            <div class="small"><b> Approved By:</b> {{ loan_request.approved_by }}</div>
+                        </div>
+                        {% endif %}
+
+                        {% if loan_request.status == 'rejected' %}
+                        <div class="timeline-item">
+                            <div class="small text-muted">Date</div>
+                            <div class="fw-bold text-danger">Loan Rejected</div>
+                            <div class="small">{{ loan_request.rejection_reason|default:"No reason provided" }}</div>
+                        </div>
+                        {% endif %}
+                    </div>
+                </div>
+
+                <!-- Repayment History -->
+                {% if repayments %}
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0 d-flex justify-content-between align-items-center">
+                        <h5 class="fw-bold mb-0">
+                            <i class="fas fa-list me-2" style="color: #17a2b8;"></i>
+                            Payment History
+                        </h5>
+                        {% if loan_request.status == 'approved' %}
+                        <a href="{% url 'add_single_loan_payment'  %}" class="btn btn-sm btn-primary">
+                            <i class="fas fa-plus me-1"></i>Add
+                        </a>
+                        {% endif %}
+                    </div>
+                    <div class="card-body" style="max-height: 400px; overflow-y: auto;">
+                        {% for repayment in repayments %}
+                        <div class="repayment-item">
+                            <div class="d-flex justify-content-between align-items-start">
+                                <div>
+                                    <div class="fw-bold text-success">₦{{ repayment.amount_paid|floatformat:2 }}</div>
+                                    <div class="small text-muted">{{ repayment.repayment_date }}</div>
+                                    <div class="small">Balance: ₦{{ repayment.balance_remaining|floatformat:2 }}</div>
+                                </div>
+                                <div class="dropdown">
+                                    <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                        <i class="fas fa-ellipsis-v"></i>
+                                    </button>
+                                    <ul class="dropdown-menu">
+                                        <li><a class="dropdown-item" href="">
+                                            <i class="fas fa-edit me-2"></i>Edit
+                                        </a></li>
+                                        <li><a class="dropdown-item text-danger" href="">
+                                            <i class="fas fa-trash me-2"></i>Delete
+                                        </a></li>
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                </div>
+                {% endif %}
+
+            </div>
+            
+        </div>
+    </div>
+
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/js/bootstrap.bundle.min.js"></script> -->
+    <script>
+        // Add animation delays for staggered appearance
+        document.addEventListener('DOMContentLoaded', function() {
+            const cards = document.querySelectorAll('.animate-fade-in');
+            cards.forEach((card, index) => {
+                card.style.animationDelay = `${index * 0.1}s`;
+            });
+        });
+
+        // Progress bar animation
+        const progressBar = document.querySelector('.progress-bar-custom');
+        if (progressBar) {
+            const width = progressBar.style.width;
+            progressBar.style.width = '0%';
+            setTimeout(() => {
+                progressBar.style.transition = 'width 2s ease-in-out';
+                progressBar.style.width = width;
+            }, 500);
+        }
+
+        // File preview modal
+        const filePreview = document.querySelector('.file-preview');
+        if (filePreview) {
+            filePreview.addEventListener('click', function() {
+                const modal = document.createElement('div');
+                modal.className = 'modal fade';
+                modal.innerHTML = `
+                    <div class="modal-dialog modal-lg">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">Supporting Document</h5>
+                                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                            </div>
+                            <div class="modal-body text-center">
+                                <img src="${this.src}" class="img-fluid" alt="Supporting Document">
+                            </div>
+                        </div>
+                    </div>
+                `;
+                document.body.appendChild(modal);
+                const bsModal = new bootstrap.Modal(modal);
+                bsModal.show();
+                modal.addEventListener('hidden.bs.modal', () => {
+                    document.body.removeChild(modal);
+                });
+            });
+        }
+    </script>
+
+{% endblock content %}

@@ -1,0 +1,270 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Admin Dashboard - Consumable Requests{% endblock %}
+
+{% block content %}
+    <style>
+        .status-badge {
+            font-size: 0.8rem;
+            padding: 0.25rem 0.5rem;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #198754; color: #fff; }
+        .status-declined { background-color: #dc3545; color: #fff; }
+        .status-paid { background-color: #0d6efd; color: #fff; }
+        
+        .request-card {
+            transition: transform 0.2s;
+            border-left: 4px solid #dee2e6;
+            max-height: 200px;
+        }
+        
+        .request-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .request-card.pending { border-left-color: #ffc107; }
+        .request-card.approved { border-left-color: #198754; }
+        .request-card.declined { border-left-color: #dc3545; }
+        .request-card.paid { border-left-color: #0d6efd; }
+        
+        .item-list {
+            max-height: 100px;
+            overflow-y: auto;
+        }
+        
+        .financial-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 10px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <h2><i class="fas fa-clipboard-list me-2"></i>My Consumable Requests</h2>
+                <p class="text-muted mb-0">Track and manage your consumable requests</p>
+            </div>
+            <a href="{% url 'member_request_consumable' %}" class="btn btn-primary">
+                <i class="fas fa-plus me-2"></i>New Request
+            </a>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <!-- Summary Cards -->
+        <div class="row mb-4">
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-primary">{{ requests|length }}</h5>
+                        <p class="card-text">Total Requests</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-warning">
+                            {{ requests|length }}
+                            {% comment %} You can add filter logic here {% endcomment %}
+                        </h5>
+                        <p class="card-text">Pending</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-success">
+                            {{ requests|length }}
+                            {% comment %} Add approved count {% endcomment %}
+                            
+                        </h5>
+                        <p class="card-text">Approved</p>
+                    </div>
+                </div>
+            </div>
+            <div class="col-md-3">
+                <div class="card text-center">
+                    <div class="card-body">
+                        <h5 class="card-title text-info">
+                            ₦{% comment %} Add total amount calculation {% endcomment %}0.00
+                        </h5>
+                        <p class="card-text">Total Value</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Requests List -->
+       {% if consumable_data %}
+    <div class="row">
+        {% for entry in consumable_data %}
+            {% with request=entry.consumable %}
+            <div class="col-md-6 mb-4">
+                <div class="card request-card {{ request.status|lower }}">
+                    <div class="card-header d-flex justify-content-between align-items-center">
+                        <div>
+                            <h6 class="mb-0">
+                                <i class="fas fa-hashtag me-1"></i>Request #{{ request.id }}
+                            </h6>
+                            <small class="text-muted">
+                                <i class="fas fa-calendar me-1"></i>
+                                {{ request.date_created|date:"M d, Y - g:i A" }}
+                            </small>
+                        </div>
+                        <span class="badge status-badge status-{{ request.status|lower }}">
+                            {{ request.status }}
+                        </span>
+                    </div>
+                    
+                    <div class="card-body">
+                        <!-- Request Items -->
+                        <div class="mb-3">
+                            <h6 class="text-muted mb-2">
+                                <i class="fas fa-box me-1"></i>
+                                Items ({{ request.details.all|length }})
+                            </h6>
+                        </div>
+
+                        <!-- Financial Summary -->
+                        <div class="financial-summary p-6 mt-2 mb-3">
+                            <div class="row text-center">
+                                <div class="col-3">
+                                    <small>Total Amount</small>
+                                    <div><strong>₦{{ entry.approved_amount|floatformat:2 }}</strong></div>
+                                </div>
+                                <div class="col-3">
+                                    <small>M/Payment</small>
+                                    <div><strong>₦{{ entry.monthly_payment|floatformat:2 }}</strong></div>
+                                </div>
+                                <div class="col-3">
+                                    <small>Paid</small>
+                                    <div><strong>₦{{ entry.total_paid|floatformat:2 }}</strong></div>
+                                </div>
+                                <div class="col-3">
+                                    <small>Balance</small>
+                                    <div><strong>₦{{ entry.balance|floatformat:2 }}</strong></div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-2 mt-3">
+                            <a href="{% url 'consumable_request_detail' request.id %}" 
+                               class="btn btn-outline-primary btn-sm flex-fill">
+                                <i class="fas fa-eye me-1"></i>View Details
+                            </a>
+
+                            {% if request.status == 'Approved' %}
+                                <button class="btn btn-success btn-sm">
+                                    <i class="fas fa-credit-card me-1"></i>Make Payment
+                                </button>
+                            {% endif %}
+
+                            {% if request.status == 'Pending' %}
+                                <button class="btn btn-outline-secondary btn-sm" 
+                                        onclick="cancelRequest({{ request.id }})">
+                                    <i class="fas fa-times me-1"></i>Cancel
+                                </button>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endwith %}
+        {% endfor %}
+    </div>
+{% else %}
+    <!-- Empty State -->
+    <div class="text-center py-5">
+        <div class="mb-4">
+            <i class="fas fa-clipboard-list fa-5x text-muted"></i>
+        </div>
+        <h4 class="text-muted">No Requests Yet</h4>
+        <p class="text-muted mb-4">You haven't made any consumable requests yet.</p>
+        <a href="{% url 'member_request_consumable' %}" class="btn btn-primary">
+            <i class="fas fa-plus me-2"></i>Create Your First Request
+        </a>
+    </div>
+{% endif %}
+
+    </div>
+
+    <!-- Cancel Request Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel this request? This action cannot be undone.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep It</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancel">Yes, Cancel Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    
+    <script>
+        let requestToCancel = null;
+
+        function cancelRequest(requestId) {
+            requestToCancel = requestId;
+            const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            modal.show();
+        }
+
+        document.getElementById('confirmCancel').addEventListener('click', function() {
+            if (requestToCancel) {
+                // Implement cancel request logic here
+                fetch(`/member_request_consumable/${requestToCancel}/cancel/`, {
+                    method: 'POST',
+                    headers: {
+                        'X-CSRFToken': '{{ csrf_token }}',
+                        'Content-Type': 'application/json'
+                    }
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        location.reload();
+                    } else {
+                        alert('Error canceling request: ' + data.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while canceling the request');
+                });
+            }
+        });
+
+        // Auto-refresh every 30 seconds for status updates
+        setInterval(function() {
+            // Only refresh if there are pending requests
+            const pendingRequests = document.querySelectorAll('.request-card.pending');
+            if (pendingRequests.length > 0) {
+                location.reload();
+            }
+        }, 30000);
+    </script>
+{% endblock content %}

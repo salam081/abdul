@@ -1,0 +1,156 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Repayments List{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-money-check-alt me-2"></i>Consumable Repayments</h4>
+                </div>
+                <div class="card-body">
+                    <!-- Summary Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <div class="card bg-success text-white">
+                                <div class="card-body text-center">
+                                    <h4>₦{{ total_paid|floatformat:0 }}</h4>
+                                    <p class="mb-0">Total Paid</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="card bg-warning text-dark">
+                                <div class="card-body text-center">
+                                    <h4>₦{{ total_remaining|floatformat:0 }}</h4>
+                                    <p class="mb-0">Total Remaining</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filters -->
+                    <div class="card mb-4">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Filter Repayments</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-4">
+                                    <label for="month" class="form-label">Month</label>
+                                    <select class="form-select" id="month" name="month">
+                                        <option value="">All Months</option>
+                                        {% for month in months %}
+                                            <option value="{{ month|date:'Y-m' }}" 
+                                                    {% if selected_month == month|date:'Y-m' %}selected{% endif %}>
+                                                {{ month|date:'F Y' }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="user_search" class="form-label">User Search</label>
+                                    <input type="text" class="form-control" id="user_search" name="user_search" 
+                                           value="{{ user_search }}" placeholder="Search by name or IPPIS...">
+                                </div>
+                                <div class="col-md-2 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-filter me-2"></i>Filter
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Repayments Table -->
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Date</th>
+                                    <th>User</th>
+                                    <th>Request ID</th>
+                                    <th>Amount Paid</th>
+                                    <th>Balance Remaining</th>
+                                    <th>Payment Month</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for repayment in page_obj %}
+                                <tr>
+                                    <td>{{ repayment.repayment_date|date:"M d, Y" }}</td>
+                                    <td>
+                                        <strong>{{ repayment.consumable_request.user.get_full_name|default:repayment.consumable_request.user.username }}</strong>
+                                        {% if repayment.consumable_request.user.member %}
+                                            <br><small class="text-muted">IPPIS: {{ repayment.consumable_request.user.member.ippis }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <a href="#" class="text-decoration-none">
+                                            #{{ repayment.consumable_request.id }}
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <span class="fw-bold text-success">₦{{ repayment.amount_paid|floatformat:2 }}</span>
+                                    </td>
+                                    <td>
+                                        {% if repayment.balance_remaining > 0 %}
+                                            <span class="fw-bold text-warning">₦{{ repayment.balance_remaining|floatformat:2 }}</span>
+                                        {% else %}
+                                            <span class="fw-bold text-success">₦0.00</span>
+                                        {% endif %}
+                                    </td>
+                                    <td>{{ repayment.repayment_date|date:"F Y" }}</td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-receipt fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">No repayments found matching your criteria.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if user_search %}&user_search={{ user_search }}{% endif %}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if user_search %}&user_search={{ user_search }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if selected_month %}&month={{ selected_month }}{% endif %}{% if user_search %}&user_search={{ user_search }}{% endif %}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+   

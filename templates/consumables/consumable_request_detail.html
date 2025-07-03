@@ -1,0 +1,150 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Request #{{ consumable_request.id }} Details - Admin{% endblock %}
+
+{% block content %}
+<div class="container-fluid mt-3">
+<div class="page-header mb-4">
+    <div class="d-flex justify-content-between align-items-center">
+        <div>
+            <h1 class="mb-0">
+                <i class="fas fa-file-alt me-4"></i>Request #{{ consumable_request.id }}
+            </h1>
+            <!-- <p class="text-muted mb-0">Submitted by {{
+                consumable_request.user.get_full_name|default:consumable_request.user.username }}</p> -->
+        </div>
+        <div>
+            <a href="{% url 'consumable_repayments_list' %}" class="btn btn-secondary">
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a>
+            <!-- <a href="{% url 'approve_consumable_request' consumable_request.id %}" class="btn btn-outline-secondary">
+
+                <i class="fas fa-arrow-left me-2"></i>Back to List
+            </a> -->
+        </div>
+    </div>
+</div>
+
+<div class="row">
+    <!-- Left Column -->
+    <div class="col-md-8">
+        <!-- Request Information -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-info-circle me-2"></i>Request Information</h5>
+            </div>
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-md-6">
+                        <p><strong>Request ID:</strong> #{{ consumable_request.id }}</p>
+                        <p><strong>Requested by:</strong> {{ consumable_request.user.get_full_name|default:consumable_request.user.username }}</p>
+                        <p><strong>Email:</strong> {{ consumable_request.user.email }}</p>
+                        <p><strong>Date Submitted:</strong> {{ consumable_request.date_created|date:"M d, Y" }}</p>
+                    </div>
+                    <div class="col-md-6">
+                        <p><strong>Status:</strong>
+                            <span class="badge 
+                                {% if consumable_request.status == 'Pending' %}bg-warning
+                                {% elif consumable_request.status == 'Approved' %}bg-success
+                                {% elif consumable_request.status == 'Declined' %}bg-danger
+                                {% elif consumable_request.status == 'Paid' %}bg-info
+                                {% endif %}">
+                                {{ consumable_request.status }}
+                            </span>
+                        </p>
+                        <p><strong>Total Amount:</strong> ₦{{ total_amount|floatformat:2 }}</p>
+                        <p><strong>Total Paid:</strong> ₦{{ total_paid|floatformat:2 }}</p>
+                        <p><strong>Balance:</strong> ₦{{ balance|floatformat:2 }}</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Items Requested -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-boxes me-2"></i>Items Requested</h5>
+            </div>
+            <div class="card-body">
+                <div class="table-responsive">
+                    <table class="table table-bordered table-sm">
+                        <thead class="table-light">
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Unit Price (₦)</th>
+                                <th>Total (₦)</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for detail in consumable_request.details.all %}
+                            <tr>
+                                <td>{{ detail.item.title }}</td>
+                                <td>{{ detail.quantity }}</td>
+                                <td>{{ detail.item.price|floatformat:2 }}</td>
+                                <td>{{ detail.total_price|floatformat:2 }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Right Column -->
+    <div class="col-md-4">
+        <!-- Repayment History -->
+        <div class="card mb-4 shadow-sm">
+            <div class="card-header">
+                <h5 class="mb-0"><i class="fas fa-hand-holding-usd me-2"></i>Repayment History</h5>
+            </div>
+            <div class="card-body">
+                {% if repayments %}
+                <ul class="list-group list-group-flush">
+                    {% for repayment in repayments %}
+                    <li class="list-group-item d-flex justify-content-between align-items-center">
+                        <div>
+                            <strong>₦{{ repayment.amount_paid|floatformat:2 }}</strong><br>
+                            <small class="text-muted">{{ repayment.repayment_date|date:"M d, Y" }}</small>
+                        </div>
+                        <span class="badge bg-warning text-dark fs-6">Balance: ₦{{ repayment.balance_remaining|floatformat:2 }}</span>
+                    </li>
+                    {% endfor %}
+                </ul>
+                {% else %}
+                <p class="text-muted">No repayments recorded.</p>
+                {% endif %}
+            </div>
+        </div>
+
+        <!-- Approve Button -->
+        
+        <!-- <div class="card shadow-sm">
+            <div class="card-body text-center">
+                <form method="post" action="{% url 'approve_consumable_request' consumable_request.id %}">
+                    {% csrf_token %}
+                    <button type="submit" class="btn btn-success w-100">
+                        <i class="fas fa-check-circle me-2"></i>Approve Request
+                    </button>
+                </form>
+            </div>
+        </div> -->
+        {% if consumable_request.status == "Pending" %}
+<div class="card shadow-sm">
+    <div class="card-body text-center">
+        <form method="post" action="{% url 'approve_consumable_request' consumable_request.id %}">
+            {% csrf_token %}
+            <button type="submit" class="btn btn-success w-100">
+                <i class="fas fa-check-circle me-2"></i>Approve Request
+            </button>
+        </form>
+    </div>
+</div>
+{% endif %}
+
+       
+    </div>
+</div>
+</div>
+{% endblock %}

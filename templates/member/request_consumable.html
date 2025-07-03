@@ -1,0 +1,180 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Request Consumable{% endblock %}
+
+{% block content %}
+<style>
+    .section-heading {
+        font-size: 2rem;
+        font-weight: 600;
+        color: #343a40;
+        margin-bottom: 2rem;
+        text-align: center;
+    }
+
+    .card-custom {
+        border-radius: 12px;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+        border: none;
+        transition: transform 0.2s ease-in-out;
+       
+    }
+
+    .card-custom:hover {
+        transform: translateY(-3px);
+    }
+
+    .card-header-custom {
+        background: linear-gradient(135deg, #8a2cb8, #b0469e);
+        color: white;
+        font-size: 1.1rem;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+
+    .form-check-label small {
+        color: #b435bf;
+        font-size: 0.8rem;
+        display: block;
+        border:1px solid #8a2cb8;
+    }
+
+    .form-section {
+        background-color: #f8f9fc;
+        border-left: 4px solid #ad4aad;
+        border-right: 4px solid #bd3dc6;
+        padding: 1.25rem;
+        border-radius: 10px;
+        margin-bottom: 1.5rem;
+    }
+
+    .btn-primary {
+        background-color: #b24bc0;
+        border: none;
+        font-weight: 600;
+        border-radius: 10px;
+        padding: 0.6rem 1.25rem;
+    }
+
+    .btn-primary:hover {
+        background-color: #8552a8;
+    }
+    
+    .table th,
+    .table td {
+        border:1px solid #8a2cb8;
+        vertical-align: middle;
+        font-size: 0.95rem;
+    }
+
+    .input-sm {
+        font-size: 0.9rem;
+        padding: 0.4rem 0.6rem;
+        border-radius: 8px;
+        border:1px solid #8a2cb8;
+    }
+
+    .label-sm {
+        font-size: 0.9rem;
+        font-weight: 500;
+    }
+</style>
+
+<div class="container my-5">
+    <h2 class="section-heading">Request for Consumables</h2>
+
+    <div class="row g-4">
+        <!-- Left: Item List -->
+        <div class="col-md-5">
+            <div class="card card-custom h-100">
+                <div class="card-header-custom">Available Items & Prices</div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-hover table-sm">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>S/N</th>
+                                    <th>Item</th>
+                                    <th>Description</th>
+                                    <th>Price (₦)</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for i in items %}
+                                    <tr>
+                                        <td>{{ forloop.counter }}</td>
+                                        <td>{{ i.title }}</td>
+                                        <td>{{ i.description }}</td>
+                                        <td>{{ i.price }}</td>
+                                    </tr>
+                                {% empty %}
+                                    <tr><td colspan="3" class="text-center text-muted">No items available.</td></tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Right: Form -->
+        <div class="col-md-7">
+            <div class="card card-custom h-100">
+                <div class="card-header-custom text-center">
+                    Select Items and Provide Quantities
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data">
+                        {% csrf_token %}
+
+                        <!-- Item selection -->
+                        <div class="form-section">
+                            {% for item in items %}
+                            <div class="row mb-3 align-items-center">
+                                <div class="col-md-5">
+                                    <div class="form-check">
+                                        <input class="form-check-input" type="checkbox" name="consumable_ids"
+                                            id="consumable_{{ item.id }}" value="{{ item.id }}">
+                                        <label class="form-check-label" for="consumable_{{ item.id }}">
+                                            {{ item.title }}
+                                            <small>{{ item.description|truncatechars:50 }}</small>
+                                        </label>
+                                    </div>
+                                </div>
+                                <div class="col-md-5">
+                                    <input type="number" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}"
+                                        class="form-control input-sm" min="0" value="0" placeholder="Quantity">
+                                    <small class="text-muted">Qty for {{ item.name }}</small>
+                                </div>
+                            </div>
+                            {% empty %}
+                            <p class="text-danger">No items to request.</p>
+                            {% endfor %}
+                        </div>
+
+                        <!-- Term and file -->
+                        <div class="row mb-6">
+                            <div class="col-md-6">
+                                <label for="term_months" class="label-sm">Term (Months)</label>
+                                <input type="number" class="form-control input-sm" name="loan_term_months" id="term_months"
+                                    placeholder="e.g. 3" required>
+                            </div>
+                            <div class="col-md-6">
+                                <label for="file_one" class="label-sm">Upload File</label>
+                                <input type="file" class="form-control input-sm" name="file_one" id="file_one">
+                            </div>
+                        </div>
+
+                        <!-- Submit -->
+                        <div class="d-grid mt-2">
+                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

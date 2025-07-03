@@ -1,0 +1,84 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+<style>
+    .card-header{
+       
+        background: linear-gradient(135deg, #8a2cb8, #b0469e);
+        color: white;
+        font-size: 2.1rem;
+        text-align: center;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .btn-primary{
+       background: linear-gradient(135deg, #8a2cb8, #b0469e);
+    }
+</style>
+<div class="container mt-4 col-md-8" >
+   
+    <div class="card">
+        <div class="card-header">Upload Monthly Loan Payments</div>
+        <div class="card-body">
+    <form method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    <label>Loan Year:</label>
+   <label>Loan Year:</label>
+<select name="selected_year" id="year-select" class="form-control" required>
+    <option value="">Select Year</option>
+    {% for year in year_to_loan_types.keys %}
+    <option value="{{ year }}">{{ year }}</option>
+    {% endfor %}
+</select>
+
+<label>Loan Type:</label>
+<select name="selected_type" id="type-select" class="form-control" required>
+    <option value="">Select Loan Type</option>
+</select>
+
+
+    <label>Upload Excel File:</label>
+    <input type="file" name="excel_file" class="form-control" accept=".xls,.xlsx" required>
+<div class="d-grid">
+
+    <button type="submit" class="btn btn-primary mt-3">Upload Repayments</button>
+</div>
+</form>
+
+</div>
+</div>
+   
+</div>
+
+<script>
+document.getElementById("year-select").addEventListener("change", function() {
+    const year = this.value;
+    const typeSelect = document.getElementById("type-select");
+
+    typeSelect.innerHTML = '<option value="">Loading...</option>';
+
+    fetch(`/ajax/get-loan-types/?year=${year}`)
+        .then(response => response.json())
+        .then(data => {
+            typeSelect.innerHTML = '<option value="">Select Loan Type</option>';
+            if (data.loan_types) {
+                data.loan_types.forEach(type => {
+                    const option = document.createElement("option");
+                    option.value = type;
+                    option.textContent = type;
+                    typeSelect.appendChild(option);
+                });
+            } else {
+                typeSelect.innerHTML = '<option value="">No Loan Types</option>';
+            }
+        })
+        .catch(error => {
+            typeSelect.innerHTML = '<option value="">Error loading</option>';
+            console.error(error);
+        });
+});
+</script>
+
+{% endblock %}

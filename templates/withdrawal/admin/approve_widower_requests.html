@@ -1,0 +1,23 @@
+{% extends "base/base.html" %}
+{% block content %}
+<h3>Pending Widower Requests</h3>
+
+{% for request in pending_requests %}
+<div class="card mb-3">
+    <div class="card-body">
+        <p><strong>Member:</strong> {{ request.member }}</p>
+        <p><strong>Reason:</strong> {{ request.reason|default:"N/A" }}</p>
+        <p><strong>Date Requested:</strong> {{ request.date_requested }}</p>
+        <form method="post" style="display:inline;">
+        {% csrf_token %}
+        <input type="hidden" name="widower_id" value="{{ request.id }}">
+        <button type="submit" name="approve" class="btn btn-success">Approve</button>
+        <button type="submit" name="decline" class="btn btn-danger">Decline</button>
+    </form>
+
+    </div>
+</div>
+{% empty %}
+<p>No pending requests.</p>
+{% endfor %}
+{% endblock %}

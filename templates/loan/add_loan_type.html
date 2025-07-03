@@ -1,0 +1,373 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.3.2/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+    <style>
+        :root {
+            --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            --card-shadow: 0 10px 30px rgba(0,0,0,0.1);
+            --hover-shadow: 0 15px 35px rgba(0,0,0,0.15);
+        }
+        
+        /* body {
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        } */
+
+        .page-header {
+            /* background: var(--primary-gradient); */
+            color: rgb(0, 0, 0);
+            padding: 2rem 0;
+            margin-bottom: 2rem;
+            border-radius: 0 0 20px 20px;
+            text-align: center;
+
+        }
+
+        .custom-card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: var(--card-shadow);
+            transition: all 0.3s ease;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .custom-card:hover {
+            box-shadow: var(--hover-shadow);
+            transform: translateY(-5px);
+        }
+
+        .card-header-custom {
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 15px 15px 0 0 !important;
+            padding: 1.5rem;
+            border: none;
+        }
+
+        .loan-type-item {
+            background: linear-gradient(45deg, #f8f9ff, #e8ecff);
+            border: 1px solid #e0e6ff;
+            border-radius: 10px;
+            padding: 1rem;
+            margin-bottom: 0.8rem;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loan-type-item:hover {
+            background: linear-gradient(45deg, #e8ecff, #d8e2ff);
+            transform: translateX(5px);
+            box-shadow: 0 5px 15px rgba(102, 126, 234, 0.2);
+        }
+
+        .loan-type-item::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 4px;
+            background: var(--primary-gradient);
+            border-radius: 0 2px 2px 0;
+        }
+
+        .form-control:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+
+        .btn-primary {
+            background: var(--primary-gradient);
+            border: none;
+            border-radius: 25px;
+            padding: 0.7rem 2rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-outline-primary {
+            border: 2px solid #667eea;
+            color: #667eea;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .btn-outline-primary:hover {
+            background: var(--primary-gradient);
+            border-color: transparent;
+            transform: translateY(-2px);
+        }
+
+        .required-asterisk {
+            color: #dc3545;
+            font-weight: bold;
+            margin-left: 3px;
+        }
+
+        .form-label {
+            font-weight: 600;
+            color: #495057;
+            margin-bottom: 0.5rem;
+        }
+
+        .no-loans {
+            text-align: center;
+            color: #6c757d;
+            font-style: italic;
+            padding: 2rem;
+        }
+
+        .loan-count-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: var(--primary-gradient);
+            color: white;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+
+        .section-icon {
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            font-size: 1.2rem;
+            margin-right: 0.5rem;
+        }
+
+        @media (max-width: 768px) {
+            .row > div {
+                margin-bottom: 1.5rem;
+            }
+            
+            .page-header h1 {
+                font-size: 1.8rem;
+            }
+        }
+
+        .animate-fade-in {
+            animation: fadeIn 0.6s ease-in;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .loan-meta {
+            font-size: 0.85rem;
+            color: #6c757d;
+            margin-top: 0.5rem;
+        }
+
+        .amount-highlight {
+            color: #28a745;
+            font-weight: 600;
+        }
+
+        .term-highlight {
+            color: #17a2b8;
+            font-weight: 600;
+        }
+    </style>
+
+    <div class="page-header mt-2">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col">
+                    <h1 class="mb-0">
+                        <!-- <i class="fas fa-money-check-alt me-3"></i> -->
+                        Loan Type Management
+                    </h1>
+                    <p class="mb-0 mt-2 opacity-75">Manage and configure loan types for your organization</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="container mt-2">
+        <div class="row g-4">
+            <!-- Loan Types List -->
+            <div class="col-lg-5">
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header-custom position-relative">
+                        <h5 class="mb-0">
+                            <i class="section-icon fas fa-list"></i>
+                            Available Loan Types
+                        </h5>
+                        <div class="loan-count-badge">{{ loan_types|length }}</div>
+                    </div>
+                    <div class="card-body p-3">
+                        {% if loan_types %}
+                            <div class="loan-types-container" style="max-height: 500px; overflow-y: auto;">
+                                {% for loan_type in loan_types %}
+                                <div class="loan-type-item">
+                                    <div class="d-flex justify-content-between align-items-start">
+                                        <div class="flex-grow-1">
+                                            <h6 class="mb-1 fw-bold text-dark">
+                                                <i class="fas fa-tag me-2" style="color: #667eea;"></i>
+                                                {{ loan_type.name }}
+                                            </h6>
+                                            {% if loan_type.description %}
+                                                <p class="mb-2 text-muted small">{{ loan_type.description|truncatewords:15 }}</p>
+                                            {% endif %}
+                                            <div class="loan-meta">
+                                                {% if loan_type.max_amount %}
+                                                    <span class="me-3">
+                                                        <i class="fas fa-dollar-sign me-1"></i>
+                                                        Max: <span class="amount-highlight">${{ loan_type.max_amount|floatformat:0 }}</span>
+                                                    </span>
+                                                {% endif %}
+                                                {% if loan_type.max_loan_term_months %}
+                                                    <span>
+                                                        <i class="fas fa-calendar-alt me-1"></i>
+                                                        Term: <span class="term-highlight">{{ loan_type.max_loan_term_months }} months</span>
+                                                    </span>
+                                                {% endif %}
+                                            </div>
+                                        </div>
+                                        <div class="dropdown">
+                                            <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                                <i class="fas fa-ellipsis-v"></i>
+                                            </button>
+                                            <ul class="dropdown-menu">
+                                                <li><a class="dropdown-item" href="#"><i class="fas fa-edit me-2"></i>Edit</a></li>
+                                                <li><a class="dropdown-item text-danger" href="#"><i class="fas fa-trash me-2"></i>Delete</a></li>
+                                            </ul>
+                                        </div>
+                                    </div>
+                                </div>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            <div class="no-loans">
+                                <i class="fas fa-inbox fa-3x mb-3" style="color: #dee2e6;"></i>
+                                <p>No loan types configured yet.</p>
+                                <p class="small text-muted">Add your first loan type using the form on the right.</p>
+                            </div>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+
+            <!-- Add Loan Type Form -->
+            <div class="col-lg-7">
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header-custom">
+                        <h5 class="mb-0">
+                            <i class="section-icon fas fa-plus-circle"></i>
+                            Add New Loan Type
+                        </h5>
+                    </div>
+                    <div class="card-body p-4 bg-light">
+                        <form method="post" class="needs-validation" novalidate>
+                            {% csrf_token %}
+                            
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="name" class="form-label">
+                                        <i class="fas fa-tag me-2"></i>Loan Type Name
+                                        <span class="required-asterisk">*</span>
+                                    </label>
+                                    <input type="text"  name="name" id="name"  class="form-control"  placeholder="Enter Loan Name"  required>
+                                    <!-- <div class="invalid-feedback">
+                                        Please provide a valid loan type name.
+                                    </div> -->
+                                </div>
+
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_amount" class="form-label">
+                                        <i class="fas fa-naira-sign me-2"></i>Maximum Amount
+                                    </label>
+                                    <div class="input-group">
+                                        <!-- <span class="input-group-text">₦</span> -->
+                                        <input type="number" name="max_amount" id="max_amount"  step="0.01" class="form-control"placeholder="Enter Maximum Amountt">
+                                    </div>
+                                    <!-- <div class="form-text">Maximum loan amount allowed for this type</div> -->
+                                </div>
+                            </div>
+
+                            <div class="row">
+                                <div class="col-md-6 mb-3">
+                                    <label for="max_loan_term_months" class="form-label">
+                                        <i class="fas fa-calendar-alt me-2"></i>Maximum Term (Months)
+                                    </label>
+                                    <input type="number"  name="max_loan_term_months" id="max_loan_term_months" class="form-control" placeholder="Enter Maximum Months">
+                                    <!-- <div class="form-text">Maximum repayment period in months</div> -->
+                                </div>
+                            </div>
+
+                            <div class="mb-4">
+                                <label for="description" class="form-label">
+                                    <i class="fas fa-align-left me-2"></i>Description
+                                </label>
+                                <textarea name="description" id="description" class="form-control" rows="3" placeholder="Provide details about this loan type, eligibility criteria, interest rates, etc."></textarea>
+                                <!-- <div class="form-text">Optional: Add details about this loan type</div> -->
+                            </div>
+
+                            <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                <!-- <button type="reset" class="btn btn-outline-secondary me-md-2">
+                                    <i class="fas fa-undo me-2"></i>Reset Form
+                                </button> -->
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-plus me-2"></i>Add Loan Type
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+
+                <!-- Quick Stats Card -->
+                <!-- <div class="custom-card mt-4 animate-fade-in">
+                    <div class="card-body">
+                        <div class="row text-center">
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <i class="fas fa-list-alt fa-2x mb-2" style="color: #667eea;"></i>
+                                    <h4 class="mb-1">{{ loan_types|length }}</h4>
+                                    <small class="text-muted">Active Types</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4 border-start border-end">
+                                <div class="p-3">
+                                    <i class="fas fa-dollar-sign fa-2x mb-2" style="color: #28a745;"></i>
+                                    <h4 class="mb-1">$2.5M</h4>
+                                    <small class="text-muted">Total Capacity</small>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="p-3">
+                                    <i class="fas fa-clock fa-2x mb-2" style="color: #ffc107;"></i>
+                                    <h4 class="mb-1">24</h4>
+                                    <small class="text-muted">Avg. Term (Months)</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div> -->
+            </div>
+        </div>
+    </div>
+
+    
+{% endblock content %}

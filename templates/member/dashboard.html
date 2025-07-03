@@ -1,0 +1,614 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+   
+
+    /* Main Content */
+    .main-content {
+        padding: 2rem;
+        width: 100%;
+    }
+
+    /* Welcome Header */
+    .welcome-header {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 1rem;
+        margin-bottom: 4rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .welcome-header h1 {
+        color: #333;
+        font-size: 2rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+    }
+
+    .welcome-header p {
+        color: #666;
+        font-size: 1.1rem;
+    }
+
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 150px;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4CAF50, #45a049);
+    }
+
+    .stat-card.loan::before {
+        background: linear-gradient(90deg, #FF6B6B, #ee5a52);
+    }
+
+    .stat-card.investment::before {
+        background: linear-gradient(90deg, #4ECDC4, #44a08d);
+    }
+
+    .stat-card.consumable::before {
+        background: linear-gradient(90deg, #45B7D1, #3498db);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.savings {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+
+    .stat-icon.loan {
+        background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+    }
+
+    .stat-icon.investment {
+        background: linear-gradient(135deg, #4ECDC4, #44a08d);
+    }
+
+    .stat-icon.consumable {
+        background: linear-gradient(135deg, #45B7D1, #3498db);  
+    }
+
+    .stat-info h3 {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .stat-change.positive {
+        color: #4CAF50;
+    }
+
+    .stat-change.negative {
+        color: #f44336;
+    }
+
+    /* Charts Section */
+    .charts-section {
+        display: grid;
+        grid-template-columns: 2fr 1fr;
+        gap: 2rem;
+        margin-bottom: 2rem;
+    }
+
+    .chart-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+    }
+
+    .chart-header {
+        margin-bottom: 1.5rem;
+    }
+
+    .chart-header h3 {
+        color: #333;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    /* Tables */
+    .table-section {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        margin-bottom: 2rem;
+    }
+
+    .table-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 1.5rem;
+    }
+
+    .table-header h3 {
+        color: #333;
+        font-size: 1.2rem;
+        font-weight: 600;
+    }
+
+    .btn-primary {
+        background: linear-gradient(135deg, #667eea, #764ba2);
+        color: white;
+        border: none;
+        padding: 0.75rem 1.5rem;
+        border-radius: 12px;
+        cursor: pointer;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        display: inline-block;
+    }
+
+    .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 12px rgba(102, 126, 234, 0.3);
+    }
+
+    .data-table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 12px;
+        overflow: hidden;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
+    }
+
+    .data-table th {
+        background: #f8f9fa;
+        padding: 1rem;
+        text-align: left;
+        font-weight: 600;
+        color: #333;
+        border-bottom: 2px solid #e9ecef;
+    }
+
+    .data-table td {
+        padding: 1rem;
+        border-bottom: 1px solid #e9ecef;
+        color: #666;
+    }
+
+    .data-table tr:hover {
+        background: #f8f9fa;
+    }
+
+    .status-badge {
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 500;
+    }
+
+    .status-approved {
+        background: #d4edda;
+        color: #155724;
+    }
+
+    .status-pending {
+        background: #fff3cd;
+        color: #856404;
+    }
+
+    .status-rejected {
+        background: #f8d7da;
+        color: #721c24;
+    }
+
+    /* Quick Actions */
+    .quick-actions {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+    }
+
+    .action-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        cursor: pointer;
+        transition: all 0.3s ease;
+        text-decoration: none;
+        color: inherit;
+    }
+
+    .action-card:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        color: inherit;
+        text-decoration: none;
+    }
+
+    .action-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto 1rem;
+        color: white;
+        font-size: 1.2rem;
+    }
+
+    .action-card:nth-child(1) .action-icon {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+
+    .action-card:nth-child(2) .action-icon {
+        background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+    }
+
+    .action-card:nth-child(3) .action-icon {
+        background: linear-gradient(135deg, #4ECDC4, #44a08d);
+    }
+
+    .action-card:nth-child(4) .action-icon {
+        background: linear-gradient(135deg, #45B7D1, #3498db);
+    }
+
+    .loan-details-grid {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        gap: 1rem;
+        text-align: center;
+    }
+
+    .loan-detail-item {
+        padding: 1rem;
+    }
+
+    .loan-detail-item h4 {
+        color: #666;
+        margin-bottom: 0.5rem;
+        font-size: 0.9rem;
+    }
+
+    .loan-detail-value {
+        font-size: 1.5rem;
+        font-weight: bold;
+        color: #333;
+    }
+
+    .loan-detail-value.positive {
+        color: #4CAF50;
+    }
+
+    .loan-detail-value.negative {
+        color: #ff6b6b;
+    }
+
+    @media (max-width: 768px) {
+        .charts-section {
+            grid-template-columns: 1fr;
+        }
+
+        .stats-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .loan-details-grid {
+            grid-template-columns: 1fr;
+        }
+
+        .main-content {
+            padding: 1rem;
+        }
+    }
+</style>
+
+<!-- Main Content -->
+<main class="main-content">
+    <!-- Welcome Header -->
+    <!-- <div class="welcome-header">
+        <h5>Welcome back, {{ member.member.first_name }}!</h5>
+        <p>Here's your financial overview for today</p>
+    </div> -->
+
+    <!-- Stats Cards -->
+     
+  
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Total Savings</h3>
+                    <div class="stat-value">₦{{ total_savings|floatformat:0|intcomma }}</div>
+                    <div class="stat-change {% if monthly_saving > previous_monthly_saving %}positive{% else %}negative{% endif %}">
+                        <i class="fas fa-arrow-{% if monthly_saving > previous_monthly_saving %}up{% else %}down{% endif %}"></i>
+                        <span>This month: ₦{{ monthly_saving|floatformat:0|intcomma }}</span>
+                    </div>
+                </div>
+                <div class="stat-icon savings">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card loan">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Active Loan Balance</h3>
+                    <div class="stat-value">₦{{ loan_balance|floatformat:0|intcomma }}</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-calendar-alt"></i>
+                        <span>Monthly Payment: ₦{{monthly_payment|floatformat:0|intcomma }}</span>
+                    </div>
+                </div>
+                <div class="stat-icon loan">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card investment">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Total Investments</h3>
+                    <div class="stat-value">₦{{ investment_total|floatformat:0|intcomma }}</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Loanable: ₦{{ loanable_total|floatformat:0|intcomma }}</span>
+                    </div>
+                </div>
+                <div class="stat-icon investment">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card consumable">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Consumable Balance</h3>
+                    <div class="stat-value">₦{{ total_remaining|floatformat:0|intcomma }}</div>
+                    <div class="stat-change positive">
+                        <i class="fas fa-shopping-cart"></i>
+                        <span>{{ approved_consumable|length }} active purchase{% if approved_consumable|length != 1 %}s{% endif %}</span>
+                    </div>
+                </div>
+                <div class="stat-icon consumable">
+                    <i class="fas fa-shopping-cart"></i>
+                </div>
+            </div>
+        </div>
+    </div>
+
+      <!-- Loan Information -->
+    {% if loan %}
+    <div class="table-section">
+        <div class="table-header">
+            <h3>Active Loan Details</h3>
+            <!-- <a href="#" class="btn-primary">Make Payment</a> -->
+        </div>
+        <div class="loan-details-grid">
+            <div class="loan-detail-item">
+                <h4>Approved Amount</h4>
+                <div class="loan-detail-value">₦{{ loan.approved_amount|floatformat:0|intcomma }}</div>
+            </div>
+            <div class="loan-detail-item">
+                <h4>Monthly Payment</h4>
+                <div class="loan-detail-value">₦{{ loan.monthly_payment|floatformat:2 }}</div>
+            </div>
+            <div class="loan-detail-item">
+                <h4>Amount Paid</h4>
+                <div class="loan-detail-value positive">₦{{ loan_paid|floatformat:0|intcomma }}</div>
+            </div>
+            <div class="loan-detail-item">
+                <h4>Remaining Balance</h4>
+                <div class="loan-detail-value negative">₦{{ loan_balance|floatformat:0|intcomma }}</div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Quick Actions -->
+    <!-- <div class="quick-actions">
+        <a href="#" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-plus"></i>
+            </div>
+            <h4>Make Savings</h4>
+            <p>Add to your monthly savings</p>
+        </a>
+        <a href="#" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-hand-holding-usd"></i>
+            </div>
+            <h4>Apply for Loan</h4>
+            <p>Submit a new loan request</p>
+        </a>
+        <a href="#" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-chart-line"></i>
+            </div>
+            <h4>New Investment</h4>
+            <p>Explore investment options</p>
+        </a>
+        <a href="#" class="action-card">
+            <div class="action-icon">
+                <i class="fas fa-shopping-cart"></i>
+            </div>
+            <h4>Request Consumable</h4>
+            <p>Order items on credit</p>
+        </a>
+    </div> -->
+
+    <!-- Charts Section
+    <div class="charts-section">
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Financial Overview (Last 6 Months)</h3>
+            </div>
+            <canvas id="financialChart" height="100"></canvas>
+        </div>
+        <div class="chart-card">
+            <div class="chart-header">
+                <h3>Portfolio Distribution</h3>
+            </div>
+            <canvas id="portfolioChart"></canvas>
+        </div>
+    </div> -->
+
+    
+    {% if pending_guarantor_loans %}
+        
+    
+        
+  <h5>Loan Guarantee Requests</h5>
+<table class="table table-bordered">
+    <thead>
+        <tr>
+            <th>Borrower</th>
+            <th>Loan Type</th>
+            <th>Amount</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for loan in pending_guarantor_loans %}
+        <tr>
+            <td>{{ loan.member }}</td>
+            <td>{{ loan.loan_type }}</td>
+            <td>₦{{ loan.amount }}</td>
+            <td>
+                <a href="{% url 'guarantor_approval_page' loan.id %}" class="btn btn-sm btn-primary">
+                    Review & Accept
+                </a>
+            </td>
+        </tr>
+        {% empty %}
+        <tr>
+            <td colspan="4" class="text-center text-muted">No loans waiting for your approval.</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endif %}
+
+    <!-- Approved Consumables -->
+    {% if approved_consumable %}
+    <div class="table-section">
+        <div class="table-header">
+            <h3>Active Consumable Purchases</h3>
+            <!-- <a href="#" class="btn-primary">View All</a> -->
+        </div>
+        <div class="table-responsive">
+        <table class="data-table">
+            <thead>
+                <tr>
+                    <th>Date</th>
+                    <!-- <th>Items</th> -->
+                    <th>Approved Amount</th>
+                    <th>Paid</th>
+                    <th>Balance</th>
+                    <th>Monthly Payment</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in approved_consumable %}
+                <tr>
+                    <td>{{ item.consumable.date_created|date:"M d, Y" }}</td>
+                    <!-- <td class="text-nowrap text-truncate" style="max-width: 370px;">
+                        {% for detail in item.consumable.details.all %}
+                           <b class="text-nowrap text-truncate" style="max-width: 270px;">{{ detail.item.title }}</b> 
+                            {% if not forloop.last %}{% endif %}
+                        {% endfor %}
+                    </td> -->
+                    <td>₦{{ item.approved_amount|floatformat:0|intcomma }}</td>
+                    <td>₦{{ item.total_paid|floatformat:0|intcomma }}</td>
+                    <td>₦{{ item.balance|floatformat:0|intcomma }}</td>
+                    <td>₦{{ item.monthly_payment|floatformat:0|intcomma }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        </div>
+    </div>
+    {% endif %}
+</main>
+ 
+
+{% endblock content %}

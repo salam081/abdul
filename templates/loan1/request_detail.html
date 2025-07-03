@@ -1,0 +1,52 @@
+{% extends 'base/base.html' %}
+{% block content %}
+
+<div class="container mt-5">
+
+    <h2 class="text-primary mb-4">Loan Request Approve Page</h2>
+  <div class="row">
+    <div class="col-md-6">
+       <div class="card shadow-sm">
+    <div class="card-body">
+      <p><strong>Status:</strong> {{ loan_request.get_status_display }}</p>
+      <p><strong>Member:</strong> {{ loan_request.member }}</p>
+      <p><strong>Amount:</strong> ₦{{ loan_request.amount }}</p>
+
+      
+      <!-- Approve Form -->
+      <form method="post" class="mb-3">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="approve">
+        <div class="mb-3">
+          <label for="approved_amount" class="form-label">Approved Amount</label>
+          <input type="number" name="approved_amount" id="approved_amount" class="form-control" placeholder="Enter approved amount">
+        </div>
+        <button type="submit" class="btn btn-success">Approve</button>
+      </form>
+
+      
+    </div>
+  </div>  
+    </div>
+    <div class="col-md-6">
+ <div class="card shadow-sm">
+    <div class="card-body">
+      <!-- Reject Form -->
+      <form method="post">
+        {% csrf_token %}
+        <input type="hidden" name="action" value="reject">
+        <div class="mb-3">
+          <label for="rejection_reason" class="form-label">Rejection Reason</label>
+          <textarea name="rejection_reason" id="rejection_reason" class="form-control" placeholder="Enter rejection reason" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Reject</button>
+      </form>
+
+    </div>
+  </div>
+    </div>
+  </div>  
+ 
+</div>
+
+{% endblock content %}

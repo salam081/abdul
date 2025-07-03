@@ -1,0 +1,8 @@
+{% extends "base/base.html" %}
+{% block content %}
+<h3>Withdrawal Request Status</h3>
+
+<p><strong>Status:</strong> {{ request_status.status }}</p>
+<p><strong>Date:</strong> {{ request_status.date_requested }}</p>
+<p><strong>Reason:</strong> {{ request_status.reason|default:"Not provided" }}</p>
+{% endblock %}

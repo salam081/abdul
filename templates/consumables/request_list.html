@@ -1,0 +1,200 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Consumable Requests{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>Consumable Requests</h4>
+                </div>
+                <div class="card-body">
+                    <!-- {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %} -->
+
+                    <!-- Search Bar -->
+                    <div class="search-box mb-4">
+                        <form method="get" class="row g-3">
+                            <div class="col-md-8">
+                                <input type="text" class="form-control" name="q" value="{{ search_query }}" 
+                                       placeholder="Search by name, username, status, or item...">
+                            </div>
+                            <div class="col-md-4">
+                                <button type="submit" class="btn btn-primary w-100">
+                                    <i class="fas fa-search me-2"></i>Search
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-dark">
+                                <tr>
+                                    <th>Member</th>
+                                    <th>Items</th>
+                                    <th>Total Price</th>
+                                    <th>Status</th>
+                                    <th>Amount Paid</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for request in page_obj %}
+                                <tr>
+                                    <td>
+                                        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
+                                        {% if request.user.member %}
+                                            <br><small class="text-muted">IPPIS: {{ request.user.member.ippis }}</small>
+                                        {% endif %}
+                                    </td>
+                                    <td>
+                                        <table class="table table-sm table-bordered mb-0">
+                                            <thead>
+                                                <tr>
+                                                    <th>Item</th>
+                                                    <th>Qty</th>
+                                                    <th>Unit Price</th>
+                                                    <th>Total</th>
+                                                    <th>Action</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                {% for detail in request.details.all %}
+                                                <tr>
+                                                    <td>{{ detail.item.title }}</td>
+                                                    <td>
+                                                        {% if request.status == 'Pending' %}
+                                                        <form method="POST" action="{% url 'consumable_requests_list' %}" class="d-flex align-items-center">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="reduce_quantity_id" value="{{ detail.id }}">
+                                                            <input type="number" name="new_quantity" value="{{ detail.quantity }}" min="1" max="{{ detail.quantity|add:'-1' }}" class="form-control form-control-sm me-2" style="width: 80px;">
+                                                            <button type="submit" class="btn btn-sm btn-outline-primary">Reduce</button>
+                                                        </form>
+                                                        {% else %}
+                                                            {{ detail.quantity }}
+                                                        {% endif %}
+                                                    </td>
+                                                    <td>₦{{ detail.item_price|floatformat:2 }}</td>
+                                                    <td>₦{{ detail.total_price|floatformat:2 }}</td>
+                                                    <td>
+                                                        {% if request.status == 'Pending' %}
+                                                        <form method="POST" action="{% url 'consumable_requests_list' %}" style="display:inline;">
+                                                            {% csrf_token %}
+                                                            <input type="hidden" name="remove_item_id" value="{{ detail.id }}">
+                                                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
+                                                        </form>
+                                                        {% endif %}
+                                                    </td>
+                                                </tr>
+                                                {% endfor %}
+                                            </tbody>
+                                        </table>
+                                    </td>
+                                    <td><strong>₦{{ request.calculate_total_price|floatformat:2 }}</strong></td>
+                                    <td>
+                                        <span class="badge 
+                                            {% if request.status == 'Approved' %} bg-success
+                                            {% elif request.status == 'Declined' %} bg-danger
+                                            {% elif request.status == 'Paid' %} bg-primary
+                                            {% else %} bg-warning text-dark
+                                            {% endif %}">
+                                            {{ request.status }}
+                                        </span>
+                                    </td>
+                                    <td class="text-success"><b>{{ request.total_paid }}</b></td>
+                                    <td>
+                                        <div class="btn-group" role="group">
+                                            <a href="{% url 'admin_consumable_request_detail' request.id %}" class="btn btn-sm btn-outline-info" >
+                                                <i class="fas fa-eye"></i>
+                                            </a>
+                                            {% if request.status == 'Pending' %}
+                                                <a href="{% url 'admin_edit_consumable_request' request.id %}" class="btn btn-sm btn-outline-primary">
+                                                    <i class="fas fa-edit"></i>
+                                                </a>
+                                                <a href="{% url 'approve_consumable_request' request.id %}" class="btn btn-sm btn-outline-success"
+                                                   onclick="return confirm('Are you sure you want to approve this request?')">
+                                                    <i class="fas fa-check"></i>
+                                                </a>
+                                                <a href="{% url 'decline_consumable_request' request.id %}" class="btn btn-sm btn-outline-danger"
+                                                   onclick="return confirm('Are you sure you want to decline this request?')">
+                                                    <i class="fas fa-times"></i>
+                                                </a>
+                                            {% endif %}
+                                        </div>
+                                    </td>
+                                </tr>
+                                {% empty %}
+                                <tr>
+                                    <td colspan="6" class="text-center py-4">
+                                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
+                                        <p class="text-muted">No requests found.</p>
+                                    </td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+
+                    <!-- Pagination -->
+                    {% if page_obj.has_other_pages %}
+                    <nav>
+                        <ul class="pagination justify-content-center">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
+                                </li>
+                            {% endif %}
+                            
+                            {% for num in page_obj.paginator.page_range %}
+                                {% if page_obj.number == num %}
+                                    <li class="page-item active">
+                                        <span class="page-link">{{ num }}</span>
+                                    </li>
+                                {% else %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                                    </li>
+                                {% endif %}
+                            {% endfor %}
+                            
+                            {% if page_obj.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
+                                </li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Request Details Modal -->
+<div class="modal fade" id="requestDetailsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Request Details</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="requestDetailsContent">
+                <!-- Content will be loaded here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+
+{% endblock %}

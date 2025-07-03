@@ -1,0 +1,127 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Upload Payments{% endblock %}
+
+{% block content %}
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-12">
+            <div class="card shadow">
+                <div class="card-header">
+                    <h4 class="mb-0"><i class="fas fa-upload me-2"></i>Upload Payment Excel File</h4>
+                </div>
+                <div class="card-body">
+                    {% if messages %}
+                        {% for message in messages %}
+                            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                                {{ message }}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                            </div>
+                        {% endfor %}
+                    {% endif %}
+
+                    <!-- Instructions -->
+                    <div class="alert alert-info">
+                        <h5><i class="fas fa-info-circle me-2"></i>Upload Instructions</h5>
+                        <ul class="mb-0">
+                            <li>Excel file must contain columns: <strong>IPPIS</strong>, <strong>Amount Paid</strong>, <strong>Repayment Date</strong></li>
+                            <li>Select the month when the consumable requests were created</li>
+                            <li>Repayment Date should be in DD/MM/YYYY or similar format</li>
+                            <li>Duplicate payments for the same month will be skipped</li>
+                        </ul>
+                    </div>
+
+                    <!-- Upload Form -->
+                    <div class="card">
+                        <div class="card-header bg-primary text-white">
+                            <h5 class="mb-0">Upload Payment Data</h5>
+                        </div>
+                        <div class="card-body">
+                            <form method="post" enctype="multipart/form-data">
+                                {% csrf_token %}
+                                <div class="row g-3">
+                                    <div class="col-md-6">
+                                        <label for="selected_month" class="form-label">Request Month *</label>
+                                        <select class="form-select" id="selected_month" name="selected_month" required>
+                                            <option value="">Select month of requests...</option>
+                                            {% for month, requests in grouped_list %}
+                                                <option value="{{ month|date:'Y-m' }}">
+                                                    {{ month|date:'F Y' }} ({{ requests|length }} requests)
+                                                </option>
+                                            {% endfor %}
+                                        </select>
+                                        <div class="form-text">Select the month when consumable requests were created</div>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <label for="excel_file" class="form-label">Excel File *</label>
+                                        <input type="file" class="form-control" id="excel_file" name="excel_file" 
+                                               accept=".xlsx,.xls" required>
+                                        <div class="form-text">Upload Excel file with payment data</div>
+                                    </div>
+                                </div>
+                                <div class="mt-3">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-upload me-2"></i>Upload Payments
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- Available Requests by Month -->
+                    {% if grouped_list %}
+                    <div class="card mt-4">
+                        <div class="card-header bg-secondary text-white">
+                            <h5 class="mb-0">Available Requests by Month</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="table-responsive">
+                                <table class="table table-striped">
+                                    <thead>
+                                        <tr>
+                                            <th>Month</th>
+                                            <th>Number of Requests</th>
+                                            <th>Total Outstanding</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        {% for month, requests in grouped_list %}
+                                        <tr>
+                                            <td>{{ month|date:'F Y' }}</td>
+                                            <td>{{ requests|length }}</td>
+                                            <td>
+                                                {% with total=0 %}
+                                                    {% for req in requests %}
+                                                        {% if req.balance > 0 %}
+                                                            ₦{{ req.balance|floatformat:2 }}
+                                                        {% endif %}
+                                                    {% endfor %}
+                                                {% endwith %}
+                                            </td>
+                                            <td>
+                                                <a href="{% url 'consumable_details' month|date:'Y-m' %}" 
+                                                   class="btn btn-sm btn-outline-info">
+                                                    <i class="fas fa-eye me-1"></i>View Details
+                                                </a>
+                                            </td>
+                                        </tr>
+                                        {% endfor %}
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </div>
+                    {% else %}
+                    <div class="alert alert-warning mt-4">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        No approved requests with outstanding balances found.
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

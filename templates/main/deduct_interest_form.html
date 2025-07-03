@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<style>
+    .card-header{
+        background: linear-gradient(135deg, #8a2cb8, #b0469e);
+        color: white;
+        font-size: 2.1rem;
+        text-align: center;
+        font-weight: 500;
+        padding: 1rem 1.5rem;
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+    }
+    .btn-primary{
+       background: linear-gradient(135deg, #8a2cb8, #b0469e);
+    }
+</style>
+<div class="container mt-5 col-md-6">
+    <div class="card shadow">
+        <div class="card-header">
+            <h4 class="text-center text-white">Deduct Monthly Admin Fee</h4>
+        </div>
+        <div class="card-body">
+            <form method="post" action="{% url 'deduct_interest' %}">
+                {% csrf_token %}
+                <div class="mb-3">
+                    <label for="month" class="form-label">Select Month:</label>
+                    <input type="month" class="form-control" id="month" name="month" required>
+                </div>
+                <div class="mb-3">
+                    <label for="deduction_amount" class="form-label">Amount to Deduct (₦):</label>
+                    <input type="number" class="form-control" id="deduction_amount" name="deduction_amount" placeholder="Enter Amount" step="0.01" required>
+                </div>
+                <button type="submit" class="btn btn-primary">Deduct</button>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock content %}

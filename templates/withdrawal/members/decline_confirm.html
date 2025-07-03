@@ -1,0 +1,21 @@
+{% extends 'base/base.html' %}
+{% load static %}
+
+{% block title %}Decline Request{% endblock %}
+
+{% block content %}
+<div class="container mt-4 col-md-6">
+    <h4>Decline Withdrawal Request</h4>
+    <p>Are you sure you want to decline this request from <strong>{{ request_obj.member }}</strong>?</p>
+
+    <form method="post">
+        {% csrf_token %}
+        <div class="form-group mb-3">
+            <label for="reason">Reason for Decline (optional)</label>
+            <textarea name="reason" id="reason" class="form-control" rows="3"></textarea>
+        </div>
+        <button type="submit" class="btn btn-danger">Confirm Decline</button>
+        <a href="{% url 'list_withdrawal_requests' %}" class="btn btn-secondary">Cancel</a>
+    </form>
+</div>
+{% endblock %}

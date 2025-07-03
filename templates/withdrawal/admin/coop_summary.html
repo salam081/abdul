@@ -1,0 +1,10 @@
+{% extends "base/base.html" %}
+{% block content %}
+<h3>Cooperative Financial Summary</h3>
+<ul>
+    <li><strong>Total Savings:</strong> ₦{{ total_savings }}</li>
+    <li><strong>Total Investment:</strong> ₦{{ total_investment }}</li>
+    <li><strong>Total Loanable:</strong> ₦{{ total_loanable }}</li>
+    <li><strong>Grand Total:</strong> ₦{{ grand_total }}</li>
+</ul>
+{% endblock %}

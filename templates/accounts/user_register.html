@@ -1,0 +1,177 @@
+{% extends 'base/base.html' %}
+{% load humanize %}
+
+{% block content %}
+<style>
+   
+    .registration-card {
+        border: none;
+        border-radius: 12px;
+        box-shadow: 0 8px 16px rgba(0, 0, 0, 0.06);
+        background-color: #fffefe;
+        /* padding: 2rem; */
+    }
+
+    .registration-card .card-header {
+        background: linear-gradient(90deg, #ad7ac4, #951dbd);
+        border-top-left-radius: 12px;
+        border-top-right-radius: 12px;
+        padding: 1.5rem;
+    }
+
+    .registration-card .card-header h4 {
+        margin: 0;
+        font-size: 1.5rem;
+        font-weight: 600;
+    }
+
+    .form-label {
+        font-weight: 500;
+        margin-bottom: 0.3rem;
+    }
+
+    .form-control {
+        border-radius: 8px;
+        padding: 0.6rem 0.75rem;
+        border: 1px solid #ced4da;
+        transition: border-color 0.2s ease, box-shadow 0.2s ease;
+    }
+
+    .form-control:focus {
+        border-color: #4e73df;
+        box-shadow: 0 0 0 0.2rem rgba(78, 115, 223, 0.25);
+    }
+
+    .btn-primary {
+        background-color: #af34c5;
+        border-color: #4e73df;
+        font-weight: 600;
+        padding: 0.6rem;
+        border-radius: 8px;
+        transition: background-color 0.2s ease-in-out;
+    }
+
+    /* .btn-primary:hover {
+        background-color: #2e59d9;
+    } */
+
+    .card-footer {
+        background-color: #f8f9fc;
+        border-bottom-left-radius: 12px;
+        border-bottom-right-radius: 12px;
+        padding: 1rem;
+    }
+
+    .card-footer a {
+        color: #4e73df;
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .card-footer a:hover {
+        text-decoration: underline;
+    }
+</style>
+
+<div class="row justify-content-center mt-2">
+    <div class="col-md-10 col-lg-9">
+        <div class="card registration-card">
+            <div class="card-header text-white text-center">
+                <h4>Member Registration</h4>
+            </div>
+            <div class="card-body">
+                <form method="POST" enctype="multipart/form-data">
+                    {% csrf_token %}
+
+                    <!-- Row 1 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="first_name" class="form-label">First Name</label>
+                            <input type="text" class="form-control" name="first_name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="last_name" class="form-label">Last Name</label>
+                            <input type="text" class="form-control" name="last_name" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="other_name" class="form-label">Other Name</label>
+                            <input type="text" class="form-control" name="other_name">
+                        </div>
+                    </div>
+
+                    <!-- Row 2 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="username" class="form-label">Username</label>
+                            <input type="text" class="form-control" name="username" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="date_of_birth" class="form-label">Date of Birth</label>
+                            <input type="date" class="form-control" name="date_of_birth" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="department" class="form-label">Department</label>
+                            <input type="text" class="form-control" name="department" required>
+                        </div>
+                    </div>
+
+                    <!-- Row 3 -->
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <label for="unit" class="form-label">Unit</label>
+                            <input type="text" class="form-control" name="unit" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="member_number" class="form-label">Member ID</label>
+                            <input type="text" class="form-control" name="member_number" required>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="ippis" class="form-label">Ippis</label>
+                            <input type="number" class="form-control" name="ippis" required>
+                        </div>
+                    </div>
+
+                    <!-- Row 4 -->
+                    <div class="row mb-3">
+                         <div class="col-md-4">
+                            <label for="savings" class="form-label">Savings</label>
+                            <input type="number" class="form-control" name="savings" >
+                        </div>
+                       
+                        <!-- <div class="col-md-4">
+                            <label for="gender" class="form-label">Account Type</label>
+                            <select name="account_type" class="form-control" required>
+                                <option value="">-- Select Account --</option>
+                                    <option value="savings">Savings Account</option>
+                                    <option value="corent">Corent Account</option>
+                            </select>
+                        </div> -->
+                        <div class="col-md-4">
+                            <label for="gender" class="form-label">Gender</label>
+                            <select name="gender" class="form-control" required>
+                                <option value="">-- Select Gender --</option>
+                                {% for g in genders %}
+                                    <option value="{{ g.id }}">{{ g.title }}</option>
+                                {% endfor %}
+                            </select>
+                        </div>
+                        <div class="col-md-4">
+                            <label for="passport" class="form-label">Passport Photo</label>
+                            <input type="file" class="form-control" name="passport" accept="image/*">
+                        </div>
+                    </div>
+
+                    <!-- Submit -->
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-primary">Register</button>
+                    </div>
+                </form>
+            </div>
+            <div class="card-footer text-center">
+                <small>Already have an account? <a href="{% url 'login' %}">Login here</a>.</small>
+            </div>
+        </div>
+    </div>
+</div>
+<br>
+{% endblock %}

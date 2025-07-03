@@ -1,0 +1,371 @@
+<!-- templates/consumables/request_detail.html -->
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css" rel="stylesheet"> -->
+    <style>
+        .status-badge {
+            font-size: 1rem;
+            padding: 0.5rem 1rem;
+        }
+        .status-pending { background-color: #ffc107; color: #000; }
+        .status-approved { background-color: #198754; color: #fff; }
+        .status-declined { background-color: #dc3545; color: #fff; }
+        .status-paid { background-color: #0d6efd; color: #fff; }
+        
+        .timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+        
+        .timeline::before {
+            content: '';
+            position: absolute;
+            left: 1rem;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: #dee2e6;
+        }
+        
+        .timeline-item {
+            position: relative;
+            margin-bottom: 1.5rem;
+        }
+        
+        .timeline-item::before {
+            content: '';
+            position: absolute;
+            left: -1.5rem;
+            top: 0.5rem;
+            width: 1rem;
+            height: 1rem;
+            border-radius: 50%;
+            background: #fff;
+            border: 3px solid #dee2e6;
+        }
+        
+        .timeline-item.active::before {
+            border-color: #198754;
+            background: #198754;
+        }
+        
+        .financial-summary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-radius: 15px;
+        }
+        
+        .item-card {
+            border-left: 4px solid #007bff;
+            transition: transform 0.2s;
+        }
+        
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+        <!-- Header -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <div>
+                <nav aria-label="breadcrumb">
+                    <ol class="breadcrumb">
+                        <li class="breadcrumb-item">
+                            <a href="{% url 'consumables:my_consumable_requests' %}">My Requests</a>
+                        </li>
+                        <li class="breadcrumb-item active">Request #{{ consumable_request.id }}</li>
+                    </ol>
+                </nav>
+                <h2><i class="fas fa-clipboard-list me-2"></i>Request #{{ consumable_request.id }}</h2>
+            </div>
+            <div>
+                <span class="badge status-badge status-{{ consumable_request.status|lower }}">
+                    {{ consumable_request.status }}
+                </span>
+            </div>
+        </div>
+
+        <!-- Messages -->
+        {% if messages %}
+            {% for message in messages %}
+                <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                </div>
+            {% endfor %}
+        {% endif %}
+
+        <div class="row">
+            <!-- Main Content -->
+            <div class="col-lg-8">
+                <!-- Request Overview -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-info-circle me-2"></i>Request Overview</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <p><strong>Request ID:</strong> #{{ consumable_request.id }}</p>
+                                <p><strong>Date Created:</strong> {{ consumable_request.date_created|date:"M d, Y - g:i A" }}</p>
+                                <p><strong>Status:</strong> 
+                                    <span class="badge status-{{ consumable_request.status|lower }}">
+                                        {{ consumable_request.status }}
+                                    </span>
+                                </p>
+                            </div>
+                            <div class="col-md-6">
+                                <p><strong>Requested By:</strong> {{ consumable_request.user.get_full_name|default:consumable_request.user.username }}</p>
+                                <p><strong>Email:</strong> {{ consumable_request.user.email }}</p>
+                                <p><strong>Total Items:</strong> {{ request_details|length }}</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Request Items -->
+                <div class="card mb-4">
+                    <div class="card-header">
+                        <h5><i class="fas fa-box me-2"></i>Requested Items</h5>
+                    </div>
+                    <div class="card-body">
+                        {% for detail in request_details %}
+                            <div class="card item-card mb-3">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-6">
+                                            <h6 class="mb-1">{{ detail.item.title }}</h6>
+                                            
+                                                    <i class="fas fa-tag me-1"></i>Unit Price: ₦{{ detail.item_price|floatformat:2 }}
+                                                <!-- </small> -->
+                                            </p>
+                                        </div>
+                                        <div class="col-md-3 text-center">
+                                            <div class="mb-2">
+                                                <strong>{{ detail.quantity }}</strong>
+                                                
+                                                <small class="text-muted">Quantity</small>
+                                            </div>
+                                            <div>
+                                                <strong>{{ detail.loan_term_months }}</strong>
+                                              
+                                                <small class="text-muted">Months</small>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-3 text-end">
+                                            <h5 class="text-primary mb-1">₦{{ detail.total_price|floatformat:2 }}</h5>
+                                            {% if detail.approved_amount %}
+                                                <p class="text-success mb-0">
+                                                    <small>
+                                                        <i class="fas fa-check me-1"></i>
+                                                        Approved: ₦{{ detail.approved_amount|floatformat:2 }}
+                                                    </small>
+                                                </p>
+                                                {% if detail.approval_date %}
+                                                    <p class="text-muted mb-0">
+                                                        <small>On: {{ detail.approval_date|date:"M d, Y" }}</small>
+                                                    </p>
+                                                {% endif %}
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        {% endfor %}
+                    </div>
+                </div>
+
+                <!-- Request Timeline -->
+                <div class="card">
+                    <div class="card-header">
+                        <h5><i class="fas fa-history me-2"></i>Request Timeline</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="timeline">
+                            <div class="timeline-item active">
+                                <div class="card">
+                                    <div class="card-body">
+                                        <h6 class="mb-1">Request Submitted</h6>
+                                        <p class="text-muted mb-0">{{ consumable_request.date_created|date:"M d, Y - g:i A" }}</p>
+                                        <small class="text-muted">Request created with {{ request_details|length }} items</small>
+                                    </div>
+                                </div>
+                            </div>
+
+                            {% if consumable_request.status != 'Pending' %}
+                                <div class="timeline-item active">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="mb-1">Request {{ consumable_request.status }}</h6>
+                                            <p class="text-muted mb-0">
+                                                {% comment %} You can add approval/decline date field {% endcomment %}
+                                                Status updated
+                                            </p>
+                                            {% if consumable_request.status == 'Approved' %}
+                                                <small class="text-success">Your request has been approved for processing</small>
+                                            {% elif consumable_request.status == 'Declined' %}
+                                                <small class="text-danger">Request was declined</small>
+                                            {% elif consumable_request.status == 'Paid' %}
+                                                <small class="text-info">Payment completed</small>
+                                            {% endif %}
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+
+                            {% if consumable_request.status == 'Pending' %}
+                                <div class="timeline-item">
+                                    <div class="card">
+                                        <div class="card-body">
+                                            <h6 class="mb-1 text-muted">Pending Review</h6>
+                                            <small class="text-muted">Waiting for admin approval</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Sidebar -->
+            <div class="col-lg-4">
+                <!-- Financial Summary -->
+                <div class="card financial-summary mb-4">
+                    <div class="card-body text-center">
+                        <h5><i class="fas fa-calculator me-2"></i>Financial Summary</h5>
+                        <hr class="bg-white">
+                        
+                        <div class="row mb-3">
+                            <div class="col-12 mb-3">
+                                <h3>₦{{ total_amount|floatformat:2 }}</h3>
+                                <small>Total Amount</small>
+                            </div>
+                        </div>
+
+                        <div class="row text-start">
+                            <div class="col-6 border-end border-white-50">
+                                <div class="text-center">
+                                    <h5>₦{{ total_paid|floatformat:2 }}</h5>
+                                    <small>Amount Paid</small>
+                                </div>
+                            </div>
+                            <div class="col-6">
+                                <div class="text-center">
+                                    <h5>₦{{ balance|floatformat:2 }}</h5>
+                                    <small>Balance</small>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Action Buttons -->
+                <div class="card">
+                    <div class="card-body">
+                        <h6>Available Actions</h6>
+                        
+                        {% if consumable_request.status == 'Pending' %}
+                            <button class="btn btn-outline-danger btn-sm w-100 mb-2" 
+                                    onclick="cancelRequest({{ consumable_request.id }})">
+                                <i class="fas fa-times me-2"></i>Cancel Request
+                            </button>
+                        {% endif %}
+
+                        {% if consumable_request.status == 'Approved' and balance > 0 %}
+                            <button class="btn btn-success btn-sm w-100 mb-2">
+                                <i class="fas fa-credit-card me-2"></i>Make Payment
+                            </button>
+                        {% endif %}
+
+                        <a href="{% url 'consumables:my_consumable_requests' %}" 
+                           class="btn btn-outline-primary btn-sm w-100 mb-2">
+                            <i class="fas fa-arrow-left me-2"></i>Back to My Requests
+                        </a>
+
+                        <button class="btn btn-outline-secondary btn-sm w-100" onclick="window.print()">
+                            <i class="fas fa-print me-2"></i>Print Details
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Contact Information -->
+                <div class="card mt-3">
+                    <div class="card-body">
+                        <h6><i class="fas fa-question-circle me-2"></i>Need Help?</h6>
+                        <p class="small text-muted mb-2">
+                            If you have questions about your request, contact our support team.
+                        </p>
+                        <div class="d-grid gap-2">
+                            <a href="mailto:support@company.com" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-envelope me-2"></i>Email Support
+                            </a>
+                            <a href="tel:+1234567890" class="btn btn-outline-info btn-sm">
+                                <i class="fas fa-phone me-2"></i>Call Support
+                            </a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Cancel Request Modal -->
+    <div class="modal fade" id="cancelModal" tabindex="-1">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title">Cancel Request</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Are you sure you want to cancel Request #{{ consumable_request.id }}?</p>
+                    <div class="alert alert-warning">
+                        <small><strong>Warning:</strong> This action cannot be undone.</small>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">No, Keep It</button>
+                    <button type="button" class="btn btn-danger" id="confirmCancel">Yes, Cancel Request</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        function cancelRequest(requestId) {
+            const modal = new bootstrap.Modal(document.getElementById('cancelModal'));
+            modal.show();
+        }
+
+        document.getElementById('confirmCancel').addEventListener('click', function() {
+            // Implement cancel request logic
+            fetch(`/consumables/request/{{ consumable_request.id }}/cancel/`, {
+                method: 'POST',
+                headers: {
+                    'X-CSRFToken': '{{ csrf_token }}',
+                    'Content-Type': 'application/json'
+                }
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.success) {
+                    window.location.href = '{% url "consumables:my_consumable_requests" %}';
+                } else {
+                    alert('Error canceling request: ' + data.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('An error occurred while canceling the request');
+            });
+        });
+    </script>
+
+{% endblock content %}

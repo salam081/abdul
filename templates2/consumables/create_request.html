@@ -1,0 +1,304 @@
+<!-- templates/consumables/create_request.html -->
+{% extends 'base/base.html' %}
+{% load static %}
+{% block content %}
+    <!-- <link href="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/css/bootstrap.min.css" rel="stylesheet"> -->
+    <style>
+        .item-card {
+            transition: transform 0.2s;
+        }
+        .item-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        .selected-item {
+            border: 2px solid #007bff;
+            background-color: #f8f9fa;
+        }
+        .cart-summary {
+            position: sticky;
+            top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container mt-4">
+         
+
+       
+
+
+        <div class="row">
+            <div class="col-md-6">
+                <div class="d-flex justify-content-between align-items-center mb-4">
+                    <h2>Request Consumables</h2>
+                    <a href="{% url 'consumables:my_consumable_requests' %}" class="btn btn-outline-primary">
+                        My Requests
+                    </a>
+                </div>
+
+                <!-- Messages -->
+                {% if messages %}
+                    {% for message in messages %}
+                        <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                            {{ message }}
+                            <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+                        </div>
+                    {% endfor %}
+                {% endif %}
+
+                <!-- Global Loan Term Input -->
+                <div class="mb-4">
+                    <label for="global-loan-term" class="form-label">Loan Term (Months)</label>
+                    <select id="global-loan-term" class="form-select w-50">
+                        <option value="1">1 Month</option>
+                        <option value="3" selected>3 Months</option>
+                        <option value="6" >6 Months</option>
+                        <option value="12">12 Months</option>
+                        <option value="24">24 Months</option>
+                    </select>
+                </div>
+
+                <!-- Available Items -->
+                 
+                <div class="row" id="items-container">
+                    {% for item in items %}
+                        <div class="col-md-6 mb-3">
+                            <div class="card item-card " data-item-id="{{ item.id }}">
+                                <div class="card-body">
+                                    <span class="card-title">{{ item.title }}</span>
+                                    <p class="card-text">
+                                        <strong>Price: ₦{{ item.price|floatformat:2 }}</strong>
+                                    </p>
+                                    <div class="item-controls" style="display: none;">
+                                        <div class="row">
+                                            <div class="col-12">
+                                                <label class="form-label">Quantity</label>
+                                                <input type="number" class="form-control quantity-input" 
+                                                       min="1" value="1">
+                                            </div>
+                                        </div>
+                                        <div class="mt-2">
+                                            <small class="text-muted">
+                                                Subtotal: ₦<span class="subtotal">{{ item.price|floatformat:2 }}</span>
+                                            </small>
+                                        </div>
+                                    </div>
+                                    <button class="btn btn-primary select-item-btn mt-2">
+                                        Select Item
+                                    </button>
+                                    <button class="btn btn-danger remove-item-btn mt-2" style="display: none;">
+                                        Remove
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    {% empty %}
+                        <div class="col-12">
+                            <div class="alert alert-info">
+                                No consumable items are currently available.
+                            </div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+
+            <!-- Cart Summary -->
+            <div class="col-md-6 mt-4">
+                <div class="card cart-summary">
+                    <div class="card-header">
+                        <h5>Request Summary</h5>
+                    </div>
+                    <div class="card-body">
+                        <div id="selected-items-list">
+                            <p class="text-muted">No items selected</p>
+                        </div>
+                        <hr>
+                        <div class="d-flex justify-content-between">
+                            <strong>Total Amount:</strong>
+                            <strong id="total-amount">₦0.00</strong>
+                        </div>
+                        <button id="submit-request" class="btn btn-success w-100 mt-3" disabled>
+                            Submit Request
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/bootstrap/5.1.3/js/bootstrap.bundle.min.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const selectedItems = new Map();
+            const itemsContainer = document.getElementById('items-container');
+            const selectedItemsList = document.getElementById('selected-items-list');
+            const totalAmountEl = document.getElementById('total-amount');
+            const submitBtn = document.getElementById('submit-request');
+            const globalLoanTermInput = document.getElementById('global-loan-term');
+
+            itemsContainer.addEventListener('click', function(e) {
+                if (e.target.classList.contains('select-item-btn')) {
+                    const card = e.target.closest('.item-card');
+                    const itemId = card.dataset.itemId;
+
+                    card.classList.add('selected-item');
+                    card.querySelector('.item-controls').style.display = 'block';
+                    e.target.style.display = 'none';
+                    card.querySelector('.remove-item-btn').style.display = 'inline-block';
+
+                    addToSelected(card);
+                }
+
+                if (e.target.classList.contains('remove-item-btn')) {
+                    const card = e.target.closest('.item-card');
+                    const itemId = card.dataset.itemId;
+
+                    card.classList.remove('selected-item');
+                    card.querySelector('.item-controls').style.display = 'none';
+                    e.target.style.display = 'none';
+                    card.querySelector('.select-item-btn').style.display = 'inline-block';
+
+                    selectedItems.delete(itemId);
+                    updateSummary();
+                }
+            });
+
+            itemsContainer.addEventListener('input', function(e) {
+                if (e.target.classList.contains('quantity-input')) {
+                    const card = e.target.closest('.item-card');
+                    updateItemSubtotal(card);
+                    updateSummary();
+                }
+            });
+
+            globalLoanTermInput.addEventListener('change', function() {
+                updateSummary();
+            });
+
+            function addToSelected(card) {
+                const itemId = card.dataset.itemId;
+                const title = card.querySelector('.card-title').textContent;
+                const priceText = card.querySelector('.card-text strong').textContent;
+                const price = parseFloat(priceText.replace('Price: ₦', '').replace(',', ''));
+
+                selectedItems.set(itemId, {
+                    id: itemId,
+                    title: title,
+                    price: price,
+                    quantity: 1
+                });
+
+                updateSummary();
+            }
+
+            function updateItemSubtotal(card) {
+                const itemId = card.dataset.itemId;
+                const quantity = parseInt(card.querySelector('.quantity-input').value) || 1;
+                const priceText = card.querySelector('.card-text strong').textContent;
+                const price = parseFloat(priceText.replace('Price: ₦', '').replace(',', ''));
+
+                const subtotal = quantity * price;
+                card.querySelector('.subtotal').textContent = subtotal.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+
+                if (selectedItems.has(itemId)) {
+                    selectedItems.get(itemId).quantity = quantity;
+                }
+            }
+
+            function updateSummary() {
+                if (selectedItems.size === 0) {
+                    selectedItemsList.innerHTML = '<p class="text-muted">No items selected</p>';
+                    totalAmountEl.textContent = '₦0.00';
+                    submitBtn.disabled = true;
+                    return;
+                }
+
+                let html = '';
+                let total = 0;
+
+                selectedItems.forEach((item, itemId) => {
+                    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+                    const quantity = parseInt(card.querySelector('.quantity-input').value) || 1;
+                    const subtotal = quantity * item.price;
+
+                    html += `
+                        <div class="selected-item-summary mb-2">
+                            <div class="d-flex justify-content-between">
+                                <span>${item.title}</span>
+                                <span>₦${subtotal.toLocaleString('en-US', {minimumFractionDigits: 2})}</span>
+                            </div>
+                            <small class="text-muted">Qty: ${quantity}</small>
+                        </div>
+                    `;
+
+                    total += subtotal;
+                });
+
+                selectedItemsList.innerHTML = html;
+                totalAmountEl.textContent = '₦' + total.toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+                submitBtn.disabled = false;
+            }
+
+            submitBtn.addEventListener('click', function() {
+                if (selectedItems.size === 0) {
+                    alert('Please select at least one item');
+                    return;
+                }
+
+                const globalLoanTerm = parseInt(globalLoanTermInput.value) || 6;
+                const requestData = {
+                    loan_term_months: globalLoanTerm,
+                    items: []
+                };
+
+                selectedItems.forEach((item, itemId) => {
+                    const card = document.querySelector(`[data-item-id="${itemId}"]`);
+                    const quantity = parseInt(card.querySelector('.quantity-input').value) || 1;
+
+                    requestData.items.push({
+                        item_id: itemId,
+                        quantity: quantity
+                    });
+                });
+
+                submitBtn.disabled = true;
+                submitBtn.textContent = 'Submitting...';
+
+                fetch('{% url "consumables:create_consumable_request" %}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRFToken': '{{ csrf_token }}'
+                    },
+                    body: JSON.stringify(requestData)
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.success) {
+                        alert(data.message);
+                        if (data.redirect_url) {
+                            window.location.href = data.redirect_url;
+                        }
+                    } else {
+                        alert('Error: ' + data.message);
+                        submitBtn.disabled = false;
+                        submitBtn.textContent = 'Submit Request';
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('An error occurred while submitting the request');
+                    submitBtn.disabled = false;
+                    submitBtn.textContent = 'Submit Request';
+                });
+            });
+        });
+    </script>
+{% endblock content %}
