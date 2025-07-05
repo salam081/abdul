@@ -33,7 +33,7 @@
                 <li class="list-group-item d-flex justify-content-between align-items-center">
                     <span><b>Month:</b> {{ month.name }} {{ month.year }}</span>
                     <div class="d-flex">
-                        <a href="{% url 'get_upload_details' month.num %}" class="btn btn-sm btn-primary me-2">View Details</a>
+                        <a href="{% url 'get_upload_details' month.num %}" class="btn btn-sm btn-primary me-2">Details</a>
                         <form action="{% url 'delete_saving'  month.num %}" method="post"
                             onsubmit="return confirm('Are you sure you want to delete savings for {{ item.month }} {{ item.year }}?');">
                             {% csrf_token %}

@@ -36,16 +36,11 @@ def is_admin(user):
 def list_withdrawal_requests(request):
     requests = Withdrawal.objects.select_related('member', 'approved_by').all()
     stats = get_cooperative_withdrawal_stats()
-    return render(request, 'withdrawal/members/list_requests.html', {
-        'requests': requests,
-        'stats': stats,
-    })
-
+    return render(request, 'withdrawal/members/list_requests.html', {'requests': requests, 'stats': stats, })
 
 @login_required
 def member_withdrawal_request(request):
     member = get_object_or_404(Member, member=request.user)
-
     if request.method == 'POST':
         reason = request.POST.get('reason', '')
         if Withdrawal.objects.filter(member=member, status='Pending').exists():
@@ -57,9 +52,7 @@ def member_withdrawal_request(request):
             messages.success(request, "Withdrawal request submitted successfully.")
         return redirect('member_withdrawal_request')
 
-    return render(request, 'withdrawal/members/withdrawal_request_form.html', {
-        'member': member,
-    })
+    return render(request, 'withdrawal/members/withdrawal_request_form.html', {'member': member,})
 
 
 @login_required

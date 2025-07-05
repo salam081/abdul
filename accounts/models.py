@@ -46,6 +46,9 @@ class User(AbstractUser):
     marital_status = models.ForeignKey(MaritalStatus,on_delete=models.SET_NULL, null=True, blank=True)
     religion = models.ForeignKey(Religion, on_delete=models.SET_NULL, null=True, blank=True,)
     passport = models.ImageField(upload_to='passport', blank=True, null=True)
+    phone1 = models.CharField(max_length=15,null=True, blank=True)
+    phone2 = models.CharField(max_length=15, null=True, blank=True)
+    email = models.EmailField(blank=True, null=True)
     member_number = models.CharField(max_length=100) 
 
 
@@ -109,9 +112,7 @@ class State(models.Model):
 
 class Address(models.Model):
     user = models.OneToOneField(Member, on_delete=models.SET_NULL, null=True, blank=True)
-    phone1 = models.CharField(max_length=15,null=True, blank=True)
-    phone2 = models.CharField(max_length=15, null=True, blank=True)
-    email = models.EmailField(unique=True, blank=True, null=True)
+   
     country = CountryField(blank=True, null=True)
     state_of_origin = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     local_government_area = models.CharField(max_length=150)

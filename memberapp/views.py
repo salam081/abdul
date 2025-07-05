@@ -285,79 +285,6 @@ def confirm_guarantor_approval(request, pk):
     return redirect('member_dashboard')
 
 
-# def loan_request_view(request):
-#     settings = LoanSettings.objects.first()
-#     if not settings or not settings.allow_loan_requests:
-#         # messages.warning(request, "Loans are currently not available. Check back later.")
-#         return render(request, "member/loan_request.html", {
-#             "loan_types": LoanType.objects.all(),
-#             "bank_names": BankName.objects.all(),
-#         })
-
-#      # Get current month in 3-letter format (e.g., "May")
-#     current_month = datetime.now().strftime('%b')
-#     member = getattr(request.user, 'member', None)
-#     if not member:
-#         messages.error(request, "You must be a registered member to request a loan.")
-#         return redirect("dashboard")
-
-#     # Only loan types that match current month
-#     loan_types = LoanType.objects.filter(name__icontains=current_month)
-#     # loan_types = LoanType.objects.all()
-#     bank_names = BankName.objects.all()
-
-#     member = getattr(request.user, 'member', None)
-#     if not member:
-#         messages.error(request, "You must be a registered member to request a loan.")
-#         return redirect("dashboard")  # Or wherever appropriate
-
-#     if request.method == "POST":
-#         loan_type_id = request.POST.get('loan_type')
-#         amount = request.POST.get('amount')
-#         loan_term_months = request.POST.get('loan_term_months')
-#         file_one = request.FILES.get('file_one')
-
-#         bank_name_id = request.POST.get('bank_name')
-#         bank_code_id = request.POST.get('bank_code')
-#         account_number = request.POST.get('account_number')
-
-#         guarantor_name = request.POST.get('guarantor_name')
-#         guarantor_ippis = request.POST.get('guarantor_ippis')
-#         guarantor_phone = request.POST.get('guarantor_phone')
-
-#         # Ensure loan_type_id is provided and valid
-#         loan_type_id = request.POST.get('loan_type')
-
-#         try:
-#             loan_type = LoanType.objects.get(id=loan_type_id)
-#         except (LoanType.DoesNotExist, ValueError, TypeError):
-#             messages.error(request, "Please select a valid loan type.")
-#             return redirect('loan_request')
-
-#         has_outstanding_loan = LoanRequest.objects.filter(member=member,loan_type=loan_type,status__in=['pending', 'approved']).exists()
-
-#         if has_outstanding_loan:
-#             messages.error(request, f"You already have an outstanding .{loan_type}")
-#             return redirect('loan_request')
-
-#         # Save the loan request
-#         LoanRequest.objects.create(
-#             member=member,loan_type_id=loan_type_id,
-#             amount=amount,loan_term_months=loan_term_months,
-#             approved_amount=None,file_one=file_one,
-#             bank_name_id=bank_name_id,bank_code_id=bank_code_id,account_number=account_number,
-#             guarantor_name=guarantor_name,guarantor_ippis=guarantor_ippis,
-#             guarantor_phone=guarantor_phone,created_by=request.user,
-#         )
-
-#         messages.success(request, "Loan request submitted successfully!")
-#         return redirect('loan_request')
-
-#     context = {"loan_types": loan_types,"bank_names": bank_names,"settings": settings,}
-#     return render(request, "member/loan_request.html", context)
-
-
-
 
 @login_required
 def member_request_consumable(request):
@@ -507,7 +434,28 @@ def member_savings(request):
     total_savings = Savings.objects.filter(member=member).aggregate(
         total=Sum('month_saving')
     )['total'] or 0
-    return render(request, 'member/member_savings.html', {'savings': savings,'total_savings':total_savings})
+
+    investmentsavings = Investment.objects.filter(member=member)
+    total_investment = Investment.objects.filter(member=member).aggregate(
+        total=Sum('total_amount')
+    )['total'] or 0
+    
+    loanable = Loanable.objects.filter(member=member)
+    total_loanable = Loanable.objects.filter(member=member).aggregate(
+        total=Sum('total_amount')
+    )['total'] or 0
+    g_total = total_investment + total_loanable 
+    print(g_total)
+    total = g_total /4
+    print(total)
+    context = {'savings': savings,'total_savings':total_savings,
+               'investmentsavings':investmentsavings,
+               'total_investment':total_investment,
+               'loanable':loanable,
+               'total_loanable':total_loanable,
+               'total':total,
+               }
+    return render(request, 'member/member_savings.html', context)
 
 
 
@@ -534,27 +482,6 @@ def my_loan_requests(request):
         })
 
     return render(request, 'member/my_loan_requests.html', {'loan_data': loan_data})
-
-# from django.shortcuts import render, redirect
-# from django.contrib import messages
-# from django.contrib.auth.decorators import login_required
-# from .models import LoanRequest
-
-# @login_required
-# def my_loan_requests(request):
-#     # Safely get the Member object linked to the logged-in user
-#     member = getattr(request.user, 'member', None)
-
-#     if not member:
-#         messages.error(request, "You must be a registered member to view your loan requests.")
-#         return redirect('member_dashboard')  # Redirect to a safe page
-
-#     # Fetch loan requests for the current member
-#     requests = LoanRequest.objects.filter(member=member).order_by('-date_created')
-
-#     return render(request, 'member/my_loan_requests.html', {
-#         'requests': requests
-#     })
 
 
 @login_required
@@ -655,16 +582,9 @@ def consumable_request_detail(request, request_id):
 @require_POST
 def cancel_consumable_request(request, request_id):
     """Cancel a pending consumable request"""
-    consumable_request = get_object_or_404(
-        ConsumableRequest,
-        id=request_id,
-        user=request.user,
-        status='Pending'
-    )
-    
+    consumable_request = get_object_or_404(ConsumableRequest,id=request_id, user=request.user,status='Pending' )
     consumable_request.status = 'Declined'
     consumable_request.save()
-    
     messages.success(request, 'Consumable request has been cancelled.')
     return redirect('consumable_requests_list')
 

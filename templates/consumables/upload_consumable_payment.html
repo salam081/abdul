@@ -81,15 +81,15 @@
                                     <thead>
                                         <tr>
                                             <th>Month</th>
-                                            <th>Number of Requests</th>
-                                            <th>Total Outstanding</th>
+                                            <th class="text-nowrap" style="min-width: 120px;">Number of Requests</th>
+                                            <th class="text-nowrap" style="min-width: 120px;">Total Outstanding</th>
                                             <th>Actions</th>
                                         </tr>
                                     </thead>
                                     <tbody>
                                         {% for month, requests in grouped_list %}
                                         <tr>
-                                            <td>{{ month|date:'F Y' }}</td>
+                                            <td class="text-nowrap" style="min-width: 120px;">{{ month|date:'M d, Y' }}</td>
                                             <td>{{ requests|length }}</td>
                                             <td>
                                                 {% with total=0 %}

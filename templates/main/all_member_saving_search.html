@@ -4,6 +4,7 @@
 {% block content %}
 
 <div class="container-fluid  px-4">
+    
     <form method="GET" action="{% url 'all_member_saving_search' %}" class="mt-2 mb-3">
         <div class="row g-3">
             <div class="col-md-4 col-sm-6">
@@ -13,17 +14,7 @@
             <div class="col-md-4 col-sm-6">
                 <label for="dateto">Date To</label>
                 <input class="form-control" type="date" name="dateto">
-            </div>
-           
-            <!-- <div class="col-md-4 col-sm-6">
-                <label>Select Status</label>
-                <select class="form-select" name="status">
-                    <option value="" {% if not status %}selected{% endif %}>All</option>
-                    <option value="Pending" {% if status == "Pending" %}selected{% endif %}>Pending</option>
-                    <option value="Approved" {% if status == "Approved" %}selected{% endif %}>Approved</option>
-                </select>
-            </div> -->
-            
+            </div>    
         </div>
         <button type="submit" class="btn btn-success mt-2 justify-content-center">Search</button>
     </form>
@@ -40,16 +31,16 @@
                     <th>S\N</th>
                     <th>Member</th>
                     <th>Month</th>
-                    <th>monthly Deduction </th>
-                    <th>Monthly Savings</th>
+                    <th class="text-nowrap" style="min-width: 120px;">monthly Deduction </th>
+                    <th class="text-nowrap" style="min-width: 120px;">Monthly Savings</th>
                 </thead>
                 <tbody>
                     
                     {% for m in member %}
                     <tr>
                         <td>{{forloop.counter}}</td>
-                        <td>{{m.member}}</td>
-                        <td>{{m.month}}</td>
+                        <td class="text-nowrap" style="min-width: 120px;">{{m.member}}</td>
+                        <td class="text-nowrap" style="min-width: 120px;">{{m.month}}</td>
                         <td>₦{{m.original_amount}}</td>
                         <td>₦{{m.month_saving}}</td>
                     </tr>

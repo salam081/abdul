@@ -88,11 +88,11 @@
     <table class="table table-hover">
         <thead class="table-dark">
             <tr>
-                <th>User</th>
+                <th>Member</th>
                 <th>Items</th>
-                <th>Total Amount</th>
-                <th>Amount Paid</th>
-                <th>Current Payment</th>
+                <th class="text-nowrap" style="min-width: 120px;">Total Amount</th>
+                <th class="text-nowrap" style="min-width: 120px;">Amount Paid</th>
+                <th class="text-nowrap" style="min-width: 120px;">Current Payment</th>
                 <th>Balance</th>
                 <th>Actions</th>
             </tr>
@@ -100,7 +100,7 @@
         <tbody>
             {% for data in grouped_data %}
             <tr>
-                <td>
+                <td class="text-nowrap" style="min-width: 120px;">
                     <strong>{{ data.user.full_name }}</strong>
                     <br><small class="text-muted">IPPIS: {{ data.user.ippis }}</small>
                 </td>

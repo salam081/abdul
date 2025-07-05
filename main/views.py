@@ -49,6 +49,37 @@ def search_member_for_savings(request):
     }
     return render(request, 'main/search_member.html', context)
 
+def filter_requests(datefrom, dateto, ):
+    filtered_requests = Savings.objects.all() 
+
+    if datefrom:
+        filtered_requests = filtered_requests.filter(month__gte=datefrom)
+    if dateto:
+        filtered_requests = filtered_requests.filter(month__lte=dateto)
+   
+    return filtered_requests 
+
+def all_member_saving_search(request):
+    datefrom = request.GET.get('datefrom')
+    dateto = request.GET.get('dateto')
+    status = request.GET.get('status')
+
+    member = None
+
+    if datefrom or dateto:
+        filtered = filter_requests(datefrom, dateto)
+        paginator = Paginator(filtered, 100)  # 50 per page
+        page_number = request.GET.get('page')
+        member = paginator.get_page(page_number)
+
+    context = {
+        'member': member,
+        'status': status,
+        'datefrom': datefrom,
+        'dateto': dateto,
+    }
+
+    return render(request, 'main/all_member_saving_search.html', context)
 
 def add_individual_member_savings(request, id):
     member = get_object_or_404(Member, id=id)

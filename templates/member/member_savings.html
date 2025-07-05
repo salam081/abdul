@@ -1,6 +1,26 @@
 {% extends 'base/base.html' %}
 {% block content %}
-<div class="container mt-5 d-flex justify-content-center">
+<style>
+    .cardheader{
+        text-align: center;
+        background: linear-gradient(134deg, #ab5fd1 0%, #d35fc8 100%);
+        /* background: linear-gradient(135deg, #b542bd 0%, #7544a9 100%); */
+    }
+.a1{
+      background: linear-gradient(134deg, #ab5fd1 0%, #d35fc8 100%);
+}
+.a2{
+      background: linear-gradient(134deg, #67d8d6 0%, #4779ca 100%);
+      text-align: center;
+}
+.a3{
+      background: linear-gradient(134deg, #ab5fd1 0%, #d35fc8 100%);
+}
+</style>
+<div class="container mt-5 ">
+    <div class="cardheader ">
+        <p class="text-white fs-4">Your Savings Details</p>
+    </div>
     <div class="col-md-12">
         <div class="card shadow col-md-12 ">
             <div class="card-body">
@@ -33,6 +53,14 @@
                     </tr>
                 </tbody>
             </table>
+            <!-- <p class="text-primary"><b>Loanable Total</b> : {{total_investment}}</p>
+            <p class="text-primary"><b>Investment Total</b> : {{total_loanable}}</p> -->
+            <div class="d-flex text-center">
+
+                <p class="text-white col-4  a1"><b>Savings Total</b> : {{total_savings}}</p>
+                <p class="text-white col-4  a2"><b>Investment </b> : {{total}}</p>
+                <p class="text-white col-4  a3"><b>Loanable </b> : {{total}}</p>
+            </div>
             
             
         </div>

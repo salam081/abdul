@@ -4,6 +4,7 @@ from .import views
 urlpatterns = [
     path('index',views.index,name="index"),
     path('search_member_savings/', views.search_member_for_savings, name='search_member'),
+    path('all_member_saving_search/',views.all_member_saving_search,name='all_member_saving_search'),
     path('member/<int:id>/add_savings/', views.add_individual_member_savings, name='add_individual_savings'),
     path('upload_saving',views.upload_savings,name="upload_savings"),
     path("get_upload_savings", views.get_upload_savings, name="get_upload_savings"),

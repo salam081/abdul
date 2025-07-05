@@ -162,20 +162,17 @@ def summary_view(request):
     total_loanable = Decimal(sum(item["total"] for item in loanable_monthly))
     total_investment = Decimal(sum(item["total"] for item in investment_monthly))
     grand_total = total_savings + total_interest #+ total_loanable + total_investment
-    reduce = grand_total - 10000
-    print(grand_total,"befor")
-    print(reduce,"after")
     # --- Existing Per-member totals ---
     member_savings = Member.objects.annotate(
         aggregated_savings=Sum('savings__month_saving', default=Decimal('0.00'))
     ).order_by('-aggregated_savings')
-    print(member_savings,'member_savings')
+    
     # Optimized member interest fetching slightly
     member_interest_data = Member.objects.annotate(
         total_interest=Sum('interest__amount_deducted', default=Decimal('0.00'))
     )
     member_interest = {m.id: m.total_interest for m in member_interest_data}
-    print('member_interest_data', member_interest)
+    # print('member_interest_data', member_interest)
 
     context = {
         "savings_page": savings_page,
@@ -207,39 +204,10 @@ def delete_financial_summary(request, pk):
     return redirect('financial_list')  
 
 
-def filter_requests(datefrom, dateto, ):
-    filtered_requests = Savings.objects.all() 
-
-    if datefrom:
-        filtered_requests = filtered_requests.filter(month__gte=datefrom)
-    if dateto:
-        filtered_requests = filtered_requests.filter(month__lte=dateto)
-   
-    return filtered_requests  
+ 
 
 
-@login_required
-def all_member_saving_search(request):
-    datefrom = request.GET.get('datefrom')
-    dateto = request.GET.get('dateto')
-    status = request.GET.get('status')
 
-    member = None
-
-    if datefrom or dateto:
-        filtered = filter_requests(datefrom, dateto)
-        paginator = Paginator(filtered, 100)  # 50 per page
-        page_number = request.GET.get('page')
-        member = paginator.get_page(page_number)
-
-    context = {
-        'member': member,
-        'status': status,
-        'datefrom': datefrom,
-        'dateto': dateto,
-    }
-
-    return render(request, 'financial/all_member_saving_search.html', context)
 
 
 def get_upload_interest(request):

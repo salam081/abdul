@@ -20,13 +20,7 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 
-def add_consumables_items(request):
-    if request.method == 'POST':
-        title = request.POST.get('title')
-        price = request.POST.get('price')
-        Item.objects.create(title=title,price=price,available=True)
-        messages.success(request,'Item Added Successfully')
-        return redirect('consumable_items')
+
     
 def delete_item(request,id):
     itemObj = get_object_or_404(Item, id=id)
@@ -40,6 +34,7 @@ def consumable_items(request):
     if request.method == 'POST':
         title = request.POST.get('title')
         price = request.POST.get('price')
+        description = request.POST.get('description')
         item_id = request.POST.get('item_id')
         action = request.POST.get('action')  # either 'toggle' or 'edit'
         
@@ -55,13 +50,14 @@ def consumable_items(request):
             elif action == 'edit':
                 item.title = title
                 item.price = price
+                item.description=description,
                 item.save()
                 messages.success(request, 'Consumable item updated successfully')
                 return redirect('consumable_items')
             
             
         else:
-            item = Item.objects.create(title=title,price=price,available=True)
+            item = Item.objects.create(title=title,price=price,description=description,available=True)
             item.save()
             messages.success(request, 'Consumable item Created successfully')
             return redirect('consumable_items')
@@ -171,8 +167,6 @@ def admin_edit_consumable_request(request, request_id):
             })
 
     return render(request, 'consumables/admin_edit_request.html', { 'items': items, 'details': details,'request_obj': consumable_request})
-
-
 
 
 

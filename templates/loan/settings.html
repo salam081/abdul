@@ -1,13 +1,13 @@
 {% extends 'base/base.html' %}
 {% block content %}
 
-<div class="container mt-5">
-    <div class="card">
+<div class="container mt-5 justify-content-center ">
+    <div class="card col-md-6 shadow">
         <div class="card-body">
-            <h2>Open Loan Portal</h2>
+            <h4>Open Loan or Consumable Portal</h4>
             <form method="post">{% csrf_token %}
                 {{ form.as_p }}
-                <button type="submit">Submit</button>
+                <button class="btn btn-success" type="submit">Submit</button>
             </form>
         </div>
     </div>

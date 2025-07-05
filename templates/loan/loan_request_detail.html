@@ -470,13 +470,13 @@
                             <div class="col-md-4">
                                 <div class="info-item">
                                     <strong>Name:</strong><br>
-                                    <span class="fs-6">{{ loan_request.guarantor_name }}</span>
+                                    <span class="fs-6">{{ loan_request.guarantor.member.get_full_name}}</span>
                                 </div>
                             </div>
                             <div class="col-md-4">
                                 <div class="info-item">
                                     <strong>IPPIS:</strong><br>
-                                    <span class="fs-6 font-monospace">{{ loan_request.guarantor_ippis }}</span>
+                                    <span class="fs-6 font-monospace">{{ loan_request.guarantor.member.member.ippis }}</span>
                                 </div>
                             </div>
                             <div class="col-md-4">

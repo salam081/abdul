@@ -70,28 +70,28 @@
                         <table class="table table-hover">
                             <thead class="table-dark">
                                 <tr>
-                                    <th>Date</th>
-                                    <th>User</th>
-                                    <th>Request ID</th>
-                                    <th>Amount Paid</th>
-                                    <th>Balance Remaining</th>
-                                    <th>Payment Month</th>
+                                    <!-- <th>Date</th> -->
+                                    <th class="text-nowrap" style="min-width: 120px;">Request ID</th>
+                                    <th>Member</th>
+                                    <th class="text-nowrap" style="min-width: 120px;">Amount Paid</th>
+                                    <th class="text-nowrap" style="min-width: 120px;">Balance Remaining</th>
+                                    <th class="text-nowrap" style="min-width: 120px;">Payment Month</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for repayment in page_obj %}
                                 <tr>
-                                    <td>{{ repayment.repayment_date|date:"M d, Y" }}</td>
-                                    <td>
-                                        <strong>{{ repayment.consumable_request.user.get_full_name|default:repayment.consumable_request.user.username }}</strong>
-                                        {% if repayment.consumable_request.user.member %}
-                                            <br><small class="text-muted">IPPIS: {{ repayment.consumable_request.user.member.ippis }}</small>
-                                        {% endif %}
-                                    </td>
+                                    <!-- <td class="text-nowrap" style="min-width: 120px;">{{ repayment.repayment_date|date:"M d, Y" }}</td> -->
                                     <td>
                                         <a href="#" class="text-decoration-none">
                                             #{{ repayment.consumable_request.id }}
                                         </a>
+                                    </td>
+                                    <td class="text-nowrap" style="min-width: 120px;">
+                                        <strong>{{ repayment.consumable_request.user.get_full_name|default:repayment.consumable_request.user.username }}</strong>
+                                        {% if repayment.consumable_request.user.member %}
+                                            <br><small class="text-muted">IPPIS: {{ repayment.consumable_request.user.member.ippis }}</small>
+                                        {% endif %}
                                     </td>
                                     <td>
                                         <span class="fw-bold text-success">₦{{ repayment.amount_paid|floatformat:2 }}</span>
@@ -103,7 +103,7 @@
                                             <span class="fw-bold text-success">₦0.00</span>
                                         {% endif %}
                                     </td>
-                                    <td>{{ repayment.repayment_date|date:"F Y" }}</td>
+                                    <td class="text-nowrap" style="min-width: 120px;">{{ repayment.repayment_date|date:"M d, Y" }}</td>
                                 </tr>
                                 {% empty %}
                                 <tr>

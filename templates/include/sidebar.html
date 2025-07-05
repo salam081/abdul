@@ -19,6 +19,7 @@
             {% if user.is_authenticated and user.group.title == 'admin' %}
             <a href="{% url 'admin_dashboard' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Dashboard</a>
             <a href="{% url 'summary' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Summary </a>
+            <a href="{% url 'admin_loan_settings' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Portal </a>
             <a href="{% url 'list_withdrawal_requests' %}" class="nav-item nav-link active"><i class="fa fa-tachometer-alt me-2"></i>Withdrawal List</a>
             <div class="nav-item dropdown">
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-user me-2"></i>Members</a>
@@ -52,7 +53,7 @@
                 <a href="#" class="nav-link dropdown-toggle" data-bs-toggle="dropdown"><i class="fa fa-table me-2"></i>Loan</a>
                 <div class="dropdown-menu bg-transparent border-0">
                    
-                    <!-- <a href="{% url 'requested_loan' %}" class="dropdown-item mb-2"> Approve Loan Request</a> -->
+                    <!-- <a href="" class="dropdown-item mb-2"> Approve Loan Request</a> -->
                     <a href="{% url 'add_loan_type' %}" class="dropdown-item mb-2"> Add Type Loan</a>
                     <a href="{% url 'admin_loan_requests' %}" class="dropdown-item mb-2">  Approve Loan Request </a>
                     <a href="{% url 'loan_years_list' %}" class="dropdown-item mb-2">  Loan Request List </a>

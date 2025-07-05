@@ -8,12 +8,12 @@
         <thead class="table-primary">
             <tr>
                 <th>S/N</th>
-                <th>Member Id</th>
-                <th>Full Name</th>
+                <th class="text-nowrap" style="min-width: 120px;">Member Id</th>
+                <th class="text-nowrap" style="min-width: 120px;">Full Name</th>
                 <th>IPPIS</th>
-                <th>Monthly Deduction</th>
-                <th>Monthly Saving</th>
-                <th>Corrent Total Savings</th>
+                <th class="text-nowrap" style="min-width: 120px;">Monthly Deduction</th>
+                <th class="text-nowrap" style="min-width: 120px;">Monthly Saving</th>
+                <th class="text-nowrap" style="min-width: 120px;">Corrent Total Savings</th>
                 <th>Month</th>
             </tr>
         </thead>
@@ -22,12 +22,12 @@
             <tr>
                 <td>{{ forloop.counter }}</td>
                 <td>{{ save.member.id }}</td>
-                <td>{{ save.member.member.first_name }} {{ save.member.member.last_name }}</td>
+                <td class="text-nowrap" style="min-width: 120px;">{{ save.member.member.first_name }} {{ save.member.member.last_name }}</td>
                 <td>{{ save.member.ippis }}</td>
                 <td>₦{{ save.original_amount }}</td>
                 <td>₦{{ save.month_saving }}</td>
                 <td>₦{{ save.member.total_savings }}</td>
-                <td>{{ save.month|date:"F Y" }}</td>
+                <td class="text-nowrap" style="min-width: 120px;">{{ save.month|date:"M d, Y" }}</td>
             </tr>
             {% empty %}
             <tr>

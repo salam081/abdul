@@ -15,7 +15,7 @@
                     <table class="table table-bordered table-hover">
                         <thead class="table-success">
                             <tr>
-                                <th>Member ID</th>
+                                <th class="text-nowrap" style="min-width: 120px;">Member ID</th>
                                 <th>Member</th>
                                 <th>Amount</th>
                                 <th>Month</th>
@@ -24,10 +24,10 @@
                         <tbody>
                             {% for item in loanables %}
                             <tr>
-                                <td>{{ item.member.member.member_number }}</td>
-                                <td>{{ item.member }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.member.member.member_number }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.member }}</td>
                                 <td>₦{{ item.amount }}</td>
-                                <td>{{ item.month }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.month }}</td>
                             </tr>
                             {% empty %}
                             <tr>
@@ -100,10 +100,10 @@
                         <tbody>
                             {% for item in investments %}
                             <tr>
-                                <td>{{ item.member.member.member_number }}</td>
-                                <td>{{ item.member }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.member.member.member_number }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.member }}</td>
                                 <td>₦{{ item.amount }}</td>
-                                <td>{{ item.month }}</td>
+                                <td class="text-nowrap" style="min-width: 120px;">{{ item.month }}</td>
                             </tr>
                             {% empty %}
                             <tr>
