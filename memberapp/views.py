@@ -1,5 +1,6 @@
 from django.shortcuts import render, redirect,get_object_or_404
 from django.contrib.auth.decorators import login_required
+from django.views.decorators.http import require_POST
 from dateutil.relativedelta import relativedelta  
 from datetime import date
 from django.core.exceptions import ValidationError
@@ -10,7 +11,6 @@ from django.urls import reverse
 from django.contrib import messages
 from django.db.models import Prefetch
 from django.utils import timezone
-from django.views.decorators.http import require_POST
 import datetime
 from django.http import JsonResponse
 from datetime import date
@@ -24,7 +24,6 @@ from .models import *
 
 
 
-from dateutil.relativedelta import relativedelta
 
 
 
@@ -159,11 +158,6 @@ def ajax_load_bank_code(request):
     except:
         return JsonResponse({'code': ''})
 
-from datetime import datetime
-from django.shortcuts import render, redirect
-from django.contrib import messages
-from .models import LoanRequest, LoanSettings, LoanType, BankName, BankCode
-from accounts.models import Member  # Assuming Member is in accounts.models
 
 def loan_request_view(request):
     settings = LoanSettings.objects.first()

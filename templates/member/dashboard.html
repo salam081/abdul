@@ -414,7 +414,7 @@
                     <div class="stat-value">₦{{ loan_balance|floatformat:0|intcomma }}</div>
                     <div class="stat-change negative">
                         <i class="fas fa-calendar-alt"></i>
-                        <span>Monthly Payment: ₦{{monthly_payment|floatformat:0|intcomma }}</span>
+                        <span>Monthly Payment: ₦{{ loan.monthly_payment|floatformat:2 }}</span>
                     </div>
                 </div>
                 <div class="stat-icon loan">

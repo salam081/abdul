@@ -44,13 +44,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-                
-            </div>
-        </div>
-    </div>
-    
-    {% if loanables.has_other_pages %}
+                      {% if loanables.has_other_pages %}
     <nav>
         <ul class="pagination justify-content-center mt-3">
             {% if loanables.has_previous %}
@@ -81,6 +75,13 @@
         </ul>
     </nav>
     {% endif %}
+                </div>
+                
+            </div>
+        </div>
+    </div>
+    
+  
     <!-- INVESTMENT SECTION -->
     <div class="card col-md-12">
         <div class="card-body">
@@ -120,14 +121,7 @@
                             </tr>
                         </tfoot>
                     </table>
-                </div>
-
-              
-            </div>
-
-        </div>
-    </div>
-      {% if investments.has_other_pages %}
+                      {% if investments.has_other_pages %}
                 <nav>
                     <ul class="pagination justify-content-center mt-3">
                         {% if investments.has_previous %}
@@ -158,5 +152,13 @@
                     </ul>
                 </nav>
                 {% endif %}
+                </div>
+
+              
+            </div>
+
+        </div>
+    </div>
+    
 </div>
 {% endblock content %}

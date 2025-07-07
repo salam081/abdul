@@ -82,7 +82,7 @@ def add_loan_type(request):
                 created_by=request.user
             )
             messages.success(request, "Loan type created successfully.")
-            return redirect('loan_years_list') 
+            return redirect('add_loan_type') 
         else:
             messages.error(request, "Name is required.")
     context = {'loan_types':loan_types}
@@ -109,8 +109,8 @@ def admin_loan_requests_list(request):
         requests_list = requests_list.filter(
             Q(member__member__first_name__icontains=search_query) |
             Q(member__member__last_name__icontains=search_query) |
-            Q(member__ippis__icontains=search_query) |
-            Q(guarantor_name__icontains=search_query)
+            Q(member__ippis__icontains=search_query) 
+            # Q(guarantor__member__member__first_name__icontains=search_query)
         )
     else:
          results_queryset = requests_list
@@ -170,7 +170,7 @@ def loan_request_detail(request, id):
     """View loan request details"""
     loan_request = get_object_or_404(LoanRequest, id=id)
     repayments = loan_request.repaybacks.all().order_by('-repayment_date')
-    
+    monthly_payment = monthly_payment = loan_request.monthly_payment or 0
     # Calculate repayment summary
     total_paid = repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0
     balance = (loan_request.approved_amount or 0) - total_paid
@@ -180,6 +180,7 @@ def loan_request_detail(request, id):
         'repayments': repayments,
         'total_paid': total_paid,
         'balance': balance,
+        'monthly_payment': monthly_payment,
         'title': f'Loan Request #{loan_request.id}'
     }
     return render(request, 'loan/loan_request_detail.html', context)

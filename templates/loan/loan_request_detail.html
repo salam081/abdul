@@ -527,6 +527,7 @@
                         <div class="text-center mb-3">
                             <div class="amount-display">₦{{ total_paid|floatformat:2 }}</div>
                             <small class="text-muted">Total Paid</small>
+                           <p class="text-muted">{{monthly_payment}}</p>
                         </div>
                         
                         {% widthratio total_paid loan_request.approved_amount 100 as progress_percentage %}
