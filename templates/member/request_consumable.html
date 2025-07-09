@@ -17,7 +17,6 @@
         box-shadow: 0 4px 16px rgba(0, 0, 0, 0.05);
         border: none;
         transition: transform 0.2s ease-in-out;
-       
     }
 
     .card-custom:hover {
@@ -32,13 +31,6 @@
         padding: 1rem 1.5rem;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
-    }
-
-    .form-check-label small {
-        color: #b435bf;
-        font-size: 0.8rem;
-        display: block;
-        border:1px solid #8a2cb8;
     }
 
     .form-section {
@@ -61,10 +53,26 @@
     .btn-primary:hover {
         background-color: #8552a8;
     }
-    
+
+    .btn-success {
+        background-color: #28a745;
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+    }
+
+    .btn-danger {
+        background-color: #dc3545;
+        border: none;
+        font-weight: 600;
+        border-radius: 8px;
+        padding: 0.4rem 0.8rem;
+    }
+
     .table th,
     .table td {
-        border:1px solid #8a2cb8;
+        border: 1px solid #8a2cb8;
         vertical-align: middle;
         font-size: 0.95rem;
     }
@@ -73,12 +81,106 @@
         font-size: 0.9rem;
         padding: 0.4rem 0.6rem;
         border-radius: 8px;
-        border:1px solid #8a2cb8;
+        border: 1px solid #8a2cb8;
     }
 
     .label-sm {
         font-size: 0.9rem;
         font-weight: 500;
+    }
+
+    .cart-item {
+        background-color: #f8f9fa;
+        border-radius: 8px;
+        padding: 1rem;
+        margin-bottom: 0.5rem;
+        border-left: 4px solid #b24bc0;
+    }
+
+    .cart-empty {
+        text-align: center;
+        color: #6c757d;
+        font-style: italic;
+        padding: 2rem;
+    }
+
+    .quantity-controls {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quantity-btn {
+        width: 32px;
+        height: 32px;
+        border-radius: 50%;
+        border: 1px solid #8a2cb8;
+        background-color: white;
+        color: #8a2cb8;
+        font-weight: bold;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+
+    .quantity-btn:hover {
+        background-color: #8a2cb8;
+        color: white;
+    }
+
+    .quantity-input {
+        width: 60px;
+        text-align: center;
+        border: 1px solid #8a2cb8;
+        border-radius: 4px;
+        padding: 0.25rem;
+    }
+
+    .cart-total {
+        background: linear-gradient(135deg, #8a2cb8, #b0469e);
+        color: white;
+        padding: 1rem;
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+
+    .badge-cart {
+        background-color: #dc3545;
+        color: white;
+        border-radius: 50%;
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        margin-left: 0.5rem;
+    }
+
+    .item-row {
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .item-row:hover {
+        background-color: #f8f9fa;
+    }
+
+    .add-to-cart-btn {
+        background-color: #9748a1;
+        color: white;
+        border: none;
+        border-radius: 6px;
+        padding: 0.3rem 0.6rem;
+        font-size: 0.85rem;
+        cursor: pointer;
+        transition: background-color 0.2s;
+    }
+
+    .add-to-cart-btn:hover {
+        background-color: #218838;
+    }
+
+    .add-to-cart-btn:disabled {
+        background-color: #6c757d;
+        cursor: not-allowed;
     }
 </style>
 
@@ -99,18 +201,24 @@
                                     <th>Item</th>
                                     <th>Description</th>
                                     <th>Price (₦)</th>
+                                    <th>Action</th>
                                 </tr>
                             </thead>
                             <tbody>
                                 {% for i in items %}
-                                    <tr>
+                                    <tr class="item-row" data-item-id="{{ i.id }}">
                                         <td>{{ forloop.counter }}</td>
                                         <td>{{ i.title }}</td>
-                                        <td>{{ i.description }}</td>
-                                        <td>{{ i.price }}</td>
+                                        <td>{{ i.description|truncatechars:30 }}</td>
+                                        <td>₦{{ i.price }}</td>
+                                        <td>
+                                            <button class="add-to-cart-btn" onclick="addToCart({{ i.id }}, '{{ i.title }}', {{ i.price }}, '{{ i.description }}')">
+                                                Select Item
+                                            </button>
+                                        </td>
                                     </tr>
                                 {% empty %}
-                                    <tr><td colspan="3" class="text-center text-muted">No items available.</td></tr>
+                                    <tr><td colspan="5" class="text-center text-muted">No items available.</td></tr>
                                 {% endfor %}
                             </tbody>
                         </table>
@@ -119,57 +227,65 @@
             </div>
         </div>
 
-        <!-- Right: Form -->
+        <!-- Right: Cart & Form -->
         <div class="col-md-7">
-            <div class="card card-custom h-100">
-                <div class="card-header-custom text-center">
-                    Select Items and Provide Quantities
+            <!-- Cart Section -->
+            <div class="card card-custom mb-3">
+                <div class="card-header-custom">
+                    Shopping Items
+                    <span class="badge-cart" id="cart-count">0</span>
                 </div>
                 <div class="card-body">
-                    <form method="POST" enctype="multipart/form-data">
+                    <div id="cart-items">
+                        <div class="cart-empty">
+                            <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                            <p>Your cart is empty. Add items from the list above.</p>
+                        </div>
+                    </div>
+                    
+                    <div id="cart-total" class="cart-total" style="display: none;">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <strong>Total Items: <span id="total-items">0</span></strong>
+                            </div>
+                            <div class="col-md-6 text-end">
+                                <strong>Total Amount: ₦<span id="total-amount">0.00</span></strong>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Form Section -->
+            <div class="card card-custom">
+                <div class="card-header-custom text-center">
+                    Complete Your Request
+                </div>
+                <div class="card-body">
+                    <form method="POST" enctype="multipart/form-data" id="request-form">
                         {% csrf_token %}
+                        
+                        <!-- Hidden inputs for cart items -->
+                        <div id="hidden-inputs"></div>
 
-                        <!-- Item selection -->
                         <div class="form-section">
-                            {% for item in items %}
-                            <div class="row mb-3 align-items-center">
-                                <div class="col-md-5">
-                                    <div class="form-check">
-                                        <input class="form-check-input" type="checkbox" name="consumable_ids"
-                                            id="consumable_{{ item.id }}" value="{{ item.id }}">
-                                        <label class="form-check-label" for="consumable_{{ item.id }}">
-                                            {{ item.title }}
-                                            <small>{{ item.description|truncatechars:50 }}</small>
-                                        </label>
-                                    </div>
+                            <div class="row mb-3">
+                                <div class="col-md-6">
+                                    <!-- <label for="term_months" class="label-sm">Term (Months)</label> -->
+                                    <input type="number" hidden class="form-control input-sm" name="loan_term_months" value="{{4}}" id="term_months"
+                                        placeholder="e.g. 3" required>
                                 </div>
-                                <div class="col-md-5">
-                                    <input type="number" name="quantity_{{ item.id }}" id="quantity_{{ item.id }}"
-                                        class="form-control input-sm" min="0" value="0" placeholder="Quantity">
-                                    <small class="text-muted">Qty for {{ item.name }}</small>
+                                <div class="col-md-6">
+                                    <label for="file_payslpt" class="label-sm">Upload File</label>
+                                    <input type="file" class="form-control input-sm" name="file_payslpt" id="file_payslpt">
                                 </div>
-                            </div>
-                            {% empty %}
-                            <p class="text-danger">No items to request.</p>
-                            {% endfor %}
-                        </div>
-
-                        <!-- Term and file -->
-                        <div class="row mb-6">
-                            <div class="col-md-6">
-                                <label for="term_months" class="label-sm">Term (Months)</label>
-                                <input type="number" class="form-control input-sm" name="loan_term_months" id="term_months"
-                                    placeholder="e.g. 3" required>
-                            </div>
-                            <div class="col-md-6">
-                                <label for="file_one" class="label-sm">Upload File</label>
-                                <input type="file" class="form-control input-sm" name="file_one" id="file_one">
                             </div>
                         </div>
 
-                        <!-- Submit -->
-                        <div class="d-grid mt-2">
-                            <button type="submit" class="btn btn-primary">Submit Request</button>
+                        <div class="d-grid">
+                            <button type="submit" class="btn btn-primary" id="submit-btn" disabled>
+                                Submit Request
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -177,4 +293,154 @@
         </div>
     </div>
 </div>
+
+<script>
+let cart = [];
+let cartCount = 0;
+let cartTotal = 0;
+
+function addToCart(itemId, itemName, itemPrice, itemDescription) {
+    // Check if item already exists in cart
+    const existingItem = cart.find(item => item.id === itemId);
+    
+    if (existingItem) {
+        existingItem.quantity += 1;
+    } else {
+        cart.push({
+            id: itemId,
+            name: itemName,
+            price: parseFloat(itemPrice),
+            description: itemDescription,
+            quantity: 1
+        });
+    }
+    
+    updateCartDisplay();
+    updateFormInputs();
+}
+
+function removeFromCart(itemId) {
+    cart = cart.filter(item => item.id !== itemId);
+    updateCartDisplay();
+    updateFormInputs();
+}
+
+function updateQuantity(itemId, newQuantity) {
+    const item = cart.find(item => item.id === itemId);
+    if (item) {
+        if (newQuantity <= 0) {
+            removeFromCart(itemId);
+        } else {
+            item.quantity = parseInt(newQuantity);
+            updateCartDisplay();
+            updateFormInputs();
+        }
+    }
+}
+
+function updateCartDisplay() {
+    const cartItemsDiv = document.getElementById('cart-items');
+    const cartCountSpan = document.getElementById('cart-count');
+    const cartTotalDiv = document.getElementById('cart-total');
+    const totalItemsSpan = document.getElementById('total-items');
+    const totalAmountSpan = document.getElementById('total-amount');
+    const submitBtn = document.getElementById('submit-btn');
+    
+    cartCount = cart.reduce((sum, item) => sum + item.quantity, 0);
+    cartTotal = cart.reduce((sum, item) => sum + (item.price * item.quantity), 0);
+    
+    cartCountSpan.textContent = cartCount;
+    totalItemsSpan.textContent = cartCount;
+    totalAmountSpan.textContent = cartTotal.toFixed(2);
+    
+    if (cart.length === 0) {
+        cartItemsDiv.innerHTML = `
+            <div class="cart-empty">
+                <i class="fas fa-shopping-cart fa-2x mb-2"></i>
+                <p>Your cart is empty. Add items from the list above.</p>
+            </div>
+        `;
+        cartTotalDiv.style.display = 'none';
+        submitBtn.disabled = true;
+    } else {
+        cartItemsDiv.innerHTML = cart.map(item => `
+            <div class="cart-item">
+                <div class="row align-items-center">
+                    <div class="col-md-5">
+                        <strong>${item.name}</strong>
+                        <br>
+                        <small class="text-muted">${item.description}</small>
+                    </div>
+                    <div class="col-md-3">
+                        <small>₦${item.price.toFixed(2)} each</small>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="quantity-controls">
+                            <button type="button" class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity - 1})">-</button>
+                            <input type="number" class="quantity-input" value="${item.quantity}" 
+                                   onchange="updateQuantity(${item.id}, this.value)" min="1">
+                            <button type="button" class="quantity-btn" onclick="updateQuantity(${item.id}, ${item.quantity + 1})">+</button>
+                        </div>
+                    </div>
+                    <div class="col-md-1">
+                        <button type="button" class="btn btn-danger btn-sm" onclick="removeFromCart(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                </div>
+                <div class="row mt-2">
+                    <div class="col-md-12 text-end">
+                        <strong>Subtotal: ₦${(item.price * item.quantity).toFixed(2)}</strong>
+                    </div>
+                </div>
+            </div>
+        `).join('');
+        
+        cartTotalDiv.style.display = 'block';
+        submitBtn.disabled = false;
+    }
+    
+    // Update add to cart button states
+    document.querySelectorAll('.add-to-cart-btn').forEach(btn => {
+        const row = btn.closest('.item-row');
+        const itemId = parseInt(row.dataset.itemId);
+        const inCart = cart.some(item => item.id === itemId);
+        
+        if (inCart) {
+            btn.textContent = 'In Cart';
+            btn.disabled = true;
+        } else {
+            btn.textContent = 'Select Items';
+            btn.disabled = false;
+        }
+    });
+}
+
+function updateFormInputs() {
+    const hiddenInputsDiv = document.getElementById('hidden-inputs');
+    
+    // Clear existing inputs
+    hiddenInputsDiv.innerHTML = '';
+    
+    // Add inputs for each cart item
+    cart.forEach(item => {
+        // Add consumable ID to array
+        const consumableInput = document.createElement('input');
+        consumableInput.type = 'hidden';
+        consumableInput.name = 'consumable_ids';
+        consumableInput.value = item.id;
+        hiddenInputsDiv.appendChild(consumableInput);
+        
+        // Add quantity for this item
+        const quantityInput = document.createElement('input');
+        quantityInput.type = 'hidden';
+        quantityInput.name = `quantity_${item.id}`;
+        quantityInput.value = item.quantity;
+        hiddenInputsDiv.appendChild(quantityInput);
+    });
+}
+
+// Initialize cart display
+updateCartDisplay();
+</script>
 {% endblock %}

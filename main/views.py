@@ -21,6 +21,7 @@ from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.dateparse import parse_date
 from .models import * 
 from accounts.models import * 
+from financialsummary.models import *
 
 
 def index(request):
@@ -49,37 +50,93 @@ def search_member_for_savings(request):
     }
     return render(request, 'main/search_member.html', context)
 
-def filter_requests(datefrom, dateto, ):
-    filtered_requests = Savings.objects.all() 
+
+from django.db.models import Sum
+
+def filter_requests(datefrom, dateto):
+    filtered_requests = Savings.objects.all()
 
     if datefrom:
         filtered_requests = filtered_requests.filter(month__gte=datefrom)
     if dateto:
         filtered_requests = filtered_requests.filter(month__lte=dateto)
-   
-    return filtered_requests 
+
+    return filtered_requests
+
 
 def all_member_saving_search(request):
+    
     datefrom = request.GET.get('datefrom')
     dateto = request.GET.get('dateto')
-    status = request.GET.get('status')
+    page_number = request.GET.get('page')
 
     member = None
+    page_total = 0
+    grand_total = 0
+    total_savings = 0
+    total_deductions = 0
 
     if datefrom or dateto:
         filtered = filter_requests(datefrom, dateto)
-        paginator = Paginator(filtered, 100)  # 50 per page
-        page_number = request.GET.get('page')
+        paginator = Paginator(filtered, 100)  # paginate 100 per page
         member = paginator.get_page(page_number)
 
+        # Total for this page
+        page_total = sum(item.month_saving for item in member.object_list)
+
+        # Grand total for all filtered savings
+        grand_total = filtered.aggregate(total=Sum('month_saving'))['total'] or 0
+
+        total_savings = grand_total
+
+        total_deductions = filtered.aggregate(deduct=Sum('original_amount'))['deduct'] or 0
+        print(total_deductions)
     context = {
         'member': member,
-        'status': status,
         'datefrom': datefrom,
         'dateto': dateto,
+        'page_total': page_total,
+        'grand_total': grand_total,
+        'total_savings': total_savings,
+        'total_deductions': total_deductions,
+      
     }
 
     return render(request, 'main/all_member_saving_search.html', context)
+
+
+
+# def filter_requests(datefrom, dateto, ):
+#     filtered_requests = Savings.objects.all() 
+
+#     if datefrom:
+#         filtered_requests = filtered_requests.filter(month__gte=datefrom)
+#     if dateto:
+#         filtered_requests = filtered_requests.filter(month__lte=dateto)
+   
+#     return filtered_requests 
+
+# def all_member_saving_search(request):
+#     datefrom = request.GET.get('datefrom')
+#     dateto = request.GET.get('dateto')
+#     status = request.GET.get('status')
+
+#     member = None
+
+#     if datefrom or dateto:
+#         filtered = filter_requests(datefrom, dateto)
+#         paginator = Paginator(filtered, 100)  # 50 per page
+#         page_number = request.GET.get('page')
+#         member = paginator.get_page(page_number)
+
+#     context = {
+#         'member': member,
+#         'status': status,
+#         'datefrom': datefrom,
+#         'dateto': dateto,
+#     }
+
+#     return render(request, 'main/all_member_saving_search.html', context)
 
 def add_individual_member_savings(request, id):
     member = get_object_or_404(Member, id=id)

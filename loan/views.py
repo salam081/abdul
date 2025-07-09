@@ -397,11 +397,8 @@ def loans_by_year(request, year, loan_type_filter):
     )
 
     context = {
-        'year': year,
-        'loan_type': loan_type,
-        'loanobj': loanobj,
-        'totals_by_status': totals_by_status,
-        'selected_status': status_filter, 
+        'year': year,'loan_type': loan_type, 'loanobj': loanobj,
+        'totals_by_status': totals_by_status,'selected_status': status_filter, 
     }
 
     # Handle PDF download

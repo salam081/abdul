@@ -457,7 +457,7 @@
     </div>
 
       <!-- Loan Information -->
-    {% if loan %}
+    {% if loan and loan.status != "rejected" %}
     <div class="table-section">
         <div class="table-header">
             <h3>Active Loan Details</h3>

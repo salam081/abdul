@@ -16,9 +16,9 @@ urlpatterns = [
     path('loan_details/<int:request_id>/', views.member_loan_request_detail, name='member_loan_request_detail'),
     path('my-requests/', views.my_consumable_requests, name='my_consumable_requests'),
     path('request/<int:request_id>/', views.consumable_request_detail, name='consumable_request_detail'),
-    path('consumables/cancel/<int:request_id>/', views.cancel_consumable_request, name='cancel_consumable_request'),
+    # path('consumables/cancel/<int:request_id>/', views.cancel_consumable_request, name='cancel_consumable_request'),
 
 
-   
+   path('consumables/cancel/<int:request_id>/', views.cancel_consumable_request, name='cancel_consumable_request'),
     
 ]

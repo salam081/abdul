@@ -55,6 +55,7 @@
                         <p><strong>Total Amount:</strong> ₦{{ total_amount|floatformat:2 }}</p>
                         <p><strong>Total Paid:</strong> ₦{{ total_paid|floatformat:2 }}</p>
                         <p><strong>Balance:</strong> ₦{{ balance|floatformat:2 }}</p>
+                        
                     </div>
                 </div>
             </div>
@@ -90,6 +91,27 @@
                 </div>
             </div>
         </div>
+
+         {% if consumable_request.file_payslpt %}
+                <div class="custom-card animate-fade-in">
+                    <div class="card-header bg-transparent border-0 pb-0">
+                        <h5 class="fw-bold">
+                            <i class="fas fa-paperclip me-2" style="color: #6f42c1;"></i>
+                            View PaySlipt
+                        </h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="text-center">
+                            <img src="{{ consumable_request.file_payslpt.url }}" alt="Supporting Document" class="file-preview img-fluid">
+                            <div class="mt-2">
+                                <a href="{{ consumable_request.file_payslpt.url }}" target="_blank" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-external-link-alt me-1"></i>View Full Size
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                {% endif %}
     </div>
 
     <!-- Right Column -->

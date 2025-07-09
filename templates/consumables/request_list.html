@@ -3,191 +3,720 @@
 
 {% block title %}Consumable Requests{% endblock %}
 
+{% block extra_css %}
+<style>
+    :root {
+        --primary-color: #4f46e5;
+        --success-color: #10b981;
+        --danger-color: #ef4444;
+        --warning-color: #f59e0b;
+        --info-color: #3b82f6;
+        --dark-color: #1f2937;
+        --light-color: #f8fafc;
+        --border-color: #e5e7eb;
+    }
+
+    .page-container {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .main-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        overflow: hidden;
+    }
+
+    .card-header {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1);
+        color: white;
+        border: none;
+        padding: 1.5rem 2rem;
+        border-radius: 20px 20px 0 0;
+    }
+
+    .card-header h4 {
+        font-weight: 600;
+        margin: 0;
+        font-size: 1.5rem;
+    }
+
+    .search-box {
+        background: var(--light-color);
+        border-radius: 15px;
+        padding: 1.5rem;
+        margin-bottom: 2rem;
+        border: 1px solid var(--border-color);
+    }
+
+    .search-box .form-control {
+        border-radius: 10px;
+        border: 1px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        font-size: 0.95rem;
+        transition: all 0.3s ease;
+    }
+
+    .search-box .form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+    }
+
+    .search-box .btn-primary {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1);
+        border: none;
+        border-radius: 10px;
+        padding: 0.75rem 1.5rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .search-box .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(79, 70, 229, 0.3);
+    }
+
+    .table-responsive {
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+
+    .table {
+        margin-bottom: 0;
+        background: white;
+    }
+
+    .table-dark {
+        background: linear-gradient(135deg, var(--dark-color), #374151);
+    }
+
+    .table-dark th {
+        border: none;
+        font-weight: 600;
+        font-size: 0.9rem;
+        padding: 1rem;
+        color: white;
+    }
+
+    .table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .table tbody tr:hover {
+        background-color: rgba(79, 70, 229, 0.05);
+        transform: translateY(-1px);
+    }
+
+    .table td {
+        padding: 1rem;
+        vertical-align: middle;
+        border-color: var(--border-color);
+    }
+
+    .member-info {
+        display: flex;
+        flex-direction: column;
+        gap: 0.25rem;
+    }
+
+    .member-name {
+        font-weight: 600;
+        color: var(--dark-color);
+        font-size: 1rem;
+    }
+
+    .member-ippis {
+        font-size: 0.85rem;
+        color: #6b7280;
+        font-weight: 500;
+    }
+
+    .items-preview {
+        max-width: 200px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+
+    .items-preview:hover {
+        color: var(--primary-color);
+        text-decoration: underline;
+    }
+
+    .items-count {
+        background: linear-gradient(135deg, var(--info-color), #60a5fa);
+        color: white;
+        padding: 0.25rem 0.75rem;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        font-weight: 600;
+        display: inline-block;
+        margin-bottom: 0.5rem;
+    }
+
+    .price-display {
+        font-weight: 700;
+        font-size: 1.1rem;
+        color: var(--success-color);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 25px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    .badge.bg-success {
+        background: linear-gradient(135deg, var(--success-color), #059669) !important;
+    }
+
+    .badge.bg-danger {
+        background: linear-gradient(135deg, var(--danger-color), #dc2626) !important;
+    }
+
+    .badge.bg-warning {
+        background: linear-gradient(135deg, var(--warning-color), #d97706) !important;
+    }
+
+    .badge.bg-primary {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1) !important;
+    }
+
+    .btn-group .btn {
+        border-radius: 8px;
+        margin: 0 2px;
+        padding: 0.5rem 0.75rem;
+        font-size: 0.85rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .btn-group .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+
+    .btn-outline-info {
+        border-color: var(--info-color);
+        color: var(--info-color);
+    }
+
+    .btn-outline-info:hover {
+        background: var(--info-color);
+        border-color: var(--info-color);
+    }
+
+    .btn-outline-primary {
+        border-color: var(--primary-color);
+        color: var(--primary-color);
+    }
+
+    .btn-outline-primary:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+    }
+
+    .btn-outline-success {
+        border-color: var(--success-color);
+        color: var(--success-color);
+    }
+
+    .btn-outline-success:hover {
+        background: var(--success-color);
+        border-color: var(--success-color);
+    }
+
+    .btn-outline-danger {
+        border-color: var(--danger-color);
+        color: var(--danger-color);
+    }
+
+    .btn-outline-danger:hover {
+        background: var(--danger-color);
+        border-color: var(--danger-color);
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: #6b7280;
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .pagination {
+        margin-top: 2rem;
+    }
+
+    .pagination .page-link {
+        border-radius: 8px;
+        margin: 0 2px;
+        border: 1px solid var(--border-color);
+        color: var(--primary-color);
+        padding: 0.5rem 1rem;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1);
+        border-color: var(--primary-color);
+    }
+
+    /* Modal Styles */
+    .modal-content {
+        border-radius: 20px;
+        border: none;
+        box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .modal-header {
+        background: linear-gradient(135deg, var(--primary-color), #6366f1);
+        color: white;
+        border-radius: 20px 20px 0 0;
+        padding: 1.5rem 2rem;
+    }
+
+    .modal-title {
+        font-weight: 600;
+        font-size: 1.25rem;
+    }
+
+    .btn-close-white {
+        filter: brightness(0) invert(1);
+    }
+
+    .modal-body {
+        padding: 2rem;
+    }
+
+    .items-table {
+        background: white;
+        border-radius: 15px;
+        overflow: hidden;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.08);
+    }
+
+    .items-table th {
+        background: var(--light-color);
+        font-weight: 600;
+        color: var(--dark-color);
+        padding: 1rem;
+        border: none;
+    }
+
+    .items-table td {
+        padding: 1rem;
+        border-color: var(--border-color);
+    }
+
+    .quantity-control {
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .quantity-control input {
+        width: 70px;
+        border-radius: 5px;
+        border: 1px solid var(--border-color);
+        text-align: center;
+    }
+
+    .quantity-control button {
+        padding: 0.25rem 0.5rem;
+        font-size: 0.8rem;
+        border-radius: 5px;
+    }
+
+    .item-actions {
+        display: flex;
+        gap: 0.5rem;
+        justify-content: center;
+    }
+
+    @media (max-width: 768px) {
+        .page-container {
+            padding: 1rem;
+        }
+
+        .card-header,
+        .search-box {
+            padding: 1rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .btn-group {
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+    }
+</style>
+{% endblock %}
+
 {% block content %}
-<div class="container-fluid">
-    <div class="row">
-        <div class="col-12">
-            <div class="card shadow">
-                <div class="card-header">
-                    <h4 class="mb-0"><i class="fas fa-list-alt me-2"></i>Consumable Requests</h4>
-                </div>
-                <div class="card-body">
-
-
-                    <!-- Search Bar -->
-                    <div class="search-box mb-4">
-                        <form method="get" class="row g-3">
-                            <div class="col-md-8">
-                                <input type="text" class="form-control" name="q" value="{{ search_query }}" 
-                                       placeholder="Search by name, username, status, or item...">
-                            </div>
-                            <div class="col-md-4">
-                                <button type="submit" class="btn btn-primary w-100">
-                                    <i class="fas fa-search me-2"></i>Search
-                                </button>
-                            </div>
-                        </form>
+<div class="page-container">
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col-12">
+                <div class="card main-card">
+                    <div class="card-header">
+                        <h4><i class="fas fa-list-alt me-2"></i>Consumable Requests</h4>
                     </div>
+                    <div class="card-body">
+                        <!-- Search Bar -->
+                        <div class="search-box">
+                            <form method="get" class="row g-3">
+                                <div class="col-md-8">
+                                    <input type="text" class="form-control" name="q" value="{{ search_query }}" 
+                                           placeholder="Search by name, username, status, or item...">
+                                </div>
+                                <div class="col-md-4">
+                                    <button type="submit" class="btn btn-primary w-100">
+                                        <i class="fas fa-search me-2"></i>Search
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
 
-                    <div class="table-responsive">
-                        <table class="table table-hover align-middle">
-                            <thead class="table-dark">
-                                <tr>
-                                    <th>Member</th>
-                                    <th>Items</th>
-                                    <th class="text-nowrap" style="min-width: 120px;">Total Price</th>
-                                    <th>Status</th>
-                                    <th class="text-nowrap" style="min-width: 120px;">Amount Paid</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody>
-                                {% for request in page_obj %}
-                                <tr>
-                                    <td>
-                                        <strong>{{ request.user.get_full_name|default:request.user.username }}</strong>
-                                        {% if request.user.member %}
-                                            <br><small class="text-muted">IPPIS: {{ request.user.member.ippis }}</small>
-                                        {% endif %}
-                                    </td>
-                                    <td>
-                                        <table class="table table-sm table-bordered mb-0">
-                                            <thead>
-                                                <tr>
-                                                    <th>Item</th>
-                                                    <th>Qty</th>
-                                                    <th>Unit Price</th>
-                                                    <th>Total</th>
-                                                    <th>Action</th>
-                                                </tr>
-                                            </thead>
-                                            <tbody>
-                                                {% for detail in request.details.all %}
-                                                <tr>
-                                                    <td>{{ detail.item.title }}</td>
-                                                    <td>
-                                                        {% if request.status == 'Pending' %}
-                                                        <form method="POST" action="{% url 'consumable_requests_list' %}" class="d-flex align-items-center">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="reduce_quantity_id" value="{{ detail.id }}">
-                                                            <input type="number" name="new_quantity" value="{{ detail.quantity }}" min="1" max="{{ detail.quantity|add:'-1' }}" class="form-control form-control-sm me-2" style="width: 80px;">
-                                                            <button type="submit" class="btn btn-sm btn-outline-primary">Reduce</button>
-                                                        </form>
-                                                        {% else %}
-                                                            {{ detail.quantity }}
-                                                        {% endif %}
-                                                    </td>
-                                                    <td>₦{{ detail.item_price|floatformat:2 }}</td>
-                                                    <td>₦{{ detail.total_price|floatformat:2 }}</td>
-                                                    <td>
-                                                        {% if request.status == 'Pending' %}
-                                                        <form method="POST" action="{% url 'consumable_requests_list' %}" style="display:inline;">
-                                                            {% csrf_token %}
-                                                            <input type="hidden" name="remove_item_id" value="{{ detail.id }}">
-                                                            <button type="submit" class="btn btn-sm btn-danger">Remove</button>
-                                                        </form>
-                                                        {% endif %}
-                                                    </td>
-                                                </tr>
-                                                {% endfor %}
-                                            </tbody>
-                                        </table>
-                                    </td>
-                                    <td><strong>₦{{ request.calculate_total_price|floatformat:2 }}</strong></td>
-                                    <td>
-                                        <span class="badge 
-                                            {% if request.status == 'Approved' %} bg-success
-                                            {% elif request.status == 'Declined' %} bg-danger
-                                            {% elif request.status == 'Paid' %} bg-primary
-                                            {% else %} bg-warning text-dark
-                                            {% endif %}">
-                                            {{ request.status }}
-                                        </span>
-                                    </td>
-                                    <td class="text-success"><b>{{ request.total_paid }}</b></td>
-                                    <td>
-                                        <div class="btn-group" role="group">
-                                            <a href="{% url 'admin_consumable_request_detail' request.id %}" class="btn btn-sm btn-outline-info" >
-                                                <i class="fas fa-eye"></i>
-                                            </a>
-                                            {% if request.status == 'Pending' %}
-                                                <a href="{% url 'admin_edit_consumable_request' request.id %}" class="btn btn-sm btn-outline-primary">
-                                                    <i class="fas fa-edit"></i>
+                        <div class="table-responsive mt-3">
+                            <table class="table table-hover align-middle">
+                                <thead class="table-dark">
+                                    <tr>
+                                        <th>Member</th>
+                                        <th>Items</th>
+                                        <th class="text-nowrap" style="min-width: 120px;">Total Price</th>
+                                        <th>Status</th>
+                                        <th class="text-nowrap" style="min-width: 120px;">Amount Paid</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    {% for request in page_obj %}
+                                    <tr>
+                                        <td>
+                                            <div class="member-info">
+                                                <div class="member-name">{{ request.user.get_full_name|default:request.user.username }}</div>
+                                                {% if request.user.member %}
+                                                    <div class="member-ippis">IPPIS: {{ request.user.member.ippis }}</div>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                        <td>
+                                            
+                                            <div class="items-preview" onclick="showItemsModal({{ request.id }}, '{{ request.user.get_full_name|default:request.user.username }}', '{{ request.status }}')">
+                                                <span class="items-count">{{ request.details.all|length }} item{{ request.details.all|length|pluralize }}</span>
+                                                <div class="text-truncate" style="max-width: 200px;">
+                                                    {% for detail in request.details.all %}
+                                                        {{ detail.item.title }}{% if not forloop.last %}, {% endif %}
+                                                    {% endfor %}
+                                                </div>
+                                                <small class=" text-success">Click to view details</small>
+                                            </div>
+                                        </td>
+                                        <td>
+                                            <div class="price-display">₦{{ request.calculate_total_price|floatformat:2 }}</div>
+                                        </td>
+                                        <td>
+                                            <span class="badge status-badge
+                                                {% if request.status == 'Approved' %} bg-success
+                                                {% elif request.status == 'Declined' %} bg-danger
+                                                {% elif request.status == 'Paid' %} bg-primary
+                                                {% else %} bg-warning text-dark
+                                                {% endif %}">
+                                                {{ request.status }}
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <div class="price-display">₦{{ request.total_paid|floatformat:2 }}</div>
+                                        </td>
+                                        <td>
+                                            <div class="btn-group" role="group">
+                                                <a href="{% url 'admin_consumable_request_detail' request.id %}" 
+                                                   class="btn btn-outline-info" title="View Details">
+                                                    <i class="fas fa-eye"></i>
                                                 </a>
-                                                <a href="{% url 'approve_consumable_request' request.id %}" class="btn btn-sm btn-outline-success"
-                                                   onclick="return confirm('Are you sure you want to approve this request?')">
-                                                    <i class="fas fa-check"></i>
-                                                </a>
-                                                <a href="{% url 'decline_consumable_request' request.id %}" class="btn btn-sm btn-outline-danger"
-                                                   onclick="return confirm('Are you sure you want to decline this request?')">
-                                                    <i class="fas fa-times"></i>
-                                                </a>
-                                            {% endif %}
-                                        </div>
-                                    </td>
-                                </tr>
-                                {% empty %}
-                                <tr>
-                                    <td colspan="6" class="text-center py-4">
-                                        <i class="fas fa-clipboard-list fa-3x text-muted mb-3"></i>
-                                        <p class="text-muted">No requests found.</p>
-                                    </td>
-                                </tr>
-                                {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
+                                                {% if request.status == 'Pending' %}
+                                                    <a href="{% url 'admin_edit_consumable_request' request.id %}" 
+                                                       class="btn btn-outline-primary" title="Edit">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="{% url 'approve_consumable_request' request.id %}" 
+                                                       class="btn btn-outline-success" title="Approve"
+                                                       onclick="return confirm('Are you sure you want to approve this request?')">
+                                                        <i class="fas fa-check"></i>
+                                                    </a>
+                                                    <a href="{% url 'decline_consumable_request' request.id %}" 
+                                                       class="btn btn-outline-danger" title="Decline"
+                                                       onclick="return confirm('Are you sure you want to decline this request?')">
+                                                        <i class="fas fa-times"></i>
+                                                    </a>
+                                                {% endif %}
+                                            </div>
+                                        </td>
+                                    </tr>
+                                    {% empty %}
+                                    <tr>
+                                        <td colspan="6" class="empty-state">
+                                            <i class="fas fa-clipboard-list"></i>
+                                            <p>No requests found.</p>
+                                        </td>
+                                    </tr>
+                                    {% endfor %}
+                                </tbody>
+                            </table>
+                        </div>
 
-                    <!-- Pagination -->
-                    {% if page_obj.has_other_pages %}
-                    <nav>
-                        <ul class="pagination justify-content-center">
-                            {% if page_obj.has_previous %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Previous</a>
-                                </li>
-                            {% endif %}
-                            
-                            {% for num in page_obj.paginator.page_range %}
-                                {% if page_obj.number == num %}
-                                    <li class="page-item active">
-                                        <span class="page-link">{{ num }}</span>
-                                    </li>
-                                {% else %}
+                        <!-- Pagination -->
+                        {% if page_obj.has_other_pages %}
+                        <nav>
+                            <ul class="pagination justify-content-center">
+                                {% if page_obj.has_previous %}
                                     <li class="page-item">
-                                        <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                                        <a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                            <i class="fas fa-chevron-left me-1"></i>Previous
+                                        </a>
                                     </li>
                                 {% endif %}
-                            {% endfor %}
-                            
-                            {% if page_obj.has_next %}
-                                <li class="page-item">
-                                    <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">Next</a>
-                                </li>
-                            {% endif %}
-                        </ul>
-                    </nav>
-                    {% endif %}
+                                
+                                {% for num in page_obj.paginator.page_range %}
+                                    {% if page_obj.number == num %}
+                                        <li class="page-item active">
+                                            <span class="page-link">{{ num }}</span>
+                                        </li>
+                                    {% else %}
+                                        <li class="page-item">
+                                            <a class="page-link" href="?page={{ num }}{% if search_query %}&q={{ search_query }}{% endif %}">{{ num }}</a>
+                                        </li>
+                                    {% endif %}
+                                {% endfor %}
+                                
+                                {% if page_obj.has_next %}
+                                    <li class="page-item">
+                                        <a class="page-link" href="?page={{ page_obj.next_page_number }}{% if search_query %}&q={{ search_query }}{% endif %}">
+                                            Next<i class="fas fa-chevron-right ms-1"></i>
+                                        </a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                        {% endif %}
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
 
-<!-- Request Details Modal -->
-<div class="modal fade" id="requestDetailsModal" tabindex="-1">
+<!-- Items Details Modal -->
+<div class="modal fade" id="itemsModal" tabindex="-1" aria-labelledby="itemsModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title"><i class="fas fa-eye me-2"></i>Request Details</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+                <h5 class="modal-title" id="itemsModalLabel">
+                    <i class="fas fa-shopping-cart me-2"></i>Request Items
+                </h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
-            <div class="modal-body" id="requestDetailsContent">
-                <!-- Content will be loaded here -->
+            <div class="modal-body">
+                <div class="mb-3">
+                    <h6><i class="fas fa-user me-2"></i>Member: <span id="memberName"></span></h6>
+                    <h6><i class="fas fa-info-circle me-2"></i>Status: <span id="requestStatus"></span></h6>
+                </div>
+                
+                <div class="table-responsive">
+                    <table class="table items-table">
+                        <thead>
+                            <tr>
+                                <th>Item</th>
+                                <th>Quantity</th>
+                                <th>Unit Price</th>
+                                <th>Total Price</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="itemsTableBody">
+                            <!-- Items will be populated here -->
+                        </tbody>
+                    </table>
+                </div>
+                
+                <div class="row mt-3">
+                    <div class="col-md-6">
+                        <h6><i class="fas fa-calculator me-2"></i>Total Items: <span id="totalItems"></span></h6>
+                    </div>
+                    <div class="col-md-6 text-end">
+                        <h5><i class="fas fa-money-bill-wave me-2"></i>Grand Total: <span id="grandTotal" class="text-success"></span></h5>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 </div>
 
+<script>
+// Sample data structure - replace with actual data from your Django view
+const requestsData = {
+    {% for request in page_obj %}
+    {{ request.id }}: {
+        member: "{{ request.user.get_full_name|default:request.user.username }}",
+        status: "{{ request.status }}",
+        items: [
+            {% for detail in request.details.all %}
+            {
+                id: {{ detail.id }},
+                title: "{{ detail.item.title }}",
+                quantity: {{ detail.quantity }},
+                unitPrice: {{ detail.item_price }},
+                totalPrice: {{ detail.total_price }}
+            }{% if not forloop.last %},{% endif %}
+            {% endfor %}
+        ],
+        totalPrice: {{ request.calculate_total_price }}
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+};
 
+function showItemsModal(requestId, memberName, status) {
+    const request = requestsData[requestId];
+    if (!request) return;
+    
+    // Update modal header
+    document.getElementById('memberName').textContent = memberName;
+    document.getElementById('requestStatus').innerHTML = `<span class="badge status-badge ${getStatusClass(status)}">${status}</span>`;
+    
+    // Update items table
+    const tableBody = document.getElementById('itemsTableBody');
+    tableBody.innerHTML = '';
+    
+    let totalItems = 0;
+    request.items.forEach(item => {
+        totalItems += item.quantity;
+        const row = document.createElement('tr');
+        row.innerHTML = `
+            <td>${item.title}</td>
+            <td>
+                ${status === 'Pending' ? `
+                    <div class="quantity-control">
+                        <input type="number" value="${item.quantity}" min="1" max="${item.quantity}" class="form-control form-control-sm">
+                        <button type="button" class="btn btn-sm btn-outline-primary" onclick="updateQuantity(${item.id}, this)">
+                            <i class="fas fa-sync"></i>
+                        </button>
+                    </div>
+                ` : item.quantity}
+            </td>
+            <td>₦${item.unitPrice.toFixed(2)}</td>
+            <td>₦${item.totalPrice.toFixed(2)}</td>
+            <td>
+                ${status === 'Pending' ? `
+                    <div class="item-actions">
+                        <button type="button" class="btn btn-sm btn-outline-danger" onclick="removeItem(${item.id})">
+                            <i class="fas fa-trash"></i>
+                        </button>
+                    </div>
+                ` : '<span class="text-muted">No actions</span>'}
+            </td>
+        `;
+        tableBody.appendChild(row);
+    });
+    
+    // Update totals
+    document.getElementById('totalItems').textContent = totalItems;
+    document.getElementById('grandTotal').textContent = `₦${request.totalPrice.toFixed(2)}`;
+    
+    // Show modal
+    const modal = new bootstrap.Modal(document.getElementById('itemsModal'));
+    modal.show();
+}
+
+function getStatusClass(status) {
+    switch(status) {
+        case 'Approved': return 'bg-success';
+        case 'Declined': return 'bg-danger';
+        case 'Paid': return 'bg-primary';
+        default: return 'bg-warning text-dark';
+    }
+}
+
+function updateQuantity(itemId, button) {
+    const input = button.previousElementSibling;
+    const newQuantity = input.value;
+    
+    // Create form and submit
+    const form = document.createElement('form');
+    form.method = 'POST';
+    form.action = "{% url 'consumable_requests_list' %}";
+    form.innerHTML = `
+        {% csrf_token %}
+        <input type="hidden" name="reduce_quantity_id" value="${itemId}">
+        <input type="hidden" name="new_quantity" value="${newQuantity}">
+    `;
+    
+    document.body.appendChild(form);
+    form.submit();
+}
+
+function removeItem(itemId) {
+    if (confirm('Are you sure you want to remove this item?')) {
+        const form = document.createElement('form');
+        form.method = 'POST';
+        form.action = "{% url 'consumable_requests_list' %}";
+        form.innerHTML = `
+            {% csrf_token %}
+            <input type="hidden" name="remove_item_id" value="${itemId}">
+        `;
+        
+        document.body.appendChild(form);
+        form.submit();
+    }
+}
+
+// Add smooth scrolling for pagination
+document.querySelectorAll('.pagination a').forEach(link => {
+    link.addEventListener('click', function(e) {
+        e.preventDefault();
+        const href = this.getAttribute('href');
+        
+        // Add loading state
+        this.innerHTML = '<i class="fas fa-spinner fa-spin"></i>';
+        
+        // Navigate after short delay for visual feedback
+        setTimeout(() => {
+            window.location.href = href;
+        }, 300);
+    });
+});
+
+// Add hover effects for action buttons
+document.querySelectorAll('.btn-group .btn').forEach(button => {
+    button.addEventListener('mouseenter', function() {
+        this.style.transform = 'translateY(-2px)';
+    });
+    
+    button.addEventListener('mouseleave', function() {
+        this.style.transform = 'translateY(0)';
+    });
+});
+</script>
 {% endblock %}

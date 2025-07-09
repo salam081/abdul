@@ -1,0 +1,123 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Payment Analysis Report{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4">
+    <h2 class="text-primary mb-4">📊 Payment Analysis Report</h2>
+
+    <!-- Filter Form -->
+    <form method="get" class="row g-3 align-items-end mb-4">
+        <div class="col-md-3">
+            <label for="date_from">Date From</label>
+            <input type="date" id="date_from" name="date_from" class="form-control" value="{{ filters.date_from }}">
+        </div>
+        <div class="col-md-3">
+            <label for="date_to">Date To</label>
+            <input type="date" id="date_to" name="date_to" class="form-control" value="{{ filters.date_to }}">
+        </div>
+        <div class="col-md-3">
+            <button type="submit" class="btn btn-primary w-100">🔍 Filter</button>
+        </div>
+    </form>
+
+    <!-- Summary Statistics -->
+    <div class="row mb-4">
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Total Payments</h6>
+                    <h4>₦{{ payment_stats.total_payments|default:0|floatformat:2|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Average Payment</h6>
+                    <h4>₦{{ payment_stats.avg_payment|default:0|floatformat:2|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Number of Payments</h6>
+                    <h4>{{ payment_stats.payment_count }}</h4>
+                </div>
+            </div>
+        </div>
+        <div class="col-md-3 text-danger">
+            <div class="card text-center shadow-sm">
+                <div class="card-body">
+                    <h6>Total Outstanding</h6>
+                    <h4>₦{{ total_outstanding|floatformat:2|intcomma }}</h4>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Monthly Trend -->
+    <div class="table-responsive mb-5">
+        <h5 class="mb-3">📅 Monthly Payment Trends</h5>
+        <table class="table table-bordered table-striped align-middle">
+            <thead class="table-dark">
+                <tr>
+                    <th>Month</th>
+                    <th>Total Paid</th>
+                    <th>Payments Count</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for month in monthly_payments %}
+                <tr>
+                    <td>{{ month.month|date:"F Y" }}</td>
+                    <td>₦{{ month.total_paid|floatformat:2|intcomma }}</td>
+                    <td>{{ month.payment_count }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="3" class="text-center text-muted">No data found for selected period.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <!-- Outstanding Balances -->
+    <div class="table-responsive">
+        <h5 class="mb-3">❗ Outstanding Payments</h5>
+        <table class="table table-bordered table-hover align-middle">
+            <thead class="table-warning">
+                <tr>
+                    <th>Request ID</th>
+                    <th>User</th>
+                    <th>Date Created</th>
+                    <th>Total Price</th>
+                    <th>Total Paid</th>
+                    <th>Balance</th>
+                    <th>Days Outstanding</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for item in outstanding_data %}
+                <tr>
+                    <td>#{{ item.request.id }}</td>
+                    <td>{{ item.request.user.get_full_name|default:item.request.user.username }}</td>
+                    <td>{{ item.request.date_created|date:"Y-m-d" }}</td>
+                    <td>₦{{ item.total_price|floatformat:2|intcomma }}</td>
+                    <td>₦{{ item.total_paid|floatformat:2|intcomma }}</td>
+                    <td>₦{{ item.balance|floatformat:2|intcomma }}</td>
+                    <td>{{ item.days_outstanding }}</td>
+                </tr>
+                {% empty %}
+                <tr>
+                    <td colspan="7" class="text-center text-muted">No outstanding balances found.</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endblock %}

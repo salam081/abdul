@@ -1,118 +1,598 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<!-- Recent Sales Start -->
-<div class="container-fluid pt-4 px-4">
-    <div class="bg-light text-center rounded p-4">
-        <div class="d-flex align-items-center justify-content-between mb-4">
-            <h6 class="mb-0">Recent Sales</h6>
-            <a href="">Show All</a>
+
+<style>
+    :root {
+        --primary-gradient: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        --success-gradient: linear-gradient(135deg, #11998e 0%, #38ef7d 100%);
+        --danger-gradient: linear-gradient(135deg, #ff6b6b 0%, #ee5a24 100%);
+        --warning-gradient: linear-gradient(135deg, #feca57 0%, #ff9ff3 100%);
+        --info-gradient: linear-gradient(135deg, #54a0ff 0%, #2e86de 100%);
+        --card-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .page-container {
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        min-height: 100vh;
+        padding: 2rem 0;
+    }
+
+    .page-header {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2.5rem 0;
+        border-radius: 20px;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+        text-align: center;
+    }
+
+    .page-subtitle {
+        text-align: center;
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .stats-section {
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 2rem;
+        box-shadow: var(--card-shadow);
+        transition: all 0.3s ease;
+        border: none;
+        height: 90%;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .stat-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        margin-bottom: 1rem;
+        color: white;
+    }
+
+    .stat-icon.total { background: var(--primary-gradient); }
+    .stat-icon.active { background: var(--success-gradient); }
+    .stat-icon.inactive { background: var(--danger-gradient); }
+    .stat-icon.savings { background: var(--info-gradient); }
+
+    .stat-value {
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    .main-card {
+        background: white;
+        border-radius: 20px;
+        box-shadow: var(--card-shadow);
+        border: none;
+        overflow: hidden;
+    }
+
+    .card-header-custom {
+        background: var(--primary-gradient);
+        color: white;
+        padding: 2rem;
+        border: none;
+        display: flex;
+        justify-content: between;
+        align-items: center;
+    }
+
+    .card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin: 0;
+    }
+
+    .show-all-link {
+        color: rgba(255, 255, 255, 0.9);
+        text-decoration: none;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        border: 2px solid rgba(255, 255, 255, 0.3);
+    }
+
+    .show-all-link:hover {
+        color: white;
+        background: rgba(255, 255, 255, 0.1);
+        border-color: rgba(255, 255, 255, 0.5);
+    }
+
+    .bulk-actions {
+        background: #f8f9fa;
+        padding: 1.5rem;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    .bulk-actions h6 {
+        color: #495057;
+        font-weight: 600;
+        margin-bottom: 1rem;
+    }
+
+    .table-container {
+        padding: 0;
+    }
+
+    .table-modern {
+        margin-bottom: 0;
+        font-size: 0.95rem;
+    }
+
+    .table-modern thead th {
+        background: var(--primary-gradient);
+        color: white;
+        border: none;
+        padding: 1.2rem 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.85rem;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
+    }
+
+    .table-modern td {
+        /* padding: 1rem; */
+        /* vertical-align: middle; */
+        border: none;
+    }
+
+    .checkbox-custom {
+        width: 18px;
+        height: 18px;
+        accent-color: #667eea;
+        cursor: pointer;
+    }
+
+    .serial-number {
+        background: var(--primary-gradient);
+        color: white;
+        width: 32px;
+        height: 22px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .user-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .user-code {
+        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
+        color: #d63031;
+        padding: 0.3rem 0.8rem;
+        border-radius: 15px;
+        font-weight: 600;
+        font-size: 0.85rem;
+    }
+
+    .savings-amount {
+        font-weight: 700;
+        color: #00b894;
+        font-size: 1.1rem;
+    }
+
+    .btn-modern {
+        /* padding: 0.2rem 1rem; */
+        border-radius: 10px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0.2rem;
+    }
+
+    .btn-detail {
+        background: var(--info-gradient);
+        color: white;
+    }
+
+    .btn-detail:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(84, 160, 255, 0.3);
+        color: white;
+    }
+
+    .btn-reset {
+        background: var(--warning-gradient);
+        color: white;
+    }
+
+    .btn-reset:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(254, 202, 87, 0.3);
+        color: white;
+    }
+
+    .btn-activate {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .btn-activate:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(17, 153, 142, 0.3);
+        color: white;
+    }
+
+    .badge-active {
+        background: var(--success-gradient);
+        color: white;
+        padding: 0.1rem 1rem;
+        border-radius: 20px;
+        font-weight: 300;
+        font-size: 0.8rem;
+    }
+
+    .no-member {
+        color: #e74c3c;
+        font-weight: 600;
+        font-style: italic;
+    }
+
+    .bulk-btn {
+        padding: 0.8rem 2rem;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        border: none;
+        margin: 0.5rem;
+    }
+
+    .bulk-btn-danger {
+        background: var(--danger-gradient);
+        color: white;
+    }
+
+    .bulk-btn-danger:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.3);
+        color: white;
+    }
+
+    .bulk-btn-success {
+        background: var(--success-gradient);
+        color: white;
+    }
+
+    .bulk-btn-success:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(17, 153, 142, 0.3);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+        
+        .table-responsive {
+            font-size: 0.85rem;
+        }
+        
+        .btn-modern {
+            padding: 0.4rem 0.8rem;
+            font-size: 0.8rem;
+        }
+    }
+</style>
+
+<div class="page-container">
+    <div class="container-fluid px-4">
+        <!-- Page Header -->
+        <div class="page-header">
+            <h1 class="page-title">👥 User Management</h1>
+            <p class="page-subtitle">Manage members and control user access</p>
         </div>
 
-        <!-- Deactivation Form -->
-        <form method="post" action="{% url 'deactivate_users' %}">
-            {% csrf_token %}
-            <div class="table-responsive">
-                <table class="table text-start align-middle table-bordered table-hover mb-0">
-                    <thead class="table-primary">
-                        <tr class="text-dark">
-                            <th><input class="form-check-input" type="checkbox" id="select-all"></th>
-                            <th>S/N</th>
-                            <th>FullName</th>
-                            <th>UserName</th>
-                            <th>Department</th>
-                            <th>UserCode</th>
-                            <th>Savings</th>
-                            <th colspan="3">Action</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for m in members %}
-                        <tr>
-                            <td><input class="form-check-input user-checkbox" type="checkbox" name="user_ids" value="{{ m.id }}"></td>
-                            <td>{{ forloop.counter }}</td>
-                            <td>{{ m.first_name }} {{ m.last_name }}</td>
-                            <td>{{ m.username }}</td>
-                            <td>{{ m.department }}</td>
-                            <td>{{ m.member.ippis }}</td>
-                            <td>{{ m.member.total_savings }}</td>
-                            {% if m.member %}
-                                <td><a class="btn btn-sm btn-primary" href="{% url 'member_detail' m.member.id %}">Detail</a></td>
-                                <td><a class="btn btn-sm btn-secondary" href="{% url 'reset_password' m.member.id %}">Password Reset</a></td>
+        <!-- Statistics Cards -->
+        <div class="row stats-section">
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon total">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">{{ members|length }}</div>
+                    <div class="stat-label">Total Members</div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon active">
+                        <i class="fas fa-user-check"></i>
+                    </div>
+                    <div class="stat-value">{{ active_count|default:"0" }}</div>
+                    <div class="stat-label">Active Users</div>
+                </div>
+            </div>
+            <div class="col-lg-4 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon inactive">
+                        <i class="fas fa-user-times"></i>
+                    </div>
+                    <div class="stat-value">{{ inactive_count|default:"0" }}</div>
+                    <div class="stat-label">Inactive Users</div>
+                </div>
+            </div>
+            <!-- <div class="col-lg-3 col-md-6 mb-4">
+                <div class="stat-card">
+                    <div class="stat-icon savings">
+                        <i class="fas fa-piggy-bank"></i>
+                    </div>
+                    <div class="stat-value">₦{{ total_savings|default:"0"|floatformat:0 }}</div>
+                    <div class="stat-label">Total Savings</div>
+                </div>
+            </div> -->
+        </div>
+
+        <!-- Main Content Card -->
+        <div class="card main-card">
+            <div class="card-header-custom d-flex justify-content-between align-items-center">
+                <h3 class="card-title">📊 Member Management</h3>
+                <a href="#" class="show-all-link">
+                    <i class="fas fa-external-link-alt"></i> Show All
+                </a>
+            </div>
+
+            <!-- Bulk Actions -->
+            <div class="bulk-actions">
+                <h6><i class="fas fa-cogs"></i> Bulk Actions</h6>
+                <div class="d-flex flex-wrap align-items-center">
+                    <div class="form-check me-4">
+                        <input class="form-check-input checkbox-custom" type="checkbox" id="select-all">
+                        <label class="form-check-label fw-bold" for="select-all">
+                            Select All
+                        </label>
+                    </div>
+                    <div class="bulk-actions-buttons">
+                        <button type="button" class="bulk-btn bulk-btn-danger" onclick="submitBulkAction('deactivate')">
+                            <i class="fas fa-user-slash"></i> Deactivate Selected
+                        </button>
+                        <button type="button" class="bulk-btn bulk-btn-success" onclick="submitBulkAction('activate')">
+                            <i class="fas fa-user-check"></i> Activate Selected
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Table -->
+            <div class="table-container">
+                <div class="table-responsive">
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th width="70">
+                                    <i class="fas fa-check-square"></i>
+                                </th>
+                                <th width="60">S/N</th>
+                                <th>Full Name</th>
+                                <th>Username</th>
+                                <th>Department</th>
+                                <th>User Code</th>
+                                <!-- <th>Savings</th> -->
+                                <th colspan="3">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for m in members %}
+                            <tr>
                                 <td>
-                                    {% if not m.is_active %}
-                                        <form method="post" action="{% url 'activate_users' %}" style="display:inline;">
-                                            {% csrf_token %}
-                                            <input type="hidden" name="user_ids" value="{{ m.id }}">
-                                            <button type="submit" class="btn btn-sm btn-success">Activate</button>
-                                        </form>
+                                    <input class="form-check-input checkbox-custom user-checkbox" type="checkbox" value="{{ m.id }}">
+                                </td>
+                                <td>
+                                    <div class="serial-number">{{ forloop.counter }}</div>
+                                </td>
+                                <td >{{ m.first_name }} {{ m.last_name }}</td>
+                                <td>{{ m.username }}</td>
+                                <td>{{ m.department|default:"Not Set" }}</td>
+                                <td>
+                                    {% if m.member.ippis %}
+                                        <span class="user-code">{{ m.member.ippis }}</span>
                                     {% else %}
-                                        <span class="badge bg-success">Active</span>
+                                        <span class="text-muted">--</span>
                                     {% endif %}
                                 </td>
-                            {% else %}
-                                <td colspan="3"><span class="text-danger">No member record</span></td>
-                            {% endif %}
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
+                                <!-- <td class="savings-amount">₦{{ m.member.total_savings|default:"0"|floatformat:2 }}</td> -->
+                                {% if m.member %}
+                                    <td>
+                                        <a class="btn btn-primary" href="{% url 'member_detail' m.member.id %}">
+                                            <i class="fas fa-eye"></i> 
+                                        </a>
+                                    </td>
+                                    <td>
+                                        <a class="btn btn-modern btn-reset" href="{% url 'reset_password' m.member.id %}">
+                                            <i class="fas fa-key"></i> 
+                                        </a>
+                                    </td>
+                                    <td>
+                                        {% if not m.is_active %}
+                                            <form method="post" action="{% url 'activate_users' %}" style="display:inline;">
+                                                {% csrf_token %}
+                                                <input type="hidden" name="user_ids" value="{{ m.id }}">
+                                                <div class="d-flex">
+
+                                                    <button type="submit" class="btn btn-modern btn-activate">
+                                                        <i class="fas fa-user-check"></i>
+                                                    </button>
+                                                </div>
+                                            </form>
+                                        {% else %}
+                                            <span class="badge-active">
+                                                <i class="fas fa-check-circle"></i>
+                                            </span>
+                                        {% endif %}
+                                    </td>
+                                {% else %}
+                                    <td colspan="3">
+                                        <span class="no-member">
+                                            <i class="fas fa-exclamation-triangle"></i> No member record
+                                        </span>
+                                    </td>
+                                {% endif %}
+                            </tr>
+                            {% empty %}
+                            <tr>
+                                <td colspan="10">
+                                    <div class="empty-state">
+                                        <div class="empty-icon">👥</div>
+                                        <h4>No Members Found</h4>
+                                        <p>No members are currently registered in the system.</p>
+                                    </div>
+                                </td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
             </div>
-            <button type="submit" class="btn btn-danger mt-3">Deactivate Selected Users</button>
-        </form>
-
-       
-       <!-- Bulk Activation Form -->
-<form method="post" action="{% url 'activate_users' %}" id="bulk-activate-form" class="mt-3">
-    {% csrf_token %}
-    <!-- We will dynamically add <input name="user_ids" value="..."> for each selected user -->
-    <div id="activate-user-inputs"></div>
-    <button type="submit" class="btn btn-success">Activate Selected Users</button>
-</form>
-
-
-      <script>
-    document.addEventListener('DOMContentLoaded', function () {
-        const selectAllCheckbox = document.getElementById('select-all');
-        const userCheckboxes = document.querySelectorAll('.user-checkbox');
-
-        selectAllCheckbox.addEventListener('change', function () {
-            userCheckboxes.forEach(cb => cb.checked = this.checked);
-        });
-
-        userCheckboxes.forEach(cb => {
-            cb.addEventListener('change', () => {
-                selectAllCheckbox.checked = [...userCheckboxes].every(c => c.checked);
-            });
-        });
-
-        // Handle bulk activation form
-        const activateForm = document.getElementById('bulk-activate-form');
-        const inputContainer = document.getElementById('activate-user-inputs');
-
-        activateForm.addEventListener('submit', function (e) {
-            inputContainer.innerHTML = '';  // Clear previous inputs
-
-            const selectedCheckboxes = [...userCheckboxes].filter(cb => cb.checked);
-
-            if (selectedCheckboxes.length === 0) {
-                e.preventDefault();
-                alert("No users selected for activation.");
-                return;
-            }
-
-            selectedCheckboxes.forEach(cb => {
-                const hiddenInput = document.createElement('input');
-                hiddenInput.type = 'hidden';
-                hiddenInput.name = 'user_ids';
-                hiddenInput.value = cb.value;
-                inputContainer.appendChild(hiddenInput);
-            });
-        });
-    });
-</script>
-
+        </div>
     </div>
 </div>
-<!-- Recent Sales End -->
+
+<!-- Hidden Forms for Bulk Actions -->
+<form method="post" action="{% url 'deactivate_users' %}" id="bulk-deactivate-form" style="display: none;">
+    {% csrf_token %}
+    <div id="deactivate-user-inputs"></div>
+</form>
+
+<form method="post" action="{% url 'activate_users' %}" id="bulk-activate-form" style="display: none;">
+    {% csrf_token %}
+    <div id="activate-user-inputs"></div>
+</form>
+
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const selectAllCheckbox = document.getElementById('select-all');
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+
+    // Select All functionality
+    selectAllCheckbox.addEventListener('change', function () {
+        userCheckboxes.forEach(cb => cb.checked = this.checked);
+    });
+
+    // Individual checkbox change handler
+    userCheckboxes.forEach(cb => {
+        cb.addEventListener('change', () => {
+            selectAllCheckbox.checked = [...userCheckboxes].every(c => c.checked);
+        });
+    });
+
+    // Update statistics (if needed)
+    updateStats();
+});
+
+function submitBulkAction(action) {
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    const selectedCheckboxes = [...userCheckboxes].filter(cb => cb.checked);
+
+    if (selectedCheckboxes.length === 0) {
+        alert(`Please select at least one user to ${action}.`);
+        return;
+    }
+
+    const confirmMessage = `Are you sure you want to ${action} ${selectedCheckboxes.length} user(s)?`;
+    if (!confirm(confirmMessage)) {
+        return;
+    }
+
+    const formId = action === 'activate' ? 'bulk-activate-form' : 'bulk-deactivate-form';
+    const inputContainerId = action === 'activate' ? 'activate-user-inputs' : 'deactivate-user-inputs';
+    
+    const form = document.getElementById(formId);
+    const inputContainer = document.getElementById(inputContainerId);
+    
+    // Clear previous inputs
+    inputContainer.innerHTML = '';
+    
+    // Add selected user IDs
+    selectedCheckboxes.forEach(cb => {
+        const hiddenInput = document.createElement('input');
+        hiddenInput.type = 'hidden';
+        hiddenInput.name = 'user_ids';
+        hiddenInput.value = cb.value;
+        inputContainer.appendChild(hiddenInput);
+    });
+    
+    // Submit form
+    form.submit();
+}
+
+function updateStats() {
+    const userCheckboxes = document.querySelectorAll('.user-checkbox');
+    const totalUsers = userCheckboxes.length;
+    
+    // You can add more dynamic stat updates here if needed
+    console.log(`Total users: ${totalUsers}`);
+}
+</script>
+
 {% endblock content %}

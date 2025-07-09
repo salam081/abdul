@@ -6,7 +6,7 @@ urlpatterns = [
     
     path('consumable_items/', views.consumable_items, name='consumable_items'),
     path('delete_item/<id>/', views.delete_item, name='delete_item'),
-    path('requests5/', views.consumable_requests_list, name='consumable_requests_list'),
+    path('requests/', views.consumable_requests_list, name='consumable_requests_list'),
     path('requests/<int:request_id>/approve/', views.approve_consumable_request, name='approve_consumable_request'),
     path('requests/<int:request_id>/decline/', views.decline_consumable_request, name='decline_consumable_request'),
     path('upload_consumable_payment/', views.upload_consumable_payment, name='upload_consumable_payment'),

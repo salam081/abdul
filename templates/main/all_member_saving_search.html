@@ -3,93 +3,484 @@
 
 {% block content %}
 
-<div class="container-fluid  px-4">
-    
-    <form method="GET" action="{% url 'all_member_saving_search' %}" class="mt-2 mb-3">
-        <div class="row g-3">
-            <div class="col-md-4 col-sm-6">
-                <label for="datefrom">Date From</label>
-                <input class="form-control" type="date" name="datefrom">
-            </div>
-            <div class="col-md-4 col-sm-6">
-                <label for="dateto">Date To</label>
-                <input class="form-control" type="date" name="dateto">
-            </div>    
+<style>
+    .page-header {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        /* padding: 1rem 0; */
+        margin-bottom: 2rem;
+        border-radius: 10px;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 300;
+        margin-bottom: 0.5rem;
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+    }
+
+    .search-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: none;
+        margin-bottom: 2rem;
+    }
+
+    .search-card .card-header {
+        /* background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); */
+        color: white;
+        border-radius: 15px 15px 0 0;
+        /* padding: 1.5rem; */
+        border: none;
+    }
+
+    .search-card .card-body {
+        padding: 1rem;
+    }
+
+    .form-floating {
+        margin-bottom: 1rem;
+    }
+
+    .form-floating>.form-control {
+        border-radius: 10px;
+        border: 2px solid #e9ecef;
+        transition: all 0.3s ease;
+    }
+
+    .form-floating>.form-control:focus {
+        border-color: #667eea;
+        box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+    }
+
+    .form-floating>label {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .btn-search {
+        /* background: linear-gradient(135deg, #d254db 0%, #a3c03c 100%); */
+        border: none;
+        padding: 10px 20px;
+        border-radius: 25px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .btn-search:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    }
+
+    .data-card {
+        background: white;
+        border-radius: 15px;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        border: none;
+        overflow: hidden;
+    }
+
+    .data-card .card-header {
+        /* background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); */
+        color: white;
+        border: none;
+        padding: 1.2rem;
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    .table-modern {
+        margin-bottom: 0;
+    }
+
+    .table-modern thead th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        padding: 1rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    .table-modern tbody tr {
+        transition: all 0.3s ease;
+        border-bottom: 1px solid #f8f9fa;
+    }
+
+    .table-modern tbody tr:hover {
+        background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
+        transform: translateY(-1px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+
+    .table-modern td {
+        padding: 1rem;
+        vertical-align: middle;
+        border: none;
+        font-size: 0.95rem;
+    }
+
+    .serial-number {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-weight: 600;
+        font-size: 0.9rem;
+    }
+
+    .member-name {
+        font-weight: 600;
+        color: #2c3e50;
+    }
+
+    .month-badge {
+        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
+        color: #d35400;
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-weight: 600;
+        font-size: 0.85rem;
+        display: inline-block;
+    }
+
+    .amount-cell {
+        font-weight: 600;
+        color: #27ae60;
+        font-size: 1.1rem;
+    }
+
+    .amount-deduction {
+        color: #e74c3c;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 4rem 2rem;
+        color: #6c757d;
+    }
+
+    .empty-state .empty-icon {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .empty-state h4 {
+        color: #495057;
+        margin-bottom: 1rem;
+    }
+
+    .empty-state p {
+        font-size: 1.1rem;
+        opacity: 0.8;
+    }
+
+    .pagination-wrapper {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        margin-top: 2rem;
+    }
+
+    .pagination-info {
+        color: #6c757d;
+        font-weight: 500;
+    }
+
+    .pagination .page-link {
+        border: none;
+        padding: 0.75rem 1rem;
+        margin: 0 0.2rem;
+        border-radius: 10px;
+        color: #667eea;
+        font-weight: 500;
+        transition: all 0.3s ease;
+    }
+
+    .pagination .page-link:hover {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .pagination .page-item.active .page-link {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border: none;
+        color: white;
+        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+    }
+
+    .stats-cards {
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.3rem;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        border: none;
+        transition: all 0.3s ease;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-icon {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.3rem;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon.total {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+    }
+
+    .stat-icon.savings {
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
+        color: white;
+    }
+
+    .stat-icon.deductions {
+        background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+        color: white;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #2c3e50;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-label {
+        color: #6c757d;
+        font-weight: 500;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9rem;
+    }
+
+    @media (max-width: 768px) {
+        .page-title {
+            font-size: 2rem;
+        }
+
+        .table-responsive {
+            font-size: 0.9rem;
+        }
+
+        .stat-card {
+            margin-bottom: 1rem;
+        }
+    }
+</style>
+
+<div class="container-fluid px-4">
+    <!-- Page Header -->
+    <div class="page-header text-center">
+        <h5 class="page-title">💰 Member Savings Report</h5>
+        <p class="page-subtitle">💰Track and manage member savings and deductions</p>
+    </div>
+
+    <!-- Search Form -->
+    <div class="card search-card">
+        <div class="card-header">
+            <h5 class="mb-0">🔍 Search & Filter</h5>
         </div>
-        <button type="submit" class="btn btn-success mt-2 justify-content-center">Search</button>
-    </form>
-    
-    {% if member %}
-        
-    
-    <div class="card sherdow">
         <div class="card-body">
+            <form method="GET" action="{% url 'all_member_saving_search' %}">
+                <div class="row g-3">
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input class="form-control" type="date" name="datefrom" id="datefrom"
+                                value="{{ datefrom }}">
+                            <label for="datefrom">📅 Date From</label>
+                        </div>
+                    </div>
+                    <div class="col-md-4">
+                        <div class="form-floating">
+                            <input class="form-control" type="date" name="dateto" id="dateto" value="{{ dateto }}">
+                            <label for="dateto">📅 Date To</label>
+                        </div>
+                    </div>
+                    <div class="col-md-2">
+                        <button type="submit" class="btn btn-search w-100 h-100">
+                            <i class="fas fa-search"></i> Search
+                        </button>
+                        
+                    </div>
+                    <div class="col-md-2">
+                            <a  href="{% url 'all_member_saving_search' %}" class="btn btn-search w-100 h-100 bg-white text-danger p-3">Clear Filters</a>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    {% if member %}
+    <!-- Statistics Cards -->
+    <div class="row stats-cards">
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon total">
+                    <i class="fas fa-users"></i>
+                </div>
+                <div class="stat-value">{{ member.paginator.count }}</div>
+                <div class="stat-label">Total Records</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon savings">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+                <div class="stat-value">₦{{ grand_total|default:"0"|floatformat:2 }}</div>
+                <div class="stat-label">Total Savings</div>
+            </div>
+        </div>
+        <div class="col-md-4">
+            <div class="stat-card">
+                <div class="stat-icon deductions">
+                    <i class="fas fa-minus-circle"></i>
+                </div>
+                <div class="stat-value">₦{{ total_deductions|default:"0"|floatformat:2 }}</div>
+                <div class="stat-label">Total Deductions</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Data Table -->
+    <div class="card data-card">
+        <div class="card-header">
+            <h5 class="mb-0">📊 Member Savings Data</h5>
+        </div>
+        <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table  align-middle table-bordered table-hover">
-                    <thead class="table-primary">
-                <thead>
-                    <th>S\N</th>
-                    <th>Member</th>
-                    <th>Month</th>
-                    <th class="text-nowrap" style="min-width: 120px;">monthly Deduction </th>
-                    <th class="text-nowrap" style="min-width: 120px;">Monthly Savings</th>
-                </thead>
-                <tbody>
-                    
-                    {% for m in member %}
-                    <tr>
-                        <td>{{forloop.counter}}</td>
-                        <td class="text-nowrap" style="min-width: 120px;">{{m.member}}</td>
-                        <td class="text-nowrap" style="min-width: 120px;">{{m.month}}</td>
-                        <td>₦{{m.original_amount}}</td>
-                        <td>₦{{m.month_saving}}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-            
-            
+                <table class="table table-modern">
+                    <thead>
+                        <tr>
+                            <th width="80">S/N</th>
+                            <th>Member</th>
+                            <th>Monthly Deduction</th>
+                            <th>Monthly Savings</th>
+                            <th>Month</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for m in member %}
+                        <tr>
+                            <td>
+                                <div class="serial-number">{{ forloop.counter }}</div>
+                            </td>
+                            <td class="member-name">{{ m.member }}</td>
+                            <td class="amount-cell amount-deduction">₦{{ m.original_amount|floatformat:2 }}</td>
+                            <td class="amount-cell">₦{{ m.month_saving|floatformat:2 }}</td>
+                            <td><span class="month-badge text-nowrap" style="min-width: 120px;">{{ m.month }}</span></td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+
+                    <tfoot class="table-light">
+                        <tr>
+                            <td colspan="3" class="fw-bold text-end">Page Total:</td>
+                            <td class="fw-bold text-primary" colspan="2">₦{{ page_total|floatformat:2 }}</td>
+                        </tr>
+                        {% if member.number == member.paginator.num_pages %}
+                        <tr>
+                            <td colspan="3" class="fw-bold text-end">Grand Total (All Pages):</td>
+                            <td class="fw-bold text-success fs-5" colspan="2">₦{{ grand_total|floatformat:2 }}</td>
+                        </tr>
+                        {% endif %}
+                    </tfoot>
+
+                </table>
+            </div>
+
         </div>
     </div>
-    </div>
-    <div class="d-flex justify-content-between align-items-center mt-3">
-        <div>
-            Showing page {{ member.number }} of {{ member.paginator.num_pages }}
-        </div>
-    
-        <nav>
-            <ul class="pagination justify-content-end">
-                {% if member.has_previous %}
+
+    <!-- Pagination -->
+    <div class="pagination-wrapper">
+        <div class="d-flex justify-content-between align-items-center">
+            <div class="pagination-info">
+    <span> page <strong>{{ member.number }}</strong> of <strong>{{ member.paginator.num_pages }}</strong></span>
+                <span class="text-muted">• Total {{ member.paginator.count }} records</span>
+            </div>
+
+            <nav>
+                <ul class="pagination mb-0">
+                    {% if member.has_previous %}
                     <li class="page-item">
-                        <a class="page-link" href="?page={{ member.previous_page_number }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">Previous</a>
+                        <a class="page-link"
+                            href="?page={{ member.previous_page_number }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">
+                            <i class="fas fa-chevron-left"></i> Previous
+                        </a>
                     </li>
-                {% endif %}
-    
-                {% for num in member.paginator.page_range %}
-                    {% if member.number == num %}
-                        <li class="page-item active"><span class="page-link">{{ num }}</span></li>
-                    {% elif num >= member.number|add:'-2' and num <= member.number|add:'2' %}
-                        <li class="page-item">
-                            <a class="page-link" href="?page={{ num }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">{{ num }}</a>
-                        </li>
                     {% endif %}
-                {% endfor %}
-    
-                {% if member.has_next %}
-                    <li class="page-item">
-                        <a class="page-link" href="?page={{ member.next_page_number }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">Next</a>
+
+                    {% for num in member.paginator.page_range %}
+                    {% if member.number == num %}
+                    <li class="page-item active">
+                        <span class="page-link">{{ num }}</span>
                     </li>
-                {% endif %}
-            </ul>
-        </nav>
+                    {% elif num >= member.number|add:'-2' and num <= member.number|add:'2' %} <li class="page-item">
+        <a class="page-link" href="?page={{ num }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">{{num }}</a>
+                        </li>
+                        {% endif %}
+                        {% endfor %}
+
+                        {% if member.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?page={{ member.next_page_number }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">
+                                Next <i class="fas fa-chevron-right"></i>
+                            </a>
+                        </li>
+                        {% endif %}
+                </ul>
+            </nav>
+        </div>
     </div>
-    
-</div>
 
     {% else %}
-    <p colspan="6" class="text-center">No requests found for the selected criteria.</p>
+    <!-- Empty State -->
+    <div class="card data-card">
+        <div class="card-body">
+            <div class="empty-state">
+                <div class="empty-icon">📊</div>
+                <h4>No Data Found</h4>
+                <p>No member savings records found for the selected criteria.</p>
+                <p class="text-muted">Try adjusting your search parameters or check back later.</p>
+            </div>
+        </div>
+    </div>
     {% endif %}
-   
-
 </div>
-    {% endblock content %}
+
+{% endblock content %}

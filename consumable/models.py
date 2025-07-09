@@ -26,6 +26,8 @@ class ConsumableRequest(models.Model):
     date_created = models.DateTimeField(auto_now_add=True)
     status = models.CharField(max_length=10, choices=STATUS_CHOICES, default='Pending')
     approved_by = models.ForeignKey(User, on_delete=models.SET_NULL, null=True, blank=True, related_name='approved_consumables')
+    file_payslpt = models.ImageField(upload_to='file_payslpt', blank=True, null=True)
+
     
     def __str__(self):
         return f"Request #{self.id} by {self.user.username}"

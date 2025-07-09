@@ -1,0 +1,100 @@
+{% extends 'base/base.html' %}
+{% load static %}
+{% block title %}Approval Workflow Report{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <h3 class="text-center text-primary mb-4">Approval Workflow Report</h3>
+
+    <!-- Filters -->
+    <form method="get" class="row g-3 mb-4">
+        <div class="col-md-3">
+            <label for="date_from" class="form-label">Date From</label>
+            <input type="date" name="date_from" id="date_from" class="form-control" value="{{ filters.date_from }}">
+        </div>
+        <div class="col-md-3">
+            <label for="date_to" class="form-label">Date To</label>
+            <input type="date" name="date_to" id="date_to" class="form-control" value="{{ filters.date_to }}">
+        </div>
+        <div class="col-md-2 d-flex align-items-end">
+            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        </div>
+    </form>
+
+    <!-- Summary Statistics -->
+    <div class="row text-center mb-4">
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Total Requests</h6>
+                <p class="fw-bold text-dark">{{ approval_stats.total_requests }}</p>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Pending</h6>
+                <p class="fw-bold text-warning">{{ approval_stats.pending_requests }}</p>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Approved</h6>
+                <p class="fw-bold text-success">{{ approval_stats.approved_requests }}</p>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Declined</h6>
+                <p class="fw-bold text-danger">{{ approval_stats.declined_requests }}</p>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Paid</h6>
+                <p class="fw-bold text-primary">{{ approval_stats.paid_requests }}</p>
+            </div>
+        </div>
+        <div class="col-md-2">
+            <div class="card p-2 shadow-sm">
+                <h6>Approval Rate</h6>
+                <p class="fw-bold text-info">{{ approval_stats.approval_rate|floatformat:2 }}%</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Average Approval Time -->
+    <div class="alert alert-secondary text-center fw-semibold">
+        Average Approval Time: {{ avg_approval_time|floatformat:1 }} days
+    </div>
+
+    <!-- Approver Statistics Table -->
+    <div class="card shadow">
+        <div class="card-header bg-light">
+            <h5 class="mb-0">Approver Statistics</h5>
+        </div>
+        <div class="card-body p-0">
+            <table class="table table-bordered table-striped m-0">
+                <thead class="table-light">
+                    <tr>
+                        <th>Approver</th>
+                        <th>Total Approved</th>
+                        <th>Total Approved Value (₦)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for approver in approver_stats %}
+                    <tr>
+                        <td>{{ approver.approved_by__username }}</td>
+                        <td>{{ approver.total_approved }}</td>
+                        <td>₦{{ approver.total_value_approved|default:0|floatformat:2 }}</td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="3" class="text-center">No approvals found for the selected period.</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -49,10 +49,11 @@ INSTALLED_APPS = [
     'memberapp',
     # 'memberconsumable',
     'loan',
-    # 'memberwidower ',
+   
     'financialsummary',
     "django_countries",
     'memberwidower',
+    'report'
 
 ]
 

@@ -13,6 +13,7 @@ from decimal import Decimal
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.core.files.base import ContentFile
+from django.utils.timezone import now  
 import os
 from .models import *
 from loan.models import *
@@ -22,11 +23,7 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 
     
-def delete_item(request,id):
-    itemObj = get_object_or_404(Item, id=id)
-    itemObj.delete()
-    messages.success(request, 'Consumable item Deleted successfully')
-    return redirect('consumable_items')
+
 
 def consumable_items(request):
     consumables = Item.objects.all()
@@ -61,9 +58,7 @@ def consumable_items(request):
             item.save()
             messages.success(request, 'Consumable item Created successfully')
             return redirect('consumable_items')
-            # messages.error(request, 'Item ID not provided.')
-            # return redirect('consumable_items')
-    
+           
     context = {'consumables': consumables}
     return render(request, "consumables/consumable_items.html", context)
 
@@ -128,7 +123,11 @@ def consumable_requests_list(request):
     }
     return render(request, 'consumables/request_list.html', context)
 
-
+def delete_item(request,id):
+    itemObj = get_object_or_404(Item, id=id)
+    itemObj.delete()
+    messages.success(request, 'Consumable item Deleted successfully')
+    return redirect('consumable_items')
 
 @staff_member_required
 def admin_edit_consumable_request(request, request_id):
@@ -169,7 +168,6 @@ def admin_edit_consumable_request(request, request_id):
     return render(request, 'consumables/admin_edit_request.html', { 'items': items, 'details': details,'request_obj': consumable_request})
 
 
-
 def approve_consumable_request(request, request_id):
     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
 
@@ -177,9 +175,10 @@ def approve_consumable_request(request, request_id):
         messages.warning(request, 'This request is already processed.')
     else:
         consumable_request.status = 'Approved'
+        consumable_request.approved_by = request.user
         consumable_request.save()
 
-        # Carry forward previous balance
+        # Calculate balance
         previous = ConsumableRequest.objects.filter(
             user=consumable_request.user, 
             status='Approved'
@@ -194,15 +193,56 @@ def approve_consumable_request(request, request_id):
         new_total = consumable_request.calculate_total_price()
         final_total = new_total + previous_balance
 
-        PaybackConsumable.objects.create(
-            consumable_request=consumable_request,
-            amount_paid=0,
-            repayment_date=date.today(), 
-            balance_remaining=final_total
-        )
+        # If you're collecting a payment now, get it from form/input. Example:
+        amount_paid = float(request.POST.get('amount_paid', 0))
 
-        messages.success(request, 'The request has been approved and previous balance carried forward.')
+        # ✅ Only create if user paid something now
+        if amount_paid > 0:
+            PaybackConsumable.objects.create(
+                consumable_request=consumable_request,
+                amount_paid=amount_paid,
+                repayment_date=date.today(),
+                balance_remaining=final_total - amount_paid
+            )
+
+        messages.success(request, 'The request has been approved.')
     return redirect('consumable_requests_list')
+
+
+
+# def approve_consumable_request(request, request_id):
+#     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
+
+#     if consumable_request.status != 'Pending':
+#         messages.warning(request, 'This request is already processed.')
+#     else:
+#         consumable_request.status = 'Approved'
+#         consumable_request.save()
+
+#         # Carry forward previous balance
+#         previous = ConsumableRequest.objects.filter(
+#             user=consumable_request.user, 
+#             status='Approved'
+#         ).exclude(id=consumable_request.id).order_by('-date_created').first()
+
+#         previous_balance = 0
+#         if previous:
+#             previous_total = previous.calculate_total_price()
+#             previous_paid = previous.total_paid()
+#             previous_balance = previous_total - previous_paid
+
+#         new_total = consumable_request.calculate_total_price()
+#         final_total = new_total + previous_balance
+
+#         PaybackConsumable.objects.create(
+#             consumable_request=consumable_request,
+#             amount_paid=0,
+#             repayment_date=date.today(), 
+#             balance_remaining=final_total
+#         )
+
+#         messages.success(request, 'The request has been approved and previous balance carried forward.')
+#     return redirect('consumable_requests_list')
 
 
 def decline_consumable_request(request, request_id):

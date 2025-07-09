@@ -1,14 +1,165 @@
 {% extends "base/base.html" %}
 {% block content %}
+<style>
+     
+    /* Stats Cards */
+    .stats-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .stat-card {
+        background: rgba(255, 255, 255, 0.95);
+        backdrop-filter: blur(10px);
+        border-radius: 20px;
+        padding: 2rem;
+        box-shadow: 0 8px 32px rgba(0, 0, 0, 0.1);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        position: relative;
+        overflow: hidden;
+        transition: transform 0.3s ease, box-shadow 0.3s ease;
+        height: 150px;
+    }
+
+    .stat-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 40px rgba(0, 0, 0, 0.15);
+    }
+
+    .stat-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: linear-gradient(90deg, #4CAF50, #45a049);
+    }
+
+    .stat-card.loan::before {
+        background: linear-gradient(90deg, #FF6B6B, #ee5a52);
+    }
+
+    .stat-card.investment::before {
+        background: linear-gradient(90deg, #4ECDC4, #44a08d);
+    }
+
+    .stat-card.consumable::before {
+        background: linear-gradient(90deg, #45B7D1, #3498db);
+    }
+
+    .stat-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
+        margin-bottom: 1rem;
+    }
+
+    .stat-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 1.5rem;
+        color: white;
+    }
+
+    .stat-icon.savings {
+        background: linear-gradient(135deg, #4CAF50, #45a049);
+    }
+
+    .stat-icon.loan {
+        background: linear-gradient(135deg, #FF6B6B, #ee5a52);
+    }
+
+    .stat-icon.investment {
+        background: linear-gradient(135deg, #4ECDC4, #44a08d);
+    }
+
+    .stat-icon.consumable {
+        background: linear-gradient(135deg, #45B7D1, #3498db);  
+    }
+
+    .stat-info h3 {
+        color: #666;
+        font-size: 0.9rem;
+        font-weight: 500;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-value {
+        font-size: 2rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+
+    .stat-change {
+        font-size: 0.8rem;
+        display: flex;
+        align-items: center;
+        gap: 0.3rem;
+    }
+
+    .stat-change.positive {
+        color: #4CAF50;
+    }
+
+    .stat-change.negative {
+        color: #f44336;
+    }
+
+</style>
 <div class="container mt-4">
     <div class="card shadow col-md-12">
         <div class="card-body">
            <h4 class="mb-3 text-center">
+     
+
         {% if selected_type %}
         {{ selected_type|title }}
         {% endif %}
          Repayments List
     </h4>
+           <div class="stats-grid ">  
+        <div class="stat-card">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Total Amount Paid</h3>
+                    <div class="stat-value"> ₦{{ total_sum_paid|floatformat:2 }}</div>
+                    <div class="stat-change ">
+                        <i class="fas fa-arrow-"></i>
+                        <!-- <span>This month: ₦</span> -->
+                    </div>
+                </div>
+                <div class="stat-icon savings">
+                    <i class="fas fa-piggy-bank"></i>
+                </div>
+            </div>
+        </div>
+
+        <div class="stat-card loan">
+            <div class="stat-header">
+                <div class="stat-info">
+                    <h3>Active Loan Balance</h3>
+                    <div class="stat-value">₦{{ total_sum_remaining|floatformat:2 }}</div>
+                    <div class="stat-change negative">
+                        <i class="fas fa-calendar-alt"></i>
+                        <!-- <span>Monthly Payment: ₦</span> -->
+                    </div>
+                </div>
+                <div class="stat-icon loan">
+                    <i class="fas fa-hand-holding-usd"></i>
+                </div>
+            </div>
+        </div>
+
+       
+    </div>
     <form method="get" class="row g-3 mb-3">
         <div class="col-md-4">
             <label>Year</label>
@@ -83,14 +234,7 @@
         </tbody>
     </table>
     </div>
-     <div class="mt-3 d-flex justify-content-between">
-    <div class="text-start text-primary fs-4">
-        <strong>Total Amount Paid:</strong> ₦{{ total_sum_paid|floatformat:2 }}
-    </div>
-    <div class="text-end text-primary fs-4">
-        <strong>Total Remaining Balance:</strong> ₦{{ total_sum_remaining|floatformat:2 }}
-    </div>
-</div>
+    
 
     <!-- Pagination controls -->
     <div class="d-flex justify-content-center">

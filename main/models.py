@@ -11,7 +11,10 @@ class Savings(models.Model):
     
     class Meta:
         unique_together = ("member", "month")  # Prevents duplicates for the same month
-
+        indexes = [
+        models.Index(fields=["member", "month"]),
+    ]
+        
     def save(self, *args, **kwargs):
         super().save(*args, **kwargs)
         self.member.update_total_savings()

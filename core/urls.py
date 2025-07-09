@@ -24,7 +24,7 @@ urlpatterns = [
     path("",include('accounts.urls')),
     path("",include('main.urls')),
     path("",include('memberapp.urls')),
-    # path("",include('memberconsumable.urls')),
+    path("",include('report.urls')),
     path("",include('loan.urls')),
     path("",include('memberwidower.urls')),
     path("",include('financialsummary.urls')),
