@@ -1,0 +1,142 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Dashboard - Selling Plan Details{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h3>Selling Plan Details</h3>
+        <div>
+            <a href="{% url 'selling_plan_list' %}" class="btn btn-outline-success">← Back</a>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0">Item Information</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="30%">Item Name:</th>
+                                <td>{{ selling_plan.purchased_item.item_name }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Date Added:</th>
+                                <td>{{ selling_plan.purchased_item.date_added|date:"M d, Y" }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Original Unit Price:</th>
+                                <td>₦{{ selling_plan.purchased_item.unit_price|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Expenditure Amount:</th>
+                                <td>₦{{ selling_plan.purchased_item.expenditure_amount|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Total Price:</th>
+                                <td><strong>₦{{ selling_plan.purchased_item.total_price|floatformat:2 }}</strong></td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Total Quantity Available:</th>
+                                <td>{{ selling_plan.purchased_item.quantity }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Selling Plan Details</h5>
+                </div>
+                <div class="card-body">
+                    <table class="table table-borderless">
+                        <tbody>
+                            <tr>
+                                <th width="30%">Quantity to Sell:</th>
+                                <td>{{ selling_plan.quantity }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Price per Unit:</th>
+                                <td>₦{{ selling_plan.selling_price_per_unit|floatformat:2 }}</td>
+                            </tr>
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Total Expected Revenue:</th>
+                                <td><strong>₦{{ selling_plan.total_sale_value|floatformat:2 }}</strong></td>
+                            </tr>
+                             <tr>
+                                <th >Profit:</th>
+                                <td><strong>₦{{ selling_plan.profit|floatformat:2 }}</strong></td>
+                            </tr>
+
+                            <tr>
+                                <th class="text-nowrap" style="min-width: 120px;">Created Date:</th>
+                                <td>{{ selling_plan.date_created|date:"M d, Y" }}</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            {% if potential_profit is not None %}
+            <div class="card">
+                <div class="card-header {% if potential_profit >= 0 %}bg-success{% else %}bg-danger{% endif %} text-white">
+                    <h5 class="mb-0 text-white">Profit Analysis</h5>
+                </div>
+                <div class="card-body text-strat">
+                    <small class="fs-8 mt-2 text-dark">
+                       <p>Unit Cost Of Purchase: <strong>₦{{ selling_plan.purchased_item.unit_price|floatformat:2 }} </strong></p>  
+                       <p>Expenditure: <strong>₦{{ selling_plan.purchased_item.expenditure_amount|floatformat:2 }}</strong> </p> 
+                       <p>Purchase Cost: <strong> Purchase Cost: ₦{{ total_purchase_cost|floatformat:2 }}</strong> </p> 
+                       <p>Selling Price: <strong>₦{{ selling_plan.selling_price_per_unit|floatformat:2 }}</strong> </p> 
+                       <p>Total Expected Revenue: <strong> ₦{{ selling_plan.total_sale_value|floatformat:2 }}</strong></p> 
+                    </small>
+                     <p class="mb-0 text-center">
+                        {% if potential_profit >= 0 %}
+                            Expected Profit
+                        {% else %}
+                            Potential Loss
+                        {% endif %}
+                    </p>
+                     <h3 style="text-align: center;" class="{% if potential_profit >= 0 %}text-success{% else %}text-danger{% endif %}">
+                       ₦{{ potential_profit|floatformat:2 }}
+                    </h3>
+                    
+                </div>
+            </div>
+            {% endif %}
+
+            <div class="card mt-4">
+                <div class="card-header">
+                    <h5 class="mb-0">Actions</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{% url 'selling_plan_update' selling_plan.pk %}" class="btn btn-primary">
+                            Edit Plan
+                        </a>
+                        <!-- {# Uncomment this if you add a status field to SellingPlan #}
+                        {#  -->
+                        <!-- {% if selling_plan.status == 'planned' %}
+                            <a href="" class="btn btn-success">
+                                Execute Sale
+                            </a>
+                        {% endif %}
+                        #} -->
+                        <a href="{% url 'selling_plan_delete' selling_plan.pk %}" class="btn btn-danger" 
+                           onclick="return confirm('Are you sure you want to delete this selling plan?')">
+                            Delete Plan
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

@@ -1,5 +1,4 @@
 
-
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum, Count, Q, Avg
@@ -17,176 +16,61 @@ from accounts.models import User
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 import csv
+from loan.models import *
 
 # Create your views here.
 
-from django.db.models.functions import TruncMonth
-from django.utils import timezone
-from datetime import timedelta
-from django.db.models import F, Sum, Count, ExpressionWrapper, DecimalField
+def admin_loan_reports(request):
+    # Default to current month
+    month = request.GET.get('month', timezone.now().strftime('%Y-%m'))
+    year, month_num = month.split('-')
 
-# class ReportingDashboardView(LoginRequiredMixin, TemplateView):
-#     template_name = 'reports/consumable_dashboard.html'
+    # Get loan_type filter from query params
+    loan_type_id = request.GET.get('loan_type')
 
-#     def get_context_data(self, **kwargs):
-#         context = super().get_context_data(**kwargs)
+    # Base queryset
+    monthly_requests = LoanRequest.objects.filter(
+        application_date__year=year,
+        application_date__month=month_num
+    )
 
-#         context['total_requests'] = ConsumableRequest.objects.count()
-#         context['pending_requests'] = ConsumableRequest.objects.filter(status='Pending').count()
-#         context['approved_requests'] = ConsumableRequest.objects.filter(status='Approved').count()
-#         context['paid_requests'] = ConsumableRequest.objects.filter(status='Paid').count()
+    # Apply loan_type filter if specified
+    if loan_type_id:
+        monthly_requests = monthly_requests.filter(loan_type_id=loan_type_id)
 
-#         # Financial totals using annotation
-#         total_value = ConsumableRequestDetail.objects.annotate(
-#             total_price=ExpressionWrapper(F('item_price') * F('quantity'), output_field=DecimalField())
-#         ).aggregate(total=Sum('total_price'))['total'] or 0
+    monthly_approvals = monthly_requests.filter(status='approved')
+    monthly_rejections = monthly_requests.filter(status='rejected')
 
-#         total_paid = PaybackConsumable.objects.aggregate(total=Sum('amount_paid'))['total'] or 0
+    # Repayments (filter by loan_type if specified)
+    monthly_repayments = LoanRepayback.objects.filter(
+        repayment_date__year=year,
+        repayment_date__month=month_num
 
-#         context['total_request_value'] = total_value
-#         context['total_paid_amount'] = total_paid
-#         context['outstanding_balance'] = total_value - total_paid
+    )
+    if loan_type_id:
+        monthly_repayments = monthly_repayments.filter(loan_request__loan_type_id=loan_type_id)
 
-#         context['monthly_data'] = self.get_monthly_trends()
+    # Loan type breakdown (for all types)
+    loan_type_stats = LoanType.objects.annotate(
+        total_requests=Count('loanrequest'),
+        total_approved=Count('loanrequest', filter=Q(loanrequest__status='approved')),
+        total_amount=Sum('loanrequest__approved_amount', filter=Q(loanrequest__status='approved'))
+    )
 
-#         return context
-
-#     def get_monthly_trends(self):
-#         end_date = timezone.now()
-#         start_date = end_date - timedelta(days=365)
-
-#         # Monthly requests
-#         monthly_requests = ConsumableRequest.objects.filter(
-#             date_created__range=[start_date, end_date]
-#         ).annotate(
-#             month=TruncMonth('date_created')
-#         ).values('month').annotate(
-#             count=Count('id')
-#         ).order_by('month')
-
-#         # Monthly payments
-#         monthly_payments = PaybackConsumable.objects.filter(
-#             repayment_date__range=[start_date, end_date]
-#         ).annotate(
-#             month=TruncMonth('repayment_date')
-#         ).values('month').annotate(
-#             total_paid=Sum('amount_paid')
-#         ).order_by('month')
-
-#         return {
-#             'requests': list(monthly_requests),
-#             'payments': list(monthly_payments)
-#         }
-
-from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, F, DecimalField, ExpressionWrapper
-from django.db.models.functions import TruncMonth
-from django.shortcuts import render
-from django.utils import timezone
-from datetime import timedelta
-import json
-from django.utils.safestring import mark_safe
-import json
-from django.utils.safestring import mark_safe
+    context = {
+        'selected_month': month,
+        'selected_loan_type': int(loan_type_id) if loan_type_id else None,
+        'monthly_requests': monthly_requests.count(),
+        'monthly_approvals': monthly_approvals.count(),
+        'monthly_rejections': monthly_rejections.count(),
+        'monthly_approved_amount': monthly_approvals.aggregate(Sum('approved_amount'))['approved_amount__sum'] or 0,
+        'monthly_repayments': monthly_repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0,
+        'loan_type_stats': loan_type_stats,
+        'loan_types': LoanType.objects.all(),  # For dropdown in the template
+    }
+    return render(request, 'reports/reports.html', context)
 
 
-from django.contrib.auth.decorators import login_required
-from django.db.models import Count, Sum, F, ExpressionWrapper, DecimalField
-from django.db.models.functions import TruncMonth
-from django.utils import timezone
-from django.utils.safestring import mark_safe
-from datetime import timedelta, date, datetime
-from decimal import Decimal
-import json
-
-
-from collections import defaultdict
-from django.utils.dateparse import parse_date
-
-# @login_required
-# def request_status_report(request):
-#     # Get filter parameters
-#     status_filter = request.GET.get('status', 'all')
-#     date_from = request.GET.get('date_from')
-#     date_to = request.GET.get('date_to')
-#     user_filter = request.GET.get('user')
-#     selected_month = request.GET.get('month')  
-
-#     # Base queryset
-#     queryset = ConsumableRequest.objects.select_related('user', 'approved_by')
-
-#     # Apply filters
-#     if status_filter != 'all':
-#         queryset = queryset.filter(status=status_filter)
-
-#     if date_from:
-#         queryset = queryset.filter(date_created__gte=date_from)
-
-#     if date_to:
-#         queryset = queryset.filter(date_created__lte=date_to)
-
-#     if user_filter:
-#         queryset = queryset.filter(user_id=user_filter)
-
-#     if selected_month:
-#         year, month = map(int, selected_month.split('-'))
-#         queryset = queryset.filter(
-#             date_created__year=year,
-#             # date_created__month=month
-#         )
-
-#     # Prepare list of months with requests
-#     month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')
-    
-
-
-#     # Build request data
-#     requests_data = []
-#     for req in queryset:
-#         requests_data.append({
-#             'id': req.id,
-#             'user': req.user.username,
-#             'date_created': req.date_created,
-#             'status': req.status,
-#             'approved_by': req.approved_by.username if req.approved_by else None,
-#             'total_price': req.calculate_total_price(),
-#             'total_paid': req.total_paid(),
-#             'balance': req.balance(),
-#             'items_count': req.details.count()
-#         })
-
-#     # Pagination
-#     paginator = Paginator(requests_data, 25)
-#     page_number = request.GET.get('page')
-#     page_obj = paginator.get_page(page_number)
-
-#     # Summary
-#     summary = {
-#         'total_requests': queryset.count(),
-#         'total_value': sum(req.calculate_total_price() for req in queryset),
-#         'total_paid': sum(req.total_paid() for req in queryset),
-#         'total_balance': sum(req.balance() for req in queryset),
-#         'pending_count': queryset.filter(status='Pending').count(),
-#         'approved_count': queryset.filter(status='Approved').count(),
-#         'paid_count': queryset.filter(status='Paid').count(),
-#         'declined_count': queryset.filter(status='Declined').count(),
-#     }
-
-#     context = {
-#         'requests': page_obj,
-#         'summary': summary,
-#         'users': User.objects.all(),
-#         'months': month_list, 
-#         'filters': {
-#             'status': status_filter,
-#             'date_from': date_from,
-#             'date_to': date_to,
-#             'user': user_filter,
-#             'month': selected_month,
-#         }
-#     }
-
-#     return render(request, 'reports/consumable_request_status_report.html', context)
 
 
 @login_required

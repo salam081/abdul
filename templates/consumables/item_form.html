@@ -1,0 +1,277 @@
+{% extends 'base/base.html' %}
+
+{% block title %}{{ title }} - Consumable Requests{% endblock %}
+
+{% block content %}
+<div class="container">
+<div class="row mt-3">
+    <div class="col-12">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h5><i class="fas fa-shopping-bag"></i> {{ title }}</h5>
+            <a href="{% url 'consumable_purchase_request_detail' consumable_request.pk %}" class="btn btn-outline-success">
+                <i class="fas fa-arrow-left"></i> Back to Request
+            </a>
+        </div>
+    </div>
+</div>
+
+
+
+<div class="row">
+    <div class="col-md-8">
+        <div class="card shadow">
+            <div class="card-header">
+                <h5 class="mb-0">
+                    <i class="fas fa-edit"></i> Item Form
+                </h5>
+            </div>
+            <div class="card-body">
+                <form method="post" enctype="multipart/form-data" id="item-form">
+                    {% csrf_token %}
+                    
+                    <!-- Non-field errors -->
+                    {% if form.non_field_errors %}
+                        <div class="alert alert-danger">
+                            {{ form.non_field_errors }}
+                        </div>
+                    {% endif %}
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.item_name.id_for_label }}" class="form-label">Item Name *</label>
+                        {{ form.item_name }}
+                        {% if form.item_name.errors %}
+                            <div class="text-danger">{{ form.item_name.errors }}</div>
+                        {% endif %}
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.quantity.id_for_label }}" class="form-label">Quantity *</label>
+                                {{ form.quantity }}
+                                {% if form.quantity.errors %}
+                                    <div class="text-danger">{{ form.quantity.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.unit_price.id_for_label }}" class="form-label">Unit Price (₦) *</label>
+                                {{ form.unit_price }}
+                                {% if form.unit_price.errors %}
+                                    <div class="text-danger">{{ form.unit_price.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                        <div class="col-md-6">
+                            <div class="mb-3">
+                                <label for="{{ form.expenditure_amount.id_for_label }}" class="form-label">Expenditure (₦) *</label>
+                                {{ form.expenditure_amount }}
+                                {% if form.expenditure_amount.errors %}
+                                    <div class="text-danger">{{ form.expenditure_amount.errors }}</div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <label for="{{ form.receipt.id_for_label }}" class="form-label">Receipt</label>
+                        {{ form.receipt }}
+                        {% if form.receipt.errors %}
+                            <div class="text-danger">{{ form.receipt.errors }}</div>
+                        {% endif %}
+                        <div class="form-text">Upload receipt image or PDF (optional)</div>
+                    </div>
+                    
+                    <div class="mb-3">
+                        <div class="card shadow">
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <strong>Total Price:</strong>
+                                        <span id="total-price">₦{{consumable_request.total_price|floatformat:2}}</span>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <strong>Remaining Balance:</strong>
+                                        <span id="remaining-balance">₦{{ consumable_request.balance_remaining|floatformat:2 }}</span>
+                                    </div>
+                                </div>
+                                <div class="row mt-2" id="balance-warning" style="display: none;">
+                                    <div class="col-12">
+                                        <div class="alert alert-warning mb-0">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            This item exceeds the remaining balance!
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="d-flex gap-2">
+                        <button type="submit" class="btn btn-primary" id="save-btn">
+                            <i class="fas fa-save"></i> Save Item
+                        </button>
+                        <a href="{% url 'consumable_purchase_request_detail' consumable_request.pk %}" class="btn btn-secondary">
+                            <i class="fas fa-times"></i> Cancel
+                        </a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    
+    <div class="col-md-4">
+        <div class="card shadow">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-info-circle"></i> Request Summary
+                </h6>
+            </div>
+            <div class="card-body">
+                <dl class="row">
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Purpose:</dt>
+                    <dd class="col-sm-6" title="{{ consumable_request.purpose|default:'Not specified' }}">
+                        {{ consumable_request.purpose|truncatechars:20|default:"Not specified" }}
+                    </dd>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Status:</dt>
+                    <dd class="col-sm-6">
+                        <span class="badge bg-{% if consumable_request.status == 'approved' %}success{% elif consumable_request.status == 'pending' %}warning{% elif consumable_request.status == 'accounted' %}info{% else %}danger{% endif %}">
+                            {{ consumable_request.get_status_display }}
+                        </span>
+                    </dd>
+                     </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Approved Amount:</dt>
+                    <dd class="col-sm-6">
+                        ₦{{ consumable_request.approved_amount|floatformat:2 }}
+                    </dd>
+                     </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Spent:</dt>
+                    <dd class="col-sm-6">
+                        ₦{{ consumable_request.total_spent|floatformat:2 }}
+                    </dd>
+                     </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Balance:</dt>
+                    <dd class="col-sm-6">
+                        <span class="{% if consumable_request.balance_remaining >= 0 %}text-success{% else %}text-danger{% endif %}">
+                            ₦{{ consumable_request.balance_remaining|floatformat:2 }}
+                        </span>
+                    </dd>
+                     </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Requested By:</dt>
+                        <dd class="col-sm-6">{{consumable_request.requested_by.first_name}} {{consumable_request.requested_by.last_name}}</dd>
+                     </div>
+                    <div class="d-flex justify-content-between mb-2">
+                    <dt class="col-sm-6">Date:</dt>
+                    <dd class="col-sm-6">{{ consumable_request.date_requested|date:"M d, Y" }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+        
+        <div class="card mt-3 shadow">
+            <div class="card-header">
+                <h6 class="mb-0">
+                    <i class="fas fa-lightbulb"></i> Tips
+                </h6>
+            </div>
+            <div class="card-body">
+                <ul class="list-unstyled small">
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Be accurate with quantities and prices
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Upload receipts for record keeping
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-check text-success"></i>
+                        Check that total doesn't exceed balance
+                    </li>
+                    <li class="mb-2">
+                        <i class="fas fa-info text-info"></i>
+                        Items can only be added to approved requests
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const quantityInput = document.getElementById('{{ form.quantity.id_for_label }}');
+    const unitPriceInput = document.getElementById('{{ form.unit_price.id_for_label }}');
+    const totalPriceSpan = document.getElementById('total-price');
+    const remainingBalanceSpan = document.getElementById('remaining-balance');
+    const balanceWarning = document.getElementById('balance-warning');
+    const saveBtn = document.getElementById('save-btn');
+    const form = document.getElementById('item-form');
+    
+    const requestedAmount = {{ consumable_request.amount_requested }};
+    const currentSpent = {{ consumable_request.total_spent }};
+    
+    function updateTotalPrice() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const unitPrice = parseFloat(unitPriceInput.value) || 0;
+        const totalPrice = quantity * unitPrice;
+        const newBalance = requestedAmount - currentSpent - totalPrice;
+        
+        totalPriceSpan.textContent = '₦' + totalPrice.toFixed(2);
+        remainingBalanceSpan.textContent = '₦' + newBalance.toFixed(2);
+        
+        // Update color based on balance
+        if (newBalance >= 0) {
+            remainingBalanceSpan.className = 'text-success';
+            balanceWarning.style.display = 'none';
+        } else {
+            remainingBalanceSpan.className = 'text-danger';
+            balanceWarning.style.display = 'block';
+        }
+    }
+    
+    function validateForm() {
+        const quantity = parseFloat(quantityInput.value) || 0;
+        const unitPrice = parseFloat(unitPriceInput.value) || 0;
+        const totalPrice = quantity * unitPrice;
+        const newBalance = requestedAmount - currentSpent - totalPrice;
+        
+        // Optional: Prevent submission if balance would be negative
+        // Uncomment the following lines if you want to enforce this client-side
+        /*
+        if (newBalance < 0) {
+            alert('The total price exceeds the remaining balance. Please adjust the quantity or unit price.');
+            return false;
+        }
+        */
+        
+        return true;
+    }
+    
+    // Add event listeners
+    if (quantityInput) quantityInput.addEventListener('input', updateTotalPrice);
+    if (unitPriceInput) unitPriceInput.addEventListener('input', updateTotalPrice);
+    
+    // Form validation on submit
+    form.addEventListener('submit', function(e) {
+        if (!validateForm()) {
+            e.preventDefault();
+        }
+    });
+    
+    // Initial calculation
+    updateTotalPrice();
+});
+</script>
+{% endblock %}

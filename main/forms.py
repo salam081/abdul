@@ -1,6 +1,10 @@
 # yourapp/forms.py
 from django import forms
+from loan.models import *
 import datetime
+
+
+
 
 class DistributionForm(forms.Form):
     # Use a MonthField for better user experience and validation

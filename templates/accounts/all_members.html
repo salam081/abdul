@@ -13,64 +13,7 @@
         --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     }
 
-    .page-container {
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        min-height: 100vh;
-        padding: 2rem 0;
-    }
-
-    .page-header {
-        background: var(--primary-gradient);
-        color: white;
-        padding: 2.5rem 0;
-        border-radius: 20px;
-        margin-bottom: 2rem;
-        box-shadow: var(--card-shadow);
-    }
-
-    .page-title {
-        font-size: 2.5rem;
-        font-weight: 300;
-        margin-bottom: 0.5rem;
-        text-align: center;
-    }
-
-    .page-subtitle {
-        text-align: center;
-        opacity: 0.9;
-        font-size: 1.1rem;
-    }
-
-    .stats-section {
-        margin-bottom: 2rem;
-    }
-
-    .stat-card {
-        background: white;
-        border-radius: 15px;
-        padding: 2rem;
-        box-shadow: var(--card-shadow);
-        transition: all 0.3s ease;
-        border: none;
-        height: 90%;
-    }
-
-    .stat-card:hover {
-        transform: translateY(-5px);
-        box-shadow: var(--hover-shadow);
-    }
-
-    .stat-icon {
-        width: 50px;
-        height: 50px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 2rem;
-        margin-bottom: 1rem;
-        color: white;
-    }
+   
 
     .stat-icon.total { background: var(--primary-gradient); }
     .stat-icon.active { background: var(--success-gradient); }
@@ -349,63 +292,26 @@
 <div class="page-container">
     <div class="container-fluid px-4">
         <!-- Page Header -->
-        <div class="page-header">
+        <!-- <div class="page-header">
             <h1 class="page-title">👥 User Management</h1>
             <p class="page-subtitle">Manage members and control user access</p>
-        </div>
+        </div> -->
 
-        <!-- Statistics Cards -->
-        <div class="row stats-section">
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="stat-card">
-                    <div class="stat-icon total">
-                        <i class="fas fa-users"></i>
-                    </div>
-                    <div class="stat-value">{{ members|length }}</div>
-                    <div class="stat-label">Total Members</div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="stat-card">
-                    <div class="stat-icon active">
-                        <i class="fas fa-user-check"></i>
-                    </div>
-                    <div class="stat-value">{{ active_count|default:"0" }}</div>
-                    <div class="stat-label">Active Users</div>
-                </div>
-            </div>
-            <div class="col-lg-4 col-md-6 mb-4">
-                <div class="stat-card">
-                    <div class="stat-icon inactive">
-                        <i class="fas fa-user-times"></i>
-                    </div>
-                    <div class="stat-value">{{ inactive_count|default:"0" }}</div>
-                    <div class="stat-label">Inactive Users</div>
-                </div>
-            </div>
-            <!-- <div class="col-lg-3 col-md-6 mb-4">
-                <div class="stat-card">
-                    <div class="stat-icon savings">
-                        <i class="fas fa-piggy-bank"></i>
-                    </div>
-                    <div class="stat-value">₦{{ total_savings|default:"0"|floatformat:0 }}</div>
-                    <div class="stat-label">Total Savings</div>
-                </div>
-            </div> -->
-        </div>
+      
 
         <!-- Main Content Card -->
         <div class="card main-card">
             <div class="card-header-custom d-flex justify-content-between align-items-center">
-                <h3 class="card-title">📊 Member Management</h3>
+                 <h3 class="page-title">👥 User Management</h3>
+                 <!-- <p class="page-subtitle">Manage members and control user access</p> -->
                 <a href="#" class="show-all-link">
-                    <i class="fas fa-external-link-alt"></i> Show All
+                    <i class="fas fa-external-link-alt"></i>Total Members: {{ members|length }}
                 </a>
             </div>
 
             <!-- Bulk Actions -->
             <div class="bulk-actions">
-                <h6><i class="fas fa-cogs"></i> Bulk Actions</h6>
+               
                 <div class="d-flex flex-wrap align-items-center">
                     <div class="form-check me-4">
                         <input class="form-check-input checkbox-custom" type="checkbox" id="select-all">

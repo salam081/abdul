@@ -3,6 +3,7 @@ from .import views
 
 urlpatterns = [
     path('index',views.index,name="index"),
+    path('loan_fee',views.loan_fee,name="loan_fee"),
     path('search_member_savings/', views.search_member_for_savings, name='search_member'),
     path('all_member_saving_search/',views.all_member_saving_search,name='all_member_saving_search'),
     path('member/<int:id>/add_savings/', views.add_individual_member_savings, name='add_individual_savings'),

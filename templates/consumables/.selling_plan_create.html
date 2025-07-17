@@ -1,0 +1,28 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Admin Dashboard - Consumable Requests{% endblock %}
+
+
+{% block content %}
+<div class="container">
+    <h2>💰 Profit Calculator for {{ sale_item.purchased_item.item_name }}</h2>
+
+<p><strong>Purchase Price:</strong> ₦{{ unit_purchase_price }}</p>
+<p><strong>Selling Price:</strong> ₦{{ unit_selling_price }}</p>
+<p><strong>Remaining Stock:</strong> {{ remaining_stock }}</p>
+
+<form method="post">
+  {% csrf_token %}
+    {{form}}
+  <button type="submit">Calculate Profit</button>
+</form>
+
+{% if profit is not None %}
+  <hr>
+  <p><strong>Total Sale Amount:</strong> ₦{{ total_sale_amount }}</p>
+  <p><strong>Total Cost:</strong> ₦{{ total_purchase_cost }}</p>
+  <p><strong>Estimated Profit:</strong> <span style="color:green;">₦{{ profit }}</span></p>
+{% endif %}
+
+</div>
+{% endblock content %}

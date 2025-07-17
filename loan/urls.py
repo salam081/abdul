@@ -24,7 +24,6 @@ urlpatterns = [
     path('loan_years_list/', views.loan_years_list, name='loan_years_list'),
     path('loans_by_year/<int:year>/<str:loan_type_filter>/', views.loans_by_year, name='loans_by_year'),
 
-   path('loan/reports/', views.admin_loan_reports, name='admin_loan_reports'),
    path('loan/repayments/', views.admin_repayment_tracking, name='admin_repayment_tracking'),
     
 ]

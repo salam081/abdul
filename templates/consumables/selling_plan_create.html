@@ -1,0 +1,127 @@
+{% extends 'base/base.html' %}
+
+{% block title %}Admin Dashboard - Consumable Requests{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h3><i class="fas fa-calculator"></i> Profit Calculator for {{ purchased_item.item_name }}</h3>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-3">
+                        <div class="col-md-4">
+                            <strong>Purchase Price:</strong> ₦{{ purchased_item.unit_price|floatformat:2 }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Total Cost:</strong> ₦{{ purchased_item.total_price|floatformat:2 }}
+                        </div>
+                        <div class="col-md-4">
+                            <strong>Available Stock:</strong> {{ purchased_item.quantity }}
+                        </div>
+                    </div>
+
+                    <form method="post" class="mb-4">
+                        {% csrf_token %}
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="selling_price">Selling Price (₦):</label>
+                                    <input type="number" step="0.01" name="selling_price_per_unit" id="selling_price_per_unit" 
+                                           class="form-control" required
+                                           value="{{ form.selling_price_per_unit.value|default:'' }}">
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-3">
+                                    <label for="quantity_to_sell">Quantity to Sell:</label>
+                                    <input type="number" name="quantity" id="quantity_to_sell" 
+                                           class="form-control" required max="{{ purchased_item.quantity }}"
+                                           value="{{ form.quantity.value|default:'' }}">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">
+                            <i class="fas fa-calculator"></i> Calculate Profit
+                        </button>
+                    </form>
+
+                    {% if profit is not None %}
+                        <div class="card bg-light">
+                            <div class="card-body">
+                                <h5 class="card-title">Profit Analysis</h5>
+                                <div class="row">
+                                    <div class="col-md-4">
+                                        <p><strong>Total Sale Amount:</strong> 
+                                            <span class="text-success">₦{{ total_sale_amount|floatformat:2 }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Total Cost:</strong> 
+                                            <span class="text-danger">₦{{ total_purchase_cost|floatformat:2 }}</span>
+                                        </p>
+                                    </div>
+                                    <div class="col-md-4">
+                                        <p><strong>Estimated Profit:</strong> 
+                                            <span class="{% if profit >= 0 %}text-success{% else %}text-danger{% endif %} h5">
+                                                ₦{{ profit|floatformat:2 }}
+                                            </span>
+                                        </p>
+                                    </div>
+                                </div>
+                                
+                                {% if profit > 0 %}
+                                    <div class="alert alert-success mt-3">
+                                        <i class="fas fa-thumbs-up"></i> 
+                                        Great! You'll make a profit of ₦{{ profit|floatformat:2 }}
+                                    </div>
+                                {% elif profit == 0 %}
+                                    <div class="alert alert-warning mt-3">
+                                        <i class="fas fa-balance-scale"></i> 
+                                        Break-even: No profit or loss
+                                    </div>
+                                {% else %}
+                                    <div class="alert alert-danger mt-3">
+                                        <i class="fas fa-exclamation-triangle"></i> 
+                                        Warning: You'll have a loss of ₦{{ profit|floatformat:2 }}
+                                    </div>
+                                {% endif %}
+                            </div>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h6><i class="fas fa-info-circle"></i> Item Details</h6>
+                </div>
+                <div class="card-body">
+                    <p><strong>Item Name:</strong> {{ purchased_item.item_name }}</p>
+                    <p><strong>Quantity:</strong> {{ purchased_item.quantity }}</p>
+                    <p><strong>Unit Price:</strong> ₦{{ purchased_item.unit_price|floatformat:2 }}</p>
+                    <p><strong>Expenditure:</strong> ₦{{ purchased_item.expenditure_amount|floatformat:2 }}</p>
+                    <p><strong>Total Price:</strong> ₦{{ purchased_item.total_price|floatformat:2 }}</p>
+                    <p><strong>Date Added:</strong> {{ purchased_item.date_added|date:"F d, Y" }}</p>
+                </div>
+            </div>
+            
+            <div class="card mt-3">
+                <div class="card-header">
+                    <h6><i class="fas fa-cog"></i> Actions</h6>
+                </div>
+                <div class="card-body">
+                    <a href="" 
+                       class="btn btn-secondary btn-sm">
+                        <i class="fas fa-arrow-left"></i> Back to Request
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

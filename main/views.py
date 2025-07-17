@@ -16,16 +16,54 @@ from django.conf import settings
 from django.contrib import messages
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.db.models import Sum
+from django.db.models import Sum,F
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.dateparse import parse_date
 from .models import * 
+from loan.models import * 
 from accounts.models import * 
 from financialsummary.models import *
+from .forms import *
+from datetime import datetime
+
+
 
 
 def index(request):
-     return render(request, "main/index.html")
+    context = {}
+    return render(request, "main/index.html", context)
+
+def loan_fee(request):
+    if request.method == 'POST':
+        member_ippis = request.POST.get('member_ippis')
+        form_fee = request.POST.get('form_fee')
+        loan_amount = request.POST.get('loan_amount')
+
+        # Get Member instance using IPPIS number
+        member = get_object_or_404(Member, ippis=member_ippis)
+
+        LoanRequestFee.objects.create(
+            member=member,
+            form_fee=form_fee,
+            loan_amount=loan_amount,
+            created_by=request.user
+        )
+        messages.success(request, 'Payment recorded successfully')
+        return redirect('loan_fee')
+
+    # Aggregates
+    loan = LoanRequestFee.objects.aggregate(total=Sum('loan_amount'))['total'] or 0
+    fee = LoanRequestFee.objects.aggregate(total=Sum('form_fee'))['total'] or 0
+    loan_req_form = LoanRequestFee.objects.count()
+
+    context = {
+        "fee": fee,
+        "loan": loan,
+        "loan_req_form": loan_req_form
+    }
+    return render(request, "main/loan_fee.html", context)
+
+
 
 def search_member_for_savings(request):
     results = []
@@ -176,8 +214,8 @@ def upload_savings(request):
             return redirect(request.path)
 
         try:
-            # Parse the selected month as a date
             month_date = datetime.strptime(selected_month, "%Y-%m").date().replace(day=1)
+            # month_date = datetime.strptime(selected_month, "%Y-%m").date().replace(day=1)
 
             # Save the uploaded file temporarily
             relative_path = default_storage.save(f"upload/{excel_file.name}", ContentFile(excel_file.read()))

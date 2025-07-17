@@ -63,30 +63,77 @@ def admin_loan_settings(request):
     }
     return render(request, 'loan/settings.html', context)
 
-
 @login_required
 def add_loan_type(request):
     loan_types = LoanType.objects.all()
+
     if request.method == 'POST':
         name = request.POST.get('name')
         description = request.POST.get('description')
         max_amount = request.POST.get('max_amount') or None
         max_loan_term_months = request.POST.get('max_loan_term_months') or None
+        loan_type_id = request.POST.get('loan_type_id')
+        action = request.POST.get('action')  # 'toggle' or 'edit'
 
-        if name:
+        if loan_type_id:
+            loan_type = get_object_or_404(LoanType, id=loan_type_id)
+
+            if action == 'toggle':
+                loan_type.available = not loan_type.available
+                loan_type.save()
+                messages.success(request, 'Loan type availability updated successfully.')
+                return redirect('add_loan_type')
+
+            elif action == 'edit':
+                loan_type.name = name
+                loan_type.description = description
+                loan_type.max_amount = max_amount
+                loan_type.max_loan_term_months = max_loan_term_months
+                loan_type.save()
+                messages.success(request, 'Loan type updated successfully.')
+                return redirect('add_loan_type')
+
+        else:
             LoanType.objects.create(
                 name=name,
                 description=description,
                 max_amount=max_amount,
                 max_loan_term_months=max_loan_term_months,
+                available=True,
                 created_by=request.user
             )
-            messages.success(request, "Loan type created successfully.")
-            return redirect('add_loan_type') 
-        else:
-            messages.error(request, "Name is required.")
-    context = {'loan_types':loan_types}
-    return render(request, 'loan/add_loan_type.html',context)
+            messages.success(request, 'Loan type created successfully.')
+            return redirect('add_loan_type')
+
+    context = {'loan_types': loan_types}
+    return render(request, 'loan/add_loan_type.html', context)
+
+
+# @login_required
+# def add_loan_type(request):
+#     loan_types = LoanType.objects.all()
+#     if request.method == 'POST':
+#         name = request.POST.get('name')
+#         description = request.POST.get('description')
+#         max_amount = request.POST.get('max_amount') or None
+#         max_loan_term_months = request.POST.get('max_loan_term_months') or None
+#         available = request.POST.get('available') == 'on'
+
+#         if name:
+#             LoanType.objects.create(
+#                 name=name,
+#                 description=description,
+#                 max_amount=max_amount,
+#                 max_loan_term_months=max_loan_term_months,
+#                 available=available,
+#                 created_by=request.user
+#             )
+#             messages.success(request, "Loan type created successfully.")
+#             return redirect('add_loan_type') 
+#         else:
+#             messages.error(request, "Name is required.")
+#     context = {'loan_types':loan_types}
+#     return render(request, 'loan/add_loan_type.html',context)
 
 
 #  =========list of Pending Loans and others ==========
@@ -186,44 +233,6 @@ def loan_request_detail(request, id):
     return render(request, 'loan/loan_request_detail.html', context)
 
 
-# def admin_loan_request_detail(request, request_id):
-#     """Detailed view of a loan request"""
-#     loan_request = get_object_or_404(LoanRequest, id=request_id)
-#     repayments = loan_request.repaybacks.all().order_by('-repayment_date')
-    
-#     if request.method == 'POST':
-#         action = request.POST.get('action')
-        
-#         if action == 'approve':
-#             approved_amount = request.POST.get('approved_amount')
-#             if approved_amount:
-#                 loan_request.approved_amount = approved_amount
-#                 loan_request.status = 'approved'
-#                 loan_request.approval_date = timezone.now().date()
-#                 loan_request.save()
-#                 messages.success(request, f'Loan request approved for ₦{approved_amount}')
-#             else:
-#                 messages.error(request, 'Please enter approved amount')
-        
-#         elif action == 'reject':
-#             rejection_reason = request.POST.get('rejection_reason')
-#             if rejection_reason:
-#                 loan_request.status = 'rejected'
-#                 loan_request.rejection_reason = rejection_reason
-#                 loan_request.save()
-#                 messages.success(request, 'Loan request rejected')
-#             else:
-#                 messages.error(request, 'Please provide rejection reason')
-        
-#         return redirect('admin_loan_request_detail', request_id=request_id)
-    
-#     context = {
-#         'loan_request': loan_request,
-#         'repayments': repayments,
-#         'total_repaid': repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0,
-#     }
-#     return render(request, 'loan/request_detail.html', context)
-
 def is_admin(user):
     return user.is_staff
 
@@ -315,7 +324,7 @@ def edit_requested_loan(request, id):
             loan_term_months=loan_term_months,
             approved_amount=amount,
         )
-        return redirect('requested_loan')
+        return redirect('admin_loan_requests')
 
     context = {'loanobj': loanobj, 'loan_types': loan_types}
     return render(request, 'loan/edit_requested_loan.html', context)
@@ -704,148 +713,6 @@ def filtered_loan_repayments(request):
                 "total_sum_paid": total_sum_paid,"total_sum_remaining": total_sum_remaining,}
     return render(request, "loan/filtered_loan_repayments.html", context)
 
-
-
-
-# def get_all_requested_loan(request):
-#     search_term = request.GET.get('search_term', '').strip()
-
-#     # Exclude rejected, approved, and paid
-#     base_queryset = LoanRequest.objects.exclude(status__in=['rejected',  'paid'])
-
-#     if search_term:
-#         results_queryset = base_queryset.filter(
-#             Q(status__icontains=search_term) |
-#             Q(member__member__first_name__icontains=search_term) |
-#             Q(member__member__last_name__icontains=search_term) |
-#             Q(member__member__username__icontains=search_term) |
-#             Q(id__icontains=search_term)
-#         )
-#     else:
-#         results_queryset = base_queryset
-
-#     results_queryset = results_queryset.order_by('status')
-
-#     # Totals by status
-#     totals_by_status = dict(
-#         results_queryset.values('status')
-#         .annotate(total=Sum('approved_amount'))
-#         .values_list('status', 'total')
-#     )
-
-#     total_approved_amount = results_queryset.aggregate(total=Sum('approved_amount'))['total'] or 0
-
-#     totals_by_status = dict(
-#         results_queryset.values('status')
-#         .annotate(total=Sum('amount'))
-#         .values_list('status', 'total')
-#     )
-
-#     total_repaid = LoanRepayback.objects.filter(
-#         loan_request__in=results_queryset
-#     ).aggregate(total=Sum('amount_paid'))['total'] or 0
-
-#     total_amont_loan_request = totals_by_status.get('approved', 0)
-#     total_pending = totals_by_status.get('pending', 0)
-
-#     paginator = Paginator(results_queryset, 100)
-#     page_number = request.GET.get('page')
-#     results = paginator.get_page(page_number)
-
-#     if request.GET.get('download_pdf') == '1' and results_queryset.exists():
-#         if results_queryset.count() > 500:
-#             return HttpResponse('Too many records to generate PDF. Please narrow your search.', status=400)
-
-#         context = {
-#             'results': results_queryset,
-#             'search_term': search_term,
-#             'totals_by_status': totals_by_status,
-#             'total_approved': total_amont_loan_request,
-#             'total_pending': total_pending,
-#             'total_repaid': total_repaid,
-#             'total_approved_amount': total_approved_amount,
-#         }
-#         html = render_to_string('loan/requested_loans_pdf.html', context)
-#         response = HttpResponse(content_type='application/pdf')
-#         response['Content-Disposition'] = 'attachment; filename="requested_loans.pdf"'
-#         pisa_status = pisa.CreatePDF(html, dest=response)
-#         if pisa_status.err:
-#             return HttpResponse('Error generating PDF', status=500)
-#         return response
-
-#     context = {
-#         'results': results,
-#         'search_term': "",
-#         'totals_by_status': totals_by_status,
-#         'total_approved': total_amont_loan_request,
-#         'total_pending': total_pending,
-#         'total_repaid': total_repaid,
-#         'total_approved_amount': total_approved_amount,
-#     }
-
-#     return render(request, 'loan/get_all_requested_loan.html', context)
-
-
-
-
-
-
-
-
-
-
-
-
-
-def admin_loan_reports(request):
-    # Default to current month
-    month = request.GET.get('month', timezone.now().strftime('%Y-%m'))
-    year, month_num = month.split('-')
-
-    # Get loan_type filter from query params
-    loan_type_id = request.GET.get('loan_type')
-
-    # Base queryset
-    monthly_requests = LoanRequest.objects.filter(
-        application_date__year=year,
-        application_date__month=month_num
-    )
-
-    # Apply loan_type filter if specified
-    if loan_type_id:
-        monthly_requests = monthly_requests.filter(loan_type_id=loan_type_id)
-
-    monthly_approvals = monthly_requests.filter(status='approved')
-    monthly_rejections = monthly_requests.filter(status='rejected')
-
-    # Repayments (filter by loan_type if specified)
-    monthly_repayments = LoanRepayback.objects.filter(
-        repayment_date__year=year,
-        repayment_date__month=month_num
-
-    )
-    if loan_type_id:
-        monthly_repayments = monthly_repayments.filter(loan_request__loan_type_id=loan_type_id)
-
-    # Loan type breakdown (for all types)
-    loan_type_stats = LoanType.objects.annotate(
-        total_requests=Count('loanrequest'),
-        total_approved=Count('loanrequest', filter=Q(loanrequest__status='approved')),
-        total_amount=Sum('loanrequest__approved_amount', filter=Q(loanrequest__status='approved'))
-    )
-
-    context = {
-        'selected_month': month,
-        'selected_loan_type': int(loan_type_id) if loan_type_id else None,
-        'monthly_requests': monthly_requests.count(),
-        'monthly_approvals': monthly_approvals.count(),
-        'monthly_rejections': monthly_rejections.count(),
-        'monthly_approved_amount': monthly_approvals.aggregate(Sum('approved_amount'))['approved_amount__sum'] or 0,
-        'monthly_repayments': monthly_repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0,
-        'loan_type_stats': loan_type_stats,
-        'loan_types': LoanType.objects.all(),  # For dropdown in the template
-    }
-    return render(request, 'loan/reports.html', context)
 
 
 

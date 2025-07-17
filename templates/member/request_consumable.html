@@ -24,11 +24,11 @@
     }
 
     .card-header-custom {
-        background: linear-gradient(135deg, #8a2cb8, #b0469e);
-        color: white;
+        background: linear-gradient(135deg, #f3f3f3, #ffffff);
+        color: rgb(7, 128, 17);
         font-size: 1.1rem;
         font-weight: 500;
-        padding: 1rem 1.5rem;
+        padding: 1rem 1.1rem;
         border-top-left-radius: 12px;
         border-top-right-radius: 12px;
     }
@@ -37,9 +37,8 @@
         background-color: #f8f9fc;
         border-left: 4px solid #ad4aad;
         border-right: 4px solid #bd3dc6;
-        padding: 1.25rem;
         border-radius: 10px;
-        margin-bottom: 1.5rem;
+        margin-bottom: 1.1rem;
     }
 
     .btn-primary {
@@ -101,7 +100,6 @@
         text-align: center;
         color: #6c757d;
         font-style: italic;
-        padding: 2rem;
     }
 
     .quantity-controls {
@@ -138,11 +136,11 @@
     }
 
     .cart-total {
-        background: linear-gradient(135deg, #8a2cb8, #b0469e);
-        color: white;
-        padding: 1rem;
+        background: linear-gradient(135deg, #ffffff, #ffffff);
+        color: rgb(7, 144, 64);
+        /* padding: 1rem; */
         border-radius: 10px;
-        margin-bottom: 1rem;
+        /* margin-bottom: 1rem; */
     }
 
     .badge-cart {
@@ -258,9 +256,7 @@
 
             <!-- Form Section -->
             <div class="card card-custom">
-                <div class="card-header-custom text-center">
-                    Complete Your Request
-                </div>
+               
                 <div class="card-body">
                     <form method="POST" enctype="multipart/form-data" id="request-form">
                         {% csrf_token %}

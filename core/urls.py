@@ -29,6 +29,7 @@ urlpatterns = [
     path("",include('memberwidower.urls')),
     path("",include('financialsummary.urls')),
     path("",include('consumable.urls')),
+    path("",include('PurchasedItems.urls')),
 ]
 
 if settings.DEBUG:

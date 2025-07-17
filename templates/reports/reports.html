@@ -119,11 +119,11 @@
     <form method="get" class="mb-4 d-flex justify-content-center">
         <input type="month" name="month" value="{{ selected_month }}" class="form-control w-auto me-2">
          <select name="loan_type">
-    <option value="">All Loan Types</option>
-    {% for type in loan_types %}
-      <option value="{{ type.id }}" {% if type.id == selected_loan_type %}selected{% endif %}>{{ type.name }}</option>
-    {% endfor %}
-  </select>
+            <option value="">All Loan Types</option>
+            {% for type in loan_types %}
+            <option value="{{ type.id }}" {% if type.id == selected_loan_type %}selected{% endif %}>{{ type.name }}</option>
+            {% endfor %}
+        </select>
         <button type="submit" class="btn btn-primary me-2">Filter</button>
         <a href="{% url 'admin_loan_reports' %}" class="btn btn-secondary">Clear</a>
     </form>

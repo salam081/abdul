@@ -53,7 +53,8 @@ INSTALLED_APPS = [
     'financialsummary',
     "django_countries",
     'memberwidower',
-    'report'
+    'report',
+    'PurchasedItems',
 
 ]
 

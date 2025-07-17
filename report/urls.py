@@ -4,7 +4,8 @@ from .import views
 
 
 urlpatterns = [
-   
+   path('loan/reports/', views.admin_loan_reports, name='admin_loan_reports'),
+    
     # path('consumable_report_dashboard/', ReportingDashboardView.as_view(), name='consumable_report_dashboard'),
     path('request_status_report',views.request_status_report,name='request_status_report'),
     path('user_spending_report',views.user_spending_report,name='user_spending_report'),

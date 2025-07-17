@@ -2,6 +2,7 @@ from django.db import models
 from django.utils import timezone
 from accounts.models import *
 from main.models import *
+from django.conf import settings
 # Create your models here.
 
 
@@ -35,6 +36,7 @@ class LoanType(models.Model):
     description = models.TextField(blank=True, null=True) 
     max_amount = models.DecimalField(max_digits=12, decimal_places=2, null=True, blank=True) 
     max_loan_term_months = models.PositiveIntegerField(null=True, blank=True) 
+    available = models.BooleanField(default=True)
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
     
     def __str__(self):
@@ -87,8 +89,25 @@ class LoanRepayback(models.Model):
     def __str__(self):
         return f"Repayment of {self.amount_paid} for Loan ID {self.loan_request.member} on {self.repayment_date}"
     
-class LoanFormFee(models.Model):
-    form_fee = models.DecimalField(max_digits=10, decimal_places=2)  
-    paid_by = models.ForeignKey(User,on_delete=models.CASCADE)
+
+
+
+# class LoanRequetsFee(models.Model):
+#     member_ippis = models.IntegerField()
+#     form_fee = models.DecimalField(max_digits=10, decimal_places=2)  
+#     loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
+#     created_by = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
+
+
+
+
+
+class LoanRequestFee(models.Model):
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)  # Reference to the Member table
+    form_fee = models.DecimalField(max_digits=10, decimal_places=2)
+    loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
+    created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, blank=True,null=True)
+    created_at = models.DateTimeField(auto_now_add=True)
+
     def __str__(self):
-        return self.paid_by.first_name
+        return f"Loan Fee - {self.member.member.first_name} with  ({self.member.ippis})"
