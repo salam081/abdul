@@ -42,7 +42,6 @@ def member_check(request):
 
     return render(request,'accounts/member_check.html')
 
-
 @login_required
 def upload_users(request):
     if request.method == "POST" and request.FILES.get("excel_file"):
@@ -77,7 +76,7 @@ def upload_users(request):
             for _, row in df.iterrows():
                 try:
                     username = str(row["username"]).strip()
-                    ippis = int(row["ippis"])
+                    ippis = int(float(row["ippis"]))  # FIX: Handle Excel converting to float
 
                     if username in existing_usernames or ippis in existing_ippis:
                         skipped += 1
@@ -104,7 +103,7 @@ def upload_users(request):
             created_users = User.objects.bulk_create(users_to_create)
 
             for user_obj, row in zip(created_users, df.itertuples(index=False)):
-                members_to_create.append(Member(member=user_obj, ippis=int(getattr(row, "ippis"))))
+                members_to_create.append(Member(member=user_obj, ippis=int(float(getattr(row, "ippis")))))  # FIX: Handle float here too
 
             Member.objects.bulk_create(members_to_create)
 
@@ -116,6 +115,80 @@ def upload_users(request):
             return redirect("upload_users")
 
     return render(request, "accounts/upload_users.html")
+
+# @login_required
+# def upload_users(request):
+#     if request.method == "POST" and request.FILES.get("excel_file"):
+#         excel_file = request.FILES["excel_file"]
+#         relative_path = default_storage.save(f"upload/{excel_file.name}", ContentFile(excel_file.read()))
+#         absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+
+#         try:
+#             df = pd.read_excel(absolute_path, engine="openpyxl")
+
+#             if df.empty:
+#                 messages.error(request, "The uploaded file is empty.")
+#                 return redirect("upload_users")
+
+#             required_columns = [
+#                 "username", "first_name", "last_name", "other_name",
+#                 "date_of_birth", "department", "unit",
+#                 "member_number", "ippis"
+#             ]
+#             for col in required_columns:
+#                 if col not in df.columns:
+#                     messages.error(request, f"Missing column: {col}")
+#                     return redirect("upload_users")
+
+#             existing_usernames = set(User.objects.values_list("username", flat=True))
+#             existing_ippis = set(Member.objects.values_list("ippis", flat=True))
+
+#             users_to_create = []
+#             members_to_create = []
+#             added, skipped = 0, 0
+
+#             for _, row in df.iterrows():
+#                 try:
+#                     username = str(row["username"]).strip()
+#                     ippis = int(row["ippis"])
+
+#                     if username in existing_usernames or ippis in existing_ippis:
+#                         skipped += 1
+#                         continue
+
+#                     user = User(
+#                         username=username,
+#                         first_name=row["first_name"],
+#                         last_name=row["last_name"],
+#                         other_name=row.get("other_name", ""),
+#                         department=row["department"],
+#                         unit=row["unit"],
+#                         member_number=row["member_number"],
+#                         date_of_birth=row["date_of_birth"],
+#                     )
+#                     user.set_password("pass")
+#                     users_to_create.append(user)
+#                     added += 1
+
+#                 except Exception as e:
+#                     print(f"Row skipped due to error: {e}")
+#                     skipped += 1
+
+#             created_users = User.objects.bulk_create(users_to_create)
+
+#             for user_obj, row in zip(created_users, df.itertuples(index=False)):
+#                 members_to_create.append(Member(member=user_obj, ippis=int(getattr(row, "ippis"))))
+
+#             Member.objects.bulk_create(members_to_create)
+
+#             messages.success(request, f"{added} users added, {skipped} skipped (duplicates or errors).")
+#             return redirect("upload_users")
+
+#         except Exception as e:
+#             messages.error(request, f"Error processing file: {e}")
+#             return redirect("upload_users")
+
+#     return render(request, "accounts/upload_users.html")
 
 
 

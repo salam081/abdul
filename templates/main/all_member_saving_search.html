@@ -406,7 +406,7 @@
                             <td>
                                 <div class="serial-number">{{ forloop.counter }}</div>
                             </td>
-                            <td class="member-name" style="width: 220px;">{{ m.member.first_name }} {{ m.member.last_name }}</td>
+                            <td class="member-name" style="width: 220px;">{{ m.member.member.first_name }} {{ m.member.member.last_name }}</td>
                             <td class="member-ippis">{{ m.member.ippis }}</td>
                             <td class="amount-cell amount-deduction">₦{{ m.original_amount|floatformat:2 }}</td>
                             <td class="amount-cell">₦{{ m.month_saving|floatformat:2 }}</td>

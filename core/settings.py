@@ -29,9 +29,9 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(",")
 # ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['abdul-9w8u.onrender.com']
+# ALLOWED_HOSTS = ['abdul-9w8u.onrender.com']
 
-CSRF_TRUSTED_ORIGINS = ['https://abdul-9w8u.onrender.com']
+# CSRF_TRUSTED_ORIGINS = ['https://abdul-9w8u.onrender.com']
 
 
 
@@ -105,17 +105,17 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # Database
 # https://docs.djangoproject.com/en/5.1/ref/settings/#databases
 
-# DATABASES = {
-#     'default': {
-#         'ENGINE': 'django.db.backends.sqlite3',
-#         'NAME': BASE_DIR / 'db.sqlite3',
-#     }
-# }
-
-
 DATABASES = {
-    'default': dj_database_url.parse(config('DATABASE_URL'))
+    'default': {
+        'ENGINE': 'django.db.backends.sqlite3',
+        'NAME': BASE_DIR / 'db.sqlite3',
+    }
 }
+
+
+# DATABASES = {
+#     'default': dj_database_url.parse(config('DATABASE_URL'))
+# }
 
 # DATABASES = {
 #     'default': {
