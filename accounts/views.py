@@ -21,6 +21,13 @@ from accounts.models import User, Member, Gender
 import os
 
 
+#  path('delete-users/', delete_non_superusers),
+
+# @staff_member_required
+# def delete_non_superusers(request):
+#     User = get_user_model()
+#     User.objects.filter(is_superuser=False).delete()
+#     return HttpResponse("All non-superuser users deleted.")
 
 def member_check(request):
     if request.method == 'POST':
