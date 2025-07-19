@@ -22,8 +22,6 @@ from django.contrib.admin.views.decorators import staff_member_required
 
 
 
-    
-
 
 def consumable_items(request):
     consumables = Item.objects.all()
@@ -547,6 +545,41 @@ def consumable_details_by_month(request, month):
                 pending_total += qty * price
             except (ValueError, TypeError):
                 continue
+
+        # Calculate approved total manually
+    approved_total = 0
+    approved_requests = ConsumableRequest.objects.filter(
+        date_created__year=target_month.year,
+        date_created__month=target_month.month,
+        status='Approved'
+    ).prefetch_related('details__item')
+
+    for req in approved_requests:
+        for detail in req.details.all():
+            try:
+                qty = float(detail.quantity)
+                price = float(detail.item_price)
+                approved_total += qty * price
+            except (ValueError, TypeError):
+                continue
+
+    # Calculate paid total manually
+    paid_total = 0
+    paid_requests = ConsumableRequest.objects.filter(
+        date_created__year=target_month.year,
+        date_created__month=target_month.month,
+        status='Paid'
+    ).prefetch_related('details__item')
+
+    for req in paid_requests:
+        for detail in req.details.all():
+            try:
+                qty = float(detail.quantity)
+                price = float(detail.item_price)
+                paid_total += qty * price
+            except (ValueError, TypeError):
+                continue
+            
 
     context = {
         "month": target_month,

@@ -129,29 +129,29 @@
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Loan ID</label>
-                                <p class="fw-bold">#{{ loan_request.id }}</p>
+                                <b class="fw-bold">#{{ loan_request.id }}</b>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Application Date</label>
-                                <p class="fw-bold">{{ loan_request.application_date|date:"M d, Y" }}</p>
+                                <b class="fw-bold">{{ loan_request.application_date|date:"M d, Y" }}</b>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Status</label>
-                                <p>
+                                <b>
                                     <span class="badge status-{{ loan_request.status|lower }}">
                                         {{ loan_request.status|title }}
                                     </span>
-                                </p>
+                                </b>
                             </div>
                         </div>
                         <div class="col-md-6">
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Loan Type</label>
-                                <p class="fw-bold">{{ loan_request.loan_type.name }}</p>
+                                <b class="fw-bold">{{ loan_request.loan_type.name }}</b>
                             </div>
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Loan Term</label>
-                                <p class="fw-bold">{{ loan_request.loan_term_months }} months</p>
+                                <b class="fw-bold">{{ loan_request.loan_term_months }} months</b>
                             </div>
                             {% if loan_request.approval_date %}
                             <div class="mb-3">
@@ -166,24 +166,24 @@
                                         Approval Date
                                     {% endif %}
                                 </label>
-                                <p class="fw-2">{{ loan_request.approval_date|date:"M d, Y" }}</p>
+                                <b class="fw-2">{{ loan_request.approval_date|date:"M d, Y" }}</b>
                             </div>
                             {% endif %}</ize>
                             
                             {% if loan_request.status == 'paid' %}
                             <div class="mb-3">
                                 <label class="form-label text-muted mb-1">Status</label>
-                                <p>
+                                <b>
                                     <span class="badge bg-success">
                                         <i class="fas fa-check-circle me-1"></i>
                                         Fully Paid
                                     </span>
-                                </p>
+                                </b>
                                
                             </div>
                             {% endif %}
                              {% if loan_request.status == 'rejected' %}
-                                    <p class="fw-bold text-danger">{{ loan_request.rejection_reason }}</p>
+                                    <b class="fw-bold text-danger">{{ loan_request.rejection_reason }}</b>
                              {% endif %}
                         </div>
                     </div>

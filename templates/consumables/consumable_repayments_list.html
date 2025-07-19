@@ -15,7 +15,7 @@
                     <!-- Summary Cards -->
                     <div class="row mb-4">
                         <div class="col-md-6">
-                            <div class="card bg-success text-white">
+                             <div class="card-header shadow border-success" style="border-left: 5px solid #15e044;">
                                 <div class="card-body text-center">
                                     <h4>₦{{ total_paid|floatformat:0 }}</h4>
                                     <p class="mb-0">Total Paid</p>
@@ -23,7 +23,7 @@
                             </div>
                         </div>
                         <div class="col-md-6">
-                            <div class="card bg-warning text-dark">
+                             <div class="card-header shadow border-warning" style="border-left: 5px solid #ebe347;">
                                 <div class="card-body text-center">
                                     <h4>₦{{ total_remaining|floatformat:0 }}</h4>
                                     <p class="mb-0">Total Remaining</p>
@@ -67,8 +67,9 @@
 
                     <!-- Repayments Table -->
                     <div class="table-responsive">
-                        <table class="table table-hover">
-                            <thead class="table-dark">
+                         <table class=" table table-hover">
+                          <thead class=" border-success" style="border-left: 5px solid #10a343; border-right: 5px solid #ebe347;">
+                          
                                 <tr>
                                     <!-- <th>Date</th> -->
                                     <th class="text-nowrap" style="min-width: 120px;">Request ID</th>

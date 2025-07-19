@@ -173,9 +173,9 @@ def loan_request_view(request):
         messages.error(request, "You must be a registered member to request a loan.")
         return redirect("dashboard")
 
-    # loan_types = LoanType.objects.all()
+    loan_types = LoanType.objects.filter(available=True)
     # loan_types = LoanType.objects.filter(name__icontains=current_month)
-    loan_types = LoanType.objects.filter(name__icontains=current_month, available=True)
+    # loan_types = LoanType.objects.filter(name__icontains=current_month, available=True)
 
     bank_names = BankName.objects.all()
 
@@ -321,16 +321,16 @@ def member_request_consumable(request):
     user = request.user
 
     # ✅ Check if user has paid LoanRequestFee for the current month
-    now = timezone.now()
-    has_paid = LoanRequestFee.objects.filter(
-        member=request.user.member,
-        created_at__year=now.year,
-        created_at__month=now.month
-    ).exists()
+    # now = timezone.now()
+    # has_paid = LoanRequestFee.objects.filter(
+    #     member=request.user.member,
+    #     created_at__year=now.year,
+    #     created_at__month=now.month
+    # ).exists()
 
-    if not has_paid:
-        messages.error(request, " pay your consumables request form fee and  apply for consumables.")
-        return redirect('member_dashboard')
+    # if not has_paid:
+    #     messages.error(request, " pay your consumables request form fee and  apply for consumables.")
+    #     return redirect('member_dashboard')
 
     # Fetch available items
     items = Item.objects.filter(available=True)

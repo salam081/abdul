@@ -112,6 +112,11 @@
                                         {{ consumable_request.status }}
                                     </span>
                                 </p>
+                                <p><strong>Approved By:</strong> 
+                                    <span class="text-success">
+                                        {{ consumable_request.approved_by.first_name }}  {{ consumable_request.approved_by.last_name }}
+                                    </span>
+                                </p>
                             </div>
                             <div class="col-md-6">
                                 <p><strong>Requested By:</strong> {{ consumable_request.user.get_full_name|default:consumable_request.user.username }}</p>

@@ -49,7 +49,7 @@
 
     .form-floating>.form-control {
         border-radius: 10px;
-        border: 2px solid #e9ecef;
+        border: 1px solid #e9ecef;
         transition: all 0.3s ease;
     }
 
@@ -66,13 +66,13 @@
     .btn-search {
         /* background: linear-gradient(135deg, #d254db 0%, #a3c03c 100%); */
         border: none;
-        padding: 10px 20px;
+        padding: 5px 10px;
         border-radius: 25px;
-        font-weight: 600;
+        font-weight: 400;
         text-transform: uppercase;
         letter-spacing: 0.5px;
         transition: all 0.3s ease;
-        box-shadow: 0 4px 15px rgba(102, 126, 234, 0.3);
+        box-shadow: 0 4px 15px rgba(79, 102, 205, 0.3);
     }
 
     .btn-search:hover {
@@ -89,7 +89,7 @@
     }
 
     .data-card .card-header {
-        /* background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); */
+        background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         color: white;
         border: none;
         padding: 1.2rem;
@@ -113,28 +113,28 @@
     }
 
     .table-modern tbody tr {
-        transition: all 0.3s ease;
+        /* transition: all 0.3s ease; */
         border-bottom: 1px solid #f8f9fa;
     }
 
     .table-modern tbody tr:hover {
         background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
-        transform: translateY(-1px);
+        /* transform: translateY(-1px); */
         box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
 
     .table-modern td {
-        padding: 1rem;
+        /* padding: 1rem; */
         vertical-align: middle;
         border: none;
-        font-size: 0.95rem;
+        font-size: 0.75rem;
     }
 
     .serial-number {
         background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
         color: white;
-        width: 30px;
-        height: 30px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -146,12 +146,18 @@
     .member-name {
         font-weight: 600;
         color: #2c3e50;
+        
+    }
+    .member-ippis {
+        font-weight: 600;
+        color: #2c3e50;
+        
     }
 
     .month-badge {
         background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 100%);
         color: #d35400;
-        padding: 0.5rem 1rem;
+        padding: 0.1rem 1rem;
         border-radius: 20px;
         font-weight: 600;
         font-size: 0.85rem;
@@ -193,7 +199,7 @@
     .pagination-wrapper {
         background: white;
         border-radius: 15px;
-        padding: 1.5rem;
+        padding: 1.3rem;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         margin-top: 2rem;
     }
@@ -201,6 +207,7 @@
     .pagination-info {
         color: #6c757d;
         font-weight: 500;
+        padding: 12px;
     }
 
     .pagination .page-link {
@@ -234,7 +241,7 @@
     .stat-card {
         background: white;
         border-radius: 15px;
-        padding: 1.3rem;
+        padding: 1.1rem;
         box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         border: none;
         transition: all 0.3s ease;
@@ -246,8 +253,8 @@
     }
 
     .stat-icon {
-        width: 40px;
-        height: 40px;
+        width: 20px;
+        height: 20px;
         border-radius: 50%;
         display: flex;
         align-items: center;
@@ -261,7 +268,7 @@
         color: white;
     }
 
-    .stat-icon.savings {
+    .stat-icon.savings::before {
         background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
         color: white;
     }
@@ -336,7 +343,7 @@
                         
                     </div>
                     <div class="col-md-2">
-                            <a  href="{% url 'all_member_saving_search' %}" class="btn btn-search w-100 h-100 bg-white text-danger p-3">Clear Filters</a>
+                            <a  href="{% url 'all_member_saving_search' %}" class="btn btn-search w-100 h-100 bg-white text-danger p-3">Clear</a>
                     </div>
                 </div>
             </form>
@@ -382,11 +389,12 @@
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-modern">
+                <table class="table table-modern text-center">
                     <thead>
                         <tr>
                             <th width="80">S/N</th>
                             <th>Member</th>
+                            <th>Ippis</th>
                             <th>Monthly Deduction</th>
                             <th>Monthly Savings</th>
                             <th>Month</th>
@@ -398,7 +406,8 @@
                             <td>
                                 <div class="serial-number">{{ forloop.counter }}</div>
                             </td>
-                            <td class="member-name">{{ m.member }}</td>
+                            <td class="member-name" style="width: 220px;">{{ m.member.member.first_name }} {{ m.member.member.last_name }}</td>
+                            <td class="member-ippis">{{ m.member.ippis }}</td>
                             <td class="amount-cell amount-deduction">₦{{ m.original_amount|floatformat:2 }}</td>
                             <td class="amount-cell">₦{{ m.month_saving|floatformat:2 }}</td>
                             <td><span class="month-badge text-nowrap" style="min-width: 120px;">{{ m.month }}</span></td>
@@ -420,21 +429,16 @@
                     </tfoot>
 
                 </table>
-            </div>
-
+                <!-- Pagination -->
+    <!-- <div class="pagination-wrapper col-md-12"> -->
+        <div class="pagination-info">
+         <span> page <strong>{{ member.number }}</strong> of <strong>{{ member.paginator.num_pages }}</strong></span>
+            <span class="text-muted">• Total {{ member.paginator.count }} records</span>
         </div>
-    </div>
-
-    <!-- Pagination -->
-    <div class="pagination-wrapper">
         <div class="d-flex justify-content-between align-items-center">
-            <div class="pagination-info">
-    <span> page <strong>{{ member.number }}</strong> of <strong>{{ member.paginator.num_pages }}</strong></span>
-                <span class="text-muted">• Total {{ member.paginator.count }} records</span>
-            </div>
 
             <nav>
-                <ul class="pagination mb-0">
+                <ul class="pagination mb-0 ">
                     {% if member.has_previous %}
                     <li class="page-item">
                         <a class="page-link"
@@ -446,11 +450,11 @@
 
                     {% for num in member.paginator.page_range %}
                     {% if member.number == num %}
-                    <li class="page-item active">
+                    <li class="page-item active ">
                         <span class="page-link">{{ num }}</span>
                     </li>
-                    {% elif num >= member.number|add:'-2' and num <= member.number|add:'2' %} <li class="page-item">
-        <a class="page-link" href="?page={{ num }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">{{num }}</a>
+                    {% elif num >= member.number|add:'-2' and num <= member.number|add:'5' %} <li class="page-item">
+                      <a class="page-link" href="?page={{ num }}&datefrom={{ datefrom }}&dateto={{ dateto }}{% if status %}&status={{ status }}{% endif %}">{{num }}</a>
                         </li>
                         {% endif %}
                         {% endfor %}
@@ -467,6 +471,12 @@
             </nav>
         </div>
     </div>
+            </div>
+
+        </div>
+    </div>
+
+    
 
     {% else %}
     <!-- Empty State -->

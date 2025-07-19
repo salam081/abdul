@@ -5,10 +5,10 @@
 
 {% block content %}
 <style>
-        .card-header {
+        /* .card-header {
             background: linear-gradient(135deg, #73c68c 0%, #bbe948 100%);
             color: white;
-        }
+        } */
         .btn-primary {
             background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             border: none;
@@ -34,59 +34,59 @@
             padding: 1rem;
         }
     </style>
-<div class="container-fluid">
+<div class="container mt-4">
     <div class="row">
         <div class="col-12">
             <div class="card shadow">
-                <div class="card-header">
+                <div class="card-header border-warning" style="border-left: 5px solid #ebe347;">
                     <h4 class="mb-0">
                         <i class="fas fa-chart-line me-2"></i>
                         Consumables for {{ month|date:'F Y' }}
                     </h4>
                 </div>
                 <div class="card-body">
-                    <!-- Summary Cards -->
-                    <div class="row mb-4">
-                        <div class="col-md-3">
-                            <div class="card bg-success text-white">
-                                <div class="card-body text-center">
-                                    <h4>₦{{ approved_total|floatformat:0 }}</h4>
-                                    <p class="mb-0">Approved Total</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-warning text-dark">
-                                <div class="card-body text-center">
-                                    <h4>₦{{ pending_total|floatformat:0 }}</h4>
-                                    <p class="mb-0">Pending Total</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-info text-white">
-                                <div class="card-body text-center">
-                                    <h4>₦{{ paid_total|floatformat:0 }}</h4>
-                                    <p class="mb-0">Paid Total</p>
-                                </div>
-                            </div>
-                        </div>
-                        <div class="col-md-3">
-                            <div class="card bg-primary text-white">
-                                <div class="card-body text-center">
-                                    <h4>{{ grouped_data|length }}</h4>
-                                    <p class="mb-0">Total Member</p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
+                  <!-- Summary Cards -->
+<div class="row mb-4">
+    <div class="col-md-3">
+        <div class="card border-success shadow" style="border-left: 5px solid #28a745;">
+            <div class="card-body text-center">
+                <h4 class="text-success">₦{{ approved_total|floatformat:0 }}</h4>
+                <p class="mb-0 text-muted">Approved Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-2">
+        <div class="card border-warning shadow" style="border-left: 5px solid #ffc107;">
+            <div class="card-body text-center">
+                <h4 class="text-warning">₦{{ pending_total|floatformat:0 }}</h4>
+                <p class="mb-0 text-muted">Pending Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-2">
+        <div class="card border-info shadow" style="border-left: 5px solid #17a2b8;">
+            <div class="card-body text-center">
+                <h4 class="text-info">₦{{ paid_total|floatformat:0 }}</h4>
+                <p class="mb-0 text-muted">Paid Total</p>
+            </div>
+        </div>
+    </div>
+    <div class="col-md-3 mt-2">
+        <div class="card border-primary shadow" style="border-left: 5px solid #007bff;">
+            <div class="card-body text-center">
+                <h4 class="text-primary">{{ grouped_data|length }}</h4>
+                <p class="mb-0 text-muted">Total Member</p>
+            </div>
+        </div>
+    </div>
+</div>
 
                     <!-- User Details -->
                    <!-- User Details -->
 {% if grouped_data %}
 <div class="table-responsive">
     <table class="table table-hover">
-        <thead class="table-dark">
+        <thead class=" border-warning" style="border-left: 5px solid #ebe347; border-right: 5px solid #ebe347;">
             <tr>
                 <th>Member</th>
                 <th>Items</th>
@@ -149,10 +149,10 @@
     </table>
 </div>
 {% else %}
-<div class="text-center py-5">
+<div class="text-center py-3">
     <i class="fas fa-users fa-5x text-muted mb-4"></i>
     <h3 class="text-muted">No Data Found</h3>
-    <p class="text-muted">No consumable requests found for {{ month|date:'F Y' }}.</p>
+    <p class="text-muted fs-5">No Approved consumable requests found for {{ month|date:'F Y' }}.</p>
 </div>
 {% endif %}
 
