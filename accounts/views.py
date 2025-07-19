@@ -36,85 +36,6 @@ def member_check(request):
     return render(request,'accounts/member_check.html')
 
 
-# @login_required
-# def upload_users(request):
-#     if request.method == "POST" and request.FILES.get("excel_file"):
-#         excel_file = request.FILES["excel_file"]
-#         relative_path = default_storage.save(f"upload/{excel_file.name}", ContentFile(excel_file.read()))
-#         absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
-
-#         try:
-#             df = pd.read_excel(absolute_path, engine="openpyxl")
-
-#             if df.empty:
-#                 messages.error(request, "The uploaded file is empty.")
-#                 return redirect("upload_users")
-
-#             required_columns = [
-#                 "username", "first_name", "last_name", "other_name",
-#                 "date_of_birth", "department", "unit",
-#                 "member_number", "ippis","gender","group","religion"
-#             ]
-#             for col in required_columns:
-#                 if col not in df.columns:
-#                     messages.error(request, f"Missing column: {col}")
-#                     return redirect("upload_users")
-
-#             added, skipped = 0, 0
-
-#             for _, row in df.iterrows():
-#                 try:
-#                     username = str(row["username"]).strip()
-#                     ippis = int(row["ippis"])
-#                     member_number = str(row["member_number"]).strip()
-
-#                     if User.objects.filter(username=username).exists() or Member.objects.filter(ippis=ippis).exists():
-#                         skipped += 1
-#                         continue
-#                      # Get foreign key values
-#                     gender = Gender.objects.filter(id=int(row["gender"])).first()
-#                     group = UserGroup.objects.filter(id=int(row["group"])).first()
-#                     religion = Religion.objects.filter(id=int(row["religion"])).first()
-
-#                     if not all([gender,group,religion, ]):#group, religion
-#                         skipped += 1
-#                         continue
-
-#                     user = User.objects.create(
-#                         username=username,
-#                         first_name=row["first_name"],
-#                         last_name=row["last_name"],
-#                         other_name=row.get("other_name", ""),
-#                         department=row["department"],
-#                         unit=row["unit"],
-#                         member_number=row["member_number"],
-#                         date_of_birth=row["date_of_birth"],
-#                         gender=gender,
-#                         group=group,
-#                         religion=religion
-#                     )
-#                     user.set_password('pass')
-#                     user.save()
-#                     Member.objects.create(
-#                         member=user,
-#                         ippis=ippis
-#                     )
-
-#                     added += 1
-
-#                 except Exception as e:
-#                     skipped += 1
-#                     print(f"Row skipped due to error: {e}")
-
-#             messages.success(request, f"{added} users added, {skipped} skipped (duplicates or errors).")
-#             return redirect("upload_users")
-
-#         except Exception as e:
-#             messages.error(request, f"Error processing file: {e}")
-#             return redirect("upload_users")
-
-#     return render(request, "accounts/upload_users.html")
-
 @login_required
 def upload_users(request):
     if request.method == "POST" and request.FILES.get("excel_file"):
@@ -132,7 +53,7 @@ def upload_users(request):
             required_columns = [
                 "username", "first_name", "last_name", "other_name",
                 "date_of_birth", "department", "unit",
-                "member_number", "ippis", "gender", "group", "religion"
+                "member_number", "ippis"
             ]
             for col in required_columns:
                 if col not in df.columns:
@@ -142,10 +63,6 @@ def upload_users(request):
             existing_usernames = set(User.objects.values_list("username", flat=True))
             existing_ippis = set(Member.objects.values_list("ippis", flat=True))
 
-            gender_map = {g.id: g for g in Gender.objects.all()}
-            group_map = {g.id: g for g in UserGroup.objects.all()}
-            religion_map = {r.id: r for r in Religion.objects.all()}
-
             users_to_create = []
             members_to_create = []
             added, skipped = 0, 0
@@ -154,17 +71,8 @@ def upload_users(request):
                 try:
                     username = str(row["username"]).strip()
                     ippis = int(row["ippis"])
-                    member_number = str(row["member_number"]).strip()
 
                     if username in existing_usernames or ippis in existing_ippis:
-                        skipped += 1
-                        continue
-
-                    gender = gender_map.get(int(row["gender"]))
-                    group = group_map.get(int(row["group"]))
-                    religion = religion_map.get(int(row["religion"]))
-
-                    if not all([gender, group, religion]):
                         skipped += 1
                         continue
 
@@ -177,9 +85,6 @@ def upload_users(request):
                         unit=row["unit"],
                         member_number=row["member_number"],
                         date_of_birth=row["date_of_birth"],
-                        gender=gender,
-                        group=group,
-                        religion=religion,
                     )
                     user.set_password("pass")
                     users_to_create.append(user)
@@ -189,10 +94,8 @@ def upload_users(request):
                     print(f"Row skipped due to error: {e}")
                     skipped += 1
 
-            # Bulk create users
             created_users = User.objects.bulk_create(users_to_create)
 
-            # Prepare Member entries based on created users
             for user_obj, row in zip(created_users, df.itertuples(index=False)):
                 members_to_create.append(Member(member=user_obj, ippis=int(getattr(row, "ippis"))))
 
@@ -206,7 +109,6 @@ def upload_users(request):
             return redirect("upload_users")
 
     return render(request, "accounts/upload_users.html")
-
 
 
 
