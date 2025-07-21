@@ -450,7 +450,7 @@
                     <div class="stat-value">₦{{ investment_total|floatformat:0|intcomma }}</div>
                     <div class="stat-change positive">
                         <i class="fas fa-chart-line"></i>
-                        <span class="fs-5">Loanable: ₦{{ loanable_total|floatformat:0|intcomma }}</span>
+                        <span class="fs-6">Loanable: ₦{{ loanable_total|floatformat:0|intcomma }}</span>
                     </div>
                 </div>
                 <div class="stat-icon investment">
@@ -484,7 +484,7 @@
                     <div class="stat-value">₦{{ total_remaining|floatformat:0|intcomma }}</div>
                     <div class="stat-change positive">
                         <i class="fas fa-shopping-cart"></i>
-                        <span class="fs-5">{{ approved_consumable|length }} active purchase{% if approved_consumable|length != 1 %}s{% endif %}</span>
+                        <span class="fs-6">{{ approved_consumable|length }} active purchase{% if approved_consumable|length != 1 %}s{% endif %}</span>
                     </div>
                 </div>
                 <div class="stat-icon consumable">
