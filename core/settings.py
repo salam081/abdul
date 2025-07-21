@@ -29,9 +29,9 @@ DEBUG = config('DEBUG', cast=bool)
 
 ALLOWED_HOSTS = config('ALLOWED_HOSTS').split(",")
 # ALLOWED_HOSTS = ['*']
-ALLOWED_HOSTS = ['abdul-9w8u.onrender.com']
+# ALLOWED_HOSTS = ['abdul-9w8u.onrender.com']
 
-CSRF_TRUSTED_ORIGINS = ['https://abdul-9w8u.onrender.com']
+# CSRF_TRUSTED_ORIGINS = ['https://abdul-9w8u.onrender.com']
 
 
 
