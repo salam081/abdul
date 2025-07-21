@@ -143,39 +143,6 @@ def all_member_saving_search(request):
     return render(request, 'main/all_member_saving_search.html', context)
 
 
-
-# def filter_requests(datefrom, dateto, ):
-#     filtered_requests = Savings.objects.all() 
-
-#     if datefrom:
-#         filtered_requests = filtered_requests.filter(month__gte=datefrom)
-#     if dateto:
-#         filtered_requests = filtered_requests.filter(month__lte=dateto)
-   
-#     return filtered_requests 
-
-# def all_member_saving_search(request):
-#     datefrom = request.GET.get('datefrom')
-#     dateto = request.GET.get('dateto')
-#     status = request.GET.get('status')
-
-#     member = None
-
-#     if datefrom or dateto:
-#         filtered = filter_requests(datefrom, dateto)
-#         paginator = Paginator(filtered, 100)  # 50 per page
-#         page_number = request.GET.get('page')
-#         member = paginator.get_page(page_number)
-
-#     context = {
-#         'member': member,
-#         'status': status,
-#         'datefrom': datefrom,
-#         'dateto': dateto,
-#     }
-
-#     return render(request, 'main/all_member_saving_search.html', context)
-
 def add_individual_member_savings(request, id):
     member = get_object_or_404(Member, id=id)
     if request.method == 'POST':
@@ -283,7 +250,7 @@ def upload_savings(request):
                 messages.info(request,f"Skipped IPPIS numbers: {skipped_ippis_str} - Savings already exist for these members for {month_date.strftime('%B %Y')}.")
 
             # Provide feedback on the result
-            messages.success( request,f"Upload complete: {total_added} added, {total_updated} updated, {total_skipped} skipped." )
+            messages.success( request,f"{total_added}  Upload complete: successful, {total_updated} updated, {total_skipped} skipped." )
             return redirect(request.path)
 
         except Exception as e:

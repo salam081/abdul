@@ -12,6 +12,12 @@ from django.utils import timezone
 from django.http import HttpResponse
 from xhtml2pdf import pisa
 from io import BytesIO
+from collections import defaultdict
+from django.db.models import Sum
+from decimal import Decimal
+import pandas as pd
+from datetime import datetime
+from .models import LoanRequest, LoanRepayback
 import openpyxl
 from django.db.models import Q, Prefetch
 from django.core.paginator import Paginator
@@ -558,6 +564,118 @@ def get_loan_types_for_year(request):
     return JsonResponse({"loan_types": list(loan_types)})
 
 
+# def upload_loan_payment(request):
+#     # Group by year and loan type
+#     loans = LoanRequest.objects.annotate(year=ExtractYear('application_date')) \
+#         .values('year', 'loan_type__name').distinct().order_by('-year', 'loan_type__name')
+    
+#     year_to_loan_types = defaultdict(list)
+#     for loan in loans:
+#         year_to_loan_types[loan['year']].append(loan['loan_type__name'])
+
+#     if request.method == "POST":
+#         selected_year = request.POST.get("selected_year")
+#         selected_type = request.POST.get("selected_type")
+#         file = request.FILES.get("excel_file")
+
+#         if not selected_year or not selected_type or not file:
+#             messages.error(request, "Please select year, loan type, and upload a file.")
+#             return redirect("upload_loan_payment")
+
+#         try:
+#             selected_year = int(selected_year)
+#         except ValueError:
+#             messages.error(request, "Invalid year selected.")
+#             return redirect("upload_loan_payment")
+
+#         try:
+#             df = pd.read_excel(file)
+#         except Exception as e:
+#             messages.error(request, f"Error reading Excel file: {e}")
+#             return redirect("upload_loan_payment")
+
+#         required_cols = {"IPPIS", "Amount Paid", "Repayment Date"}
+#         if not required_cols.issubset(df.columns):
+#             messages.error(request, "Excel must include 'IPPIS', 'Amount Paid', and 'Repayment Date'")
+#             return redirect("upload_loan_payment")
+
+#         # Filter matching loans
+#         loan_requests = LoanRequest.objects.filter(
+#             application_date__year=selected_year,
+#             loan_type__name=selected_type
+#         ).select_related("member")
+
+#         ippis_to_request = {
+#             str(loan.member.ippis): loan
+#             for loan in loan_requests
+#             if loan.member and loan.member.ippis
+#         }
+
+#         uploaded = 0
+#         skipped = []
+
+#         for _, row in df.iterrows():
+#             ippis = str(row["IPPIS"]).strip()
+#             amount = row["Amount Paid"]
+
+#             try:
+#                 repayment_month = pd.to_datetime(row["Repayment Date"]).date().replace(day=1)
+#             except Exception:
+#                 skipped.append(ippis)
+#                 continue
+
+#             loan_request = ippis_to_request.get(ippis)
+#             if not loan_request:
+#                 skipped.append(ippis)
+#                 continue
+
+#             if LoanRepayback.objects.filter(loan_request=loan_request, repayment_date=repayment_month).exists():
+#                 skipped.append(ippis)
+#                 continue
+
+#             # from django.db.models import Sum
+
+#             # Calculate total paid before this new repayment
+#             total_paid_before = LoanRepayback.objects.filter(
+#                 loan_request=loan_request
+#             ).aggregate(Sum("amount_paid"))["amount_paid__sum"] or Decimal("0.00")
+
+#             # Convert current payment to Decimal
+#             current_payment = Decimal(amount)
+
+#             # Calculate new total paid
+#             new_total_paid = total_paid_before + current_payment
+
+#             # Calculate balance
+#             approved = loan_request.approved_amount or Decimal("0.00")
+#             # balance_remaining = approved - new_total_paid
+#             balance_remaining = max(Decimal("0.00"), approved - new_total_paid)
+
+#             LoanRepayback.objects.create(
+#                 loan_request=loan_request,
+#                 amount_paid=current_payment,
+#                 repayment_date=repayment_month,
+#                 balance_remaining=balance_remaining,
+#                 created_by=request.user
+#             )
+
+#             uploaded += 1
+
+#         messages.success(request, f"{uploaded} loan repayment(s) uploaded.")
+#         if skipped:
+#             messages.warning(request, f"Skipped IPPIS: {', '.join(skipped)}")
+
+#         return redirect("upload_loan_payment")
+
+#     context = {
+#         "year_to_loan_types": dict(year_to_loan_types),
+#     }
+#     return render(request, "loan/upload_loan_payment.html", context)
+
+
+
+
+@login_required
 def upload_loan_payment(request):
     # Group by year and loan type
     loans = LoanRequest.objects.annotate(year=ExtractYear('application_date')) \
@@ -578,14 +696,9 @@ def upload_loan_payment(request):
 
         try:
             selected_year = int(selected_year)
-        except ValueError:
-            messages.error(request, "Invalid year selected.")
-            return redirect("upload_loan_payment")
-
-        try:
             df = pd.read_excel(file)
         except Exception as e:
-            messages.error(request, f"Error reading Excel file: {e}")
+            messages.error(request, f"Error processing file: {e}")
             return redirect("upload_loan_payment")
 
         required_cols = {"IPPIS", "Amount Paid", "Repayment Date"}
@@ -593,27 +706,34 @@ def upload_loan_payment(request):
             messages.error(request, "Excel must include 'IPPIS', 'Amount Paid', and 'Repayment Date'")
             return redirect("upload_loan_payment")
 
-        # Filter matching loans
+        # Fetch all loan requests for year and type
         loan_requests = LoanRequest.objects.filter(
             application_date__year=selected_year,
             loan_type__name=selected_type
         ).select_related("member")
 
         ippis_to_request = {
-            str(loan.member.ippis): loan
-            for loan in loan_requests
-            if loan.member and loan.member.ippis
+            str(lr.member.ippis): lr
+            for lr in loan_requests
+            if lr.member and lr.member.ippis
         }
 
-        uploaded = 0
+        # Fetch all existing repayments for these loans (to avoid duplicate entries)
+        existing_repayments = LoanRepayback.objects.filter(
+            loan_request__in=loan_requests
+        ).values_list('loan_request_id', 'repayment_date')
+
+        existing_keys = set((lr_id, repayment_date.replace(day=1)) for lr_id, repayment_date in existing_repayments)
+
+        repayments_to_create = []
         skipped = []
+        uploaded = 0
 
         for _, row in df.iterrows():
             ippis = str(row["IPPIS"]).strip()
-            amount = row["Amount Paid"]
-
             try:
-                repayment_month = pd.to_datetime(row["Repayment Date"]).date().replace(day=1)
+                repayment_date = pd.to_datetime(row["Repayment Date"]).date().replace(day=1)
+                current_payment = Decimal(row["Amount Paid"])
             except Exception:
                 skipped.append(ippis)
                 continue
@@ -623,37 +743,30 @@ def upload_loan_payment(request):
                 skipped.append(ippis)
                 continue
 
-            if LoanRepayback.objects.filter(loan_request=loan_request, repayment_date=repayment_month).exists():
+            if (loan_request.id, repayment_date) in existing_keys:
                 skipped.append(ippis)
                 continue
 
-            # from django.db.models import Sum
+            # Get total paid so far
+            total_paid = LoanRepayback.objects.filter(loan_request=loan_request) \
+                .aggregate(total=Sum("amount_paid"))["total"] or Decimal("0.00")
 
-            # Calculate total paid before this new repayment
-            total_paid_before = LoanRepayback.objects.filter(
-                loan_request=loan_request
-            ).aggregate(Sum("amount_paid"))["amount_paid__sum"] or Decimal("0.00")
+            approved_amount = loan_request.approved_amount or Decimal("0.00")
+            balance = max(Decimal("0.00"), approved_amount - (total_paid + current_payment))
 
-            # Convert current payment to Decimal
-            current_payment = Decimal(amount)
-
-            # Calculate new total paid
-            new_total_paid = total_paid_before + current_payment
-
-            # Calculate balance
-            approved = loan_request.approved_amount or Decimal("0.00")
-            # balance_remaining = approved - new_total_paid
-            balance_remaining = max(Decimal("0.00"), approved - new_total_paid)
-
-            LoanRepayback.objects.create(
+            repayments_to_create.append(LoanRepayback(
                 loan_request=loan_request,
                 amount_paid=current_payment,
-                repayment_date=repayment_month,
-                balance_remaining=balance_remaining,
+                repayment_date=repayment_date,
+                balance_remaining=balance,
                 created_by=request.user
-            )
+            ))
 
             uploaded += 1
+
+        if repayments_to_create:
+            with transaction.atomic():
+                LoanRepayback.objects.bulk_create(repayments_to_create, batch_size=100)
 
         messages.success(request, f"{uploaded} loan repayment(s) uploaded.")
         if skipped:
@@ -661,10 +774,10 @@ def upload_loan_payment(request):
 
         return redirect("upload_loan_payment")
 
-    context = {
+    return render(request, "loan/upload_loan_payment.html", {
         "year_to_loan_types": dict(year_to_loan_types),
-    }
-    return render(request, "loan/upload_loan_payment.html", context)
+    })
+
 
 
 def filtered_loan_repayments(request):

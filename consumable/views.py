@@ -21,8 +21,6 @@ from django.contrib.auth.decorators import login_required
 from django.contrib.admin.views.decorators import staff_member_required
 
 
-
-
 def consumable_items(request):
     consumables = Item.objects.all()
     
@@ -338,15 +336,13 @@ def add_single_consumable_payment(request):
 
 
 
-
-
 def upload_consumable_payment(request):
     available_requests = ConsumableRequest.objects.filter(status="Approved").select_related("user", "user__member")
     grouped_by_month = defaultdict(list)
 
     for req in available_requests:
         if req.balance() > 0:
-            month_key = req.date_created.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
+            month_key = req.date_created.replace(day=1).date()
             grouped_by_month[month_key].append(req)
 
     grouped_list = sorted(grouped_by_month.items())
@@ -376,54 +372,44 @@ def upload_consumable_payment(request):
             messages.error(request, "Excel must contain 'IPPIS', 'Amount Paid', and 'Repayment Date' columns.")
             return redirect("upload_consumable_payment")
 
-        # Filter requests for the selected request month
         monthly_requests = grouped_by_month.get(selected_request_month, [])
-        ippis_map = defaultdict(list)
+        ippis_map = {
+            str(req.user.member.ippis): req
+            for req in monthly_requests
+            if hasattr(req.user, "member") and req.user.member.ippis
+        }
 
-        for req in monthly_requests:
-            member = getattr(req.user, "member", None)
-            if member and member.ippis:
-                ippis_map[str(member.ippis)].append(req)
-
-        uploaded = 0
+        repayments = []
         skipped = []
+        uploaded = 0
 
-        for _, row in df.iterrows():
-            ippis = str(row["IPPIS"]).strip()
-            amount = row["Amount Paid"]
+        with transaction.atomic():
+            for _, row in df.iterrows():
+                ippis = str(row["IPPIS"]).strip()
+                amount = row["Amount Paid"]
 
-            try:
+                req = ippis_map.get(ippis)
+                if not req:
+                    skipped.append(ippis)
+                    continue
+
                 repayment_month = selected_request_month
-            except Exception:
-                skipped.append(ippis)
-                continue
 
-            possible_requests = ippis_map.get(ippis)
-            if not possible_requests:
-                skipped.append(ippis)
-                continue
+                if PaybackConsumable.objects.filter(
+                    consumable_request=req,
+                    repayment_date=repayment_month
+                ).exists():
+                    skipped.append(ippis)
+                    continue
 
-            matched_request = None
+                repayments.append(PaybackConsumable(
+                    consumable_request=req,
+                    amount_paid=Decimal(amount),
+                    repayment_date=repayment_month
+                ))
+                uploaded += 1
 
-            for req in possible_requests:
-                if req.date_created.replace(day=1).date() == selected_request_month:
-                    if not PaybackConsumable.objects.filter(
-                        consumable_request=req,
-                        repayment_date=repayment_month
-                    ).exists():
-                        matched_request = req
-                        break
-
-            if not matched_request:
-                skipped.append(ippis)
-                continue
-
-            PaybackConsumable.objects.create(
-                consumable_request=matched_request,
-                amount_paid=Decimal(amount),
-                repayment_date=repayment_month
-            )
-            uploaded += 1
+            PaybackConsumable.objects.bulk_create(repayments)
 
         messages.success(request, f"{uploaded} payment(s) uploaded successfully.")
         if skipped:
@@ -433,6 +419,102 @@ def upload_consumable_payment(request):
 
     context = {"grouped_list": grouped_list}
     return render(request, "consumables/upload_consumable_payment.html", context)
+
+
+
+# def upload_consumable_payment(request):
+#     available_requests = ConsumableRequest.objects.filter(status="Approved").select_related("user", "user__member")
+#     grouped_by_month = defaultdict(list)
+
+#     for req in available_requests:
+#         if req.balance() > 0:
+#             month_key = req.date_created.replace(day=1, hour=0, minute=0, second=0, microsecond=0).date()
+#             grouped_by_month[month_key].append(req)
+
+#     grouped_list = sorted(grouped_by_month.items())
+
+#     if request.method == "POST":
+#         selected_request_month_str = request.POST.get("selected_month")
+#         file = request.FILES.get("excel_file")
+
+#         if not selected_request_month_str or not file:
+#             messages.error(request, "Both month and file are required.")
+#             return redirect("upload_consumable_payment")
+
+#         try:
+#             selected_request_month = datetime.strptime(selected_request_month_str, "%Y-%m").date().replace(day=1)
+#         except ValueError:
+#             messages.error(request, "Invalid month format.")
+#             return redirect("upload_consumable_payment")
+
+#         try:
+#             df = pd.read_excel(file)
+#         except Exception as e:
+#             messages.error(request, f"Error reading Excel file: {e}")
+#             return redirect("upload_consumable_payment")
+
+#         required_cols = {"IPPIS", "Amount Paid", "Repayment Date"}
+#         if not required_cols.issubset(df.columns):
+#             messages.error(request, "Excel must contain 'IPPIS', 'Amount Paid', and 'Repayment Date' columns.")
+#             return redirect("upload_consumable_payment")
+
+#         # Filter requests for the selected request month
+#         monthly_requests = grouped_by_month.get(selected_request_month, [])
+#         ippis_map = defaultdict(list)
+
+#         for req in monthly_requests:
+#             member = getattr(req.user, "member", None)
+#             if member and member.ippis:
+#                 ippis_map[str(member.ippis)].append(req)
+
+#         uploaded = 0
+#         skipped = []
+
+#         for _, row in df.iterrows():
+#             ippis = str(row["IPPIS"]).strip()
+#             amount = row["Amount Paid"]
+
+#             try:
+#                 repayment_month = selected_request_month
+#             except Exception:
+#                 skipped.append(ippis)
+#                 continue
+
+#             possible_requests = ippis_map.get(ippis)
+#             if not possible_requests:
+#                 skipped.append(ippis)
+#                 continue
+
+#             matched_request = None
+
+#             for req in possible_requests:
+#                 if req.date_created.replace(day=1).date() == selected_request_month:
+#                     if not PaybackConsumable.objects.filter(
+#                         consumable_request=req,
+#                         repayment_date=repayment_month
+#                     ).exists():
+#                         matched_request = req
+#                         break
+
+#             if not matched_request:
+#                 skipped.append(ippis)
+#                 continue
+
+#             PaybackConsumable.objects.create(
+#                 consumable_request=matched_request,
+#                 amount_paid=Decimal(amount),
+#                 repayment_date=repayment_month
+#             )
+#             uploaded += 1
+
+#         messages.success(request, f"{uploaded} payment(s) uploaded successfully.")
+#         if skipped:
+#             messages.warning(request, f"Skipped IPPIS: {', '.join(skipped)}")
+
+#         return redirect("upload_consumable_payment")
+
+#     context = {"grouped_list": grouped_list}
+#     return render(request, "consumables/upload_consumable_payment.html", context)
 
 
 

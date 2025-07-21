@@ -2,11 +2,14 @@ from django.shortcuts import render,redirect,get_object_or_404
 from django_countries import countries
 from django.contrib import messages
 from.models import *
-
+from django.contrib.auth.hashers import make_password
+from django.http import HttpResponse
 from django.contrib.auth.models import User
 from django.db.models import QuerySet
+from django.core.paginator import Paginator
 import pandas as pd
 from decimal import Decimal
+from django.db import transaction
 from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
@@ -17,17 +20,16 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from accounts.models import Address, NextOfKin 
 from accounts.models import User, Member, Gender
-
+from django.db import transaction
 import os
 
 
-#  path('delete-users/', delete_non_superusers),
-
 # @staff_member_required
-# def delete_non_superusers(request):
-#     User = get_user_model()
-#     User.objects.filter(is_superuser=False).delete()
-#     return HttpResponse("All non-superuser users deleted.")
+def delete_non_superusers(request):
+    # User = get_user_model()
+    # Member.objects.all().delete()
+    # User.objects.filter(is_superuser=False).delete()
+    return HttpResponse("All non-superuser users deleted.")
 
 def member_check(request):
     if request.method == 'POST':
@@ -42,154 +44,137 @@ def member_check(request):
 
     return render(request,'accounts/member_check.html')
 
+
 @login_required
 def upload_users(request):
-    if request.method == "POST" and request.FILES.get("excel_file"):
-        excel_file = request.FILES["excel_file"]
-        relative_path = default_storage.save(f"upload/{excel_file.name}", ContentFile(excel_file.read()))
-        absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+    if request.method == 'POST' and request.FILES.get('excel_file'):
+        excel_file = request.FILES['excel_file']
+        df = pd.read_excel(excel_file)
 
-        try:
-            df = pd.read_excel(absolute_path, engine="openpyxl")
+        required_columns = [
+            "username", "first_name", "last_name", "other_name",
+            "date_of_birth", "department",
+            "member_number", "ippis", "group"
+        ]
+        # Ensure all required columns exist
+        if not all(col in df.columns for col in required_columns):
+            messages.error(request, "Missing one or more required columns.")
+            return redirect("upload_users")
 
-            if df.empty:
-                messages.error(request, "The uploaded file is empty.")
+        users_to_create = []
+        ippis_to_user = []
+
+        existing_usernames = set(User.objects.values_list("username", flat=True))
+        existing_ippis = set(Member.objects.values_list("ippis", flat=True))
+
+        for _, row in df.iterrows():
+            username = str(row["username"]).strip()
+            ippis = int(row["ippis"]) if pd.notna(row["ippis"]) else None
+
+            if username in existing_usernames or ippis in existing_ippis:
+                continue
+
+            group_title = str(row.get("group", "")).strip()
+            try:
+                user_group = UserGroup.objects.get(title__iexact=group_title)
+            except UserGroup.DoesNotExist:
+                messages.error(request, f"Group '{group_title}' not found.")
                 return redirect("upload_users")
 
-            required_columns = [
-                "username", "first_name", "last_name", "other_name",
-                "date_of_birth", "department", "unit",
-                "member_number", "ippis"
-            ]
-            for col in required_columns:
-                if col not in df.columns:
-                    messages.error(request, f"Missing column: {col}")
-                    return redirect("upload_users")
 
-            existing_usernames = set(User.objects.values_list("username", flat=True))
-            existing_ippis = set(Member.objects.values_list("ippis", flat=True))
 
-            users_to_create = []
-            members_to_create = []
-            added, skipped = 0, 0
+            user = User(
+                username=username,
+                first_name=row.get("first_name", "").strip(),
+                last_name=row.get("last_name", "").strip(),
+                other_name=row.get("other_name", "").strip(),
+                date_of_birth=row.get("date_of_birth") if pd.notna(row.get("date_of_birth")) else None,
+                department=row.get("department", "").strip(),
+                group=user_group,
+                member_number=row.get("member_number", "").strip(),
+                # password=hashed_password,  # Set the hashed password
+            )
+            users_to_create.append(user)
+            ippis_to_user.append(ippis)
 
-            for _, row in df.iterrows():
-                try:
-                    username = str(row["username"]).strip()
-                    ippis = int(float(row["ippis"]))  # FIX: Handle Excel converting to float
-
-                    if username in existing_usernames or ippis in existing_ippis:
-                        skipped += 1
-                        continue
-
-                    user = User(
-                        username=username,
-                        first_name=row["first_name"],
-                        last_name=row["last_name"],
-                        other_name=row.get("other_name", ""),
-                        department=row["department"],
-                        unit=row["unit"],
-                        member_number=row["member_number"],
-                        date_of_birth=row["date_of_birth"],
-                    )
-                    user.set_password("pass")
-                    users_to_create.append(user)
-                    added += 1
-
-                except Exception as e:
-                    print(f"Row skipped due to error: {e}")
-                    skipped += 1
-
+        with transaction.atomic():
             created_users = User.objects.bulk_create(users_to_create)
+            
+            # Set default password for all created users
+            User.objects.filter(id__in=[user.id for user in created_users]).update(
+                password=make_password("default123")
+            )
 
-            for user_obj, row in zip(created_users, df.itertuples(index=False)):
-                members_to_create.append(Member(member=user_obj, ippis=int(float(getattr(row, "ippis")))))  # FIX: Handle float here too
+            members = [
+                Member(member=user, ippis=ippis)
+                for user, ippis in zip(created_users, ippis_to_user)
+                if ippis is not None
+            ]
+            Member.objects.bulk_create(members)
 
-            Member.objects.bulk_create(members_to_create)
-
-            messages.success(request, f"{added} users added, {skipped} skipped (duplicates or errors).")
-            return redirect("upload_users")
-
-        except Exception as e:
-            messages.error(request, f"Error processing file: {e}")
-            return redirect("upload_users")
+        added_count = len(created_users)
+        skipped_count = len(df) - added_count
+        messages.success(request, f"{added_count} members successfully added, {skipped_count} skipped.")
+        return redirect("upload_users")
 
     return render(request, "accounts/upload_users.html")
 
-# @login_required
-# def upload_users(request):
-#     if request.method == "POST" and request.FILES.get("excel_file"):
-#         excel_file = request.FILES["excel_file"]
-#         relative_path = default_storage.save(f"upload/{excel_file.name}", ContentFile(excel_file.read()))
-#         absolute_path = os.path.join(settings.MEDIA_ROOT, relative_path)
+@login_required
+def complete_profile(request):
+    user = request.user
 
-#         try:
-#             df = pd.read_excel(absolute_path, engine="openpyxl")
+    if request.method == 'POST':
+        # Update user fields
+        user.first_name = request.POST.get('first_name', user.first_name)
+        user.last_name = request.POST.get('last_name', user.last_name)
+        user.other_name = request.POST.get('other_name', user.other_name)
+        user.date_of_birth = request.POST.get('date_of_birth') or None
+        user.department = request.POST.get('department', user.department)
+        user.group_id = request.POST.get('group') or user.group_id
+        user.save()
 
-#             if df.empty:
-#                 messages.error(request, "The uploaded file is empty.")
-#                 return redirect("upload_users")
+        # Create or update address using update_or_create
+        country = request.POST.get("country")
+        state_of_origin_id = request.POST.get("state_of_origin") or None
+        local_government_area = request.POST.get("local_government_area")
+        full_address = request.POST.get("address")
 
-#             required_columns = [
-#                 "username", "first_name", "last_name", "other_name",
-#                 "date_of_birth", "department", "unit",
-#                 "member_number", "ippis"
-#             ]
-#             for col in required_columns:
-#                 if col not in df.columns:
-#                     messages.error(request, f"Missing column: {col}")
-#                     return redirect("upload_users")
+        Address.objects.update_or_create(
+            user=user,
+            defaults={
+                'country': country,
+                'local_government_area': local_government_area,
+                'state_of_origin_id': state_of_origin_id,
+                'address': full_address,
+            }
+        )
 
-#             existing_usernames = set(User.objects.values_list("username", flat=True))
-#             existing_ippis = set(Member.objects.values_list("ippis", flat=True))
+        # Create or update next of kin using update_or_create
+        full_names = request.POST.get("kin_full_names")
+        phone_no = request.POST.get("kin_phone_no")
+        kin_address = request.POST.get("kin_address")
+        email = request.POST.get("kin_email")
 
-#             users_to_create = []
-#             members_to_create = []
-#             added, skipped = 0, 0
+        NextOfKin.objects.update_or_create(
+            user=user,
+            defaults={
+                'full_names': full_names,
+                'phone_no': phone_no,
+                'address': kin_address,
+                'email': email,
+            }
+        )
 
-#             for _, row in df.iterrows():
-#                 try:
-#                     username = str(row["username"]).strip()
-#                     ippis = int(row["ippis"])
+        messages.success(request, "Profile completed successfully.")
+        return redirect('member_dashboard')
 
-#                     if username in existing_usernames or ippis in existing_ippis:
-#                         skipped += 1
-#                         continue
-
-#                     user = User(
-#                         username=username,
-#                         first_name=row["first_name"],
-#                         last_name=row["last_name"],
-#                         other_name=row.get("other_name", ""),
-#                         department=row["department"],
-#                         unit=row["unit"],
-#                         member_number=row["member_number"],
-#                         date_of_birth=row["date_of_birth"],
-#                     )
-#                     user.set_password("pass")
-#                     users_to_create.append(user)
-#                     added += 1
-
-#                 except Exception as e:
-#                     print(f"Row skipped due to error: {e}")
-#                     skipped += 1
-
-#             created_users = User.objects.bulk_create(users_to_create)
-
-#             for user_obj, row in zip(created_users, df.itertuples(index=False)):
-#                 members_to_create.append(Member(member=user_obj, ippis=int(getattr(row, "ippis"))))
-
-#             Member.objects.bulk_create(members_to_create)
-
-#             messages.success(request, f"{added} users added, {skipped} skipped (duplicates or errors).")
-#             return redirect("upload_users")
-
-#         except Exception as e:
-#             messages.error(request, f"Error processing file: {e}")
-#             return redirect("upload_users")
-
-#     return render(request, "accounts/upload_users.html")
-
+    context = {
+        'genders': Gender.objects.all(),
+        'marital_statuses': MaritalStatus.objects.all(),
+        'religions': Religion.objects.all(),
+        'user': user,
+    }
+    return render(request, 'accounts/complete_profile.html', context)
 
 
 def user_registration(request):
@@ -254,46 +239,40 @@ def user_registration(request):
 
 
 
+def is_profile_complete(user):
+    required_fields = ['first_name', 'last_name', 'other_name', 'date_of_birth', 'department', 'group']
+    for field in required_fields:
+        if not getattr(user, field, None):
+            return False
+    # Check if Address and NextOfKin exist for user
+    if not Address.objects.filter(user=user).exists():
+        return False
+    if not NextOfKin.objects.filter(user=user).exists():
+        return False
+    return True
+
 def login_view(request):
     if request.method == "POST":
         username = request.POST.get("username", "").strip().lower()
         password = request.POST.get("password")
-        default_password = "pass"
-
-        try:
-            user = User.objects.get(username=username)
-            if user.is_active and not user.has_usable_password():
-                user.set_password(default_password)
-                user.save()
-        except User.DoesNotExist:
-            messages.error(request, "User not found.")
-            return redirect("login")
 
         user = authenticate(request, username=username, password=password)
         if user is not None:
             login(request, user)
             messages.success(request, f'Welcome back {user.username}')
 
-            # === Check Member info ===
-            if hasattr(user, "member"):
-                member = user.member
-                has_address = Address.objects.filter(user=member).exists()
-                has_kin = NextOfKin.objects.filter(user=member).exists()
-
-                if not has_address:
-                    messages.info(request,'Update You Information ')
-                    return redirect("create_or_update_address", id=member.id)
-                elif not has_kin:
-                    messages.info(request,'Update You Information ')
-                    return redirect("create_or_update_next_of_kin", id=member.id)
-
-            # === Redirect based on group ===
             if user.group and user.group.title.lower() == 'admin':
                 return redirect('admin_dashboard')
+
             elif user.group and user.group.title.lower() == 'members':
+                # Redirect to complete_profile if profile is not complete
+                if not is_profile_complete(user):
+                    return redirect('complete_profile')
                 return redirect('member_dashboard')
+
             elif user.group and user.group.title.lower() == 'staff':
                 return redirect('admin_dashboard')
+
             else:
                 return redirect('login')
         else:
@@ -310,53 +289,25 @@ def logout_view(request):
     messages.success(request, "You have been logged out.")
     return redirect('login')
 
-def create_or_update_address(request, id):
-    member = get_object_or_404(Member, pk=id)
-    address, created = Address.objects.get_or_create(user=member)
-    
-    if request.method == "POST":
-        address.phone1 = request.POST.get("phone1")
-        address.phone2 = request.POST.get("phone2")
-        address.email = request.POST.get("email")
-        address.country = request.POST.get("country")
-        address.state_of_origin_id = request.POST.get("state_of_origin")
-        address.local_government_area = request.POST.get("local_government_area")
-        address.address = request.POST.get("address")
-        address.save()
-        messages.success(request, "Address saved successfully!")
-        return redirect("create_or_update_next_of_kin", id=member.id)
-
-    states = State.objects.all()
-    return render(request, "accounts/address_form.html", {"address": address, "states": states, "countries": list(countries) })
-
-
-
-def create_or_update_next_of_kin(request, id):
-    member = get_object_or_404(Member, pk=id)
-    kin, created = NextOfKin.objects.get_or_create(user=member)
-
-    if request.method == "POST":
-        kin.full_names = request.POST.get("full_names")
-        kin.phone_no = request.POST.get("phone_no")
-        kin.address = request.POST.get("address")
-        kin.email = request.POST.get("email")
-        kin.save()
-        messages.success(request, "Next of Kin saved successfully!")
-        return redirect("member_detail", id=member.id)
-
-    return render(request, "accounts/next_of_kin_form.html", {"kin": kin})
 
 def all_members(request):
-    members = User.objects.all()
+    members_list = User.objects.all()
+    paginator = Paginator(members_list, 150)  # Show 10 members per page
+
+    page_number = request.GET.get("page")
+    members = paginator.get_page(page_number)
+
     return render(request, "accounts/all_members.html", {"members": members})
 
+
 def member_detail(request, id):
-    member = get_object_or_404(Member, id=id)
+    member = get_object_or_404(User, id=id)
     address = getattr(member, 'address', None)
     next_of_kin = getattr(member, 'nextofkin', None)
 
     context = {"member": member, "address": address, "next_of_kin": next_of_kin}
     return render(request, "accounts/member_detail.html", context)
+
 
 @login_required
 def deactivate_users(request):
@@ -370,7 +321,6 @@ def deactivate_users(request):
             messages.warning(request, "No users were selected for deactivation.")
         return redirect('all_members')
     return redirect('all_members')
-
 
 @login_required
 def activate_users(request):
@@ -395,7 +345,6 @@ def activate_users(request):
 
     return redirect('all_members')
 
-
 def changePassword(request):
     if request.method == 'POST':
         old_password = request.POST.get('old_password')
@@ -415,8 +364,6 @@ def changePassword(request):
             return redirect('login')
 
     return render(request, 'accounts/change_password.html')
-
-
 
 @login_required
 def resetPassword(request,id):

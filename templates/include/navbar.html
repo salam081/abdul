@@ -86,10 +86,10 @@
             <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
                 {% if request.user.member %}
                 <a href="{% url 'member_detail' id=request.user.member.id %}" class="dropdown-item">My Profile</a>
-                <a href="{% url 'create_or_update_address' id=request.user.member.id %}" class="dropdown-item">Update Profile</a>
+                <a href="{% url 'complete_profile'%}" class="dropdown-item">Update Profile</a>
                 {% else %}
                 <a href="{% url 'member_detail' id=request.user.id %}" class="dropdown-item">My Profile</a>
-                <a href="{% url 'create_or_update_address' id=request.user.id %}" class="dropdown-item">Update
+                <a href="{% url 'complete_profile'  %}" class="dropdown-item">Update
                     Profile</a>
                 {% endif %}
 

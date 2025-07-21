@@ -54,9 +54,10 @@ class User(AbstractUser):
 
     def __str__(self):
         return f"{self.first_name} ({self.last_name})"
+    
 
 class Member(models.Model):
-    member = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True,related_name='member')
+    member = models.OneToOneField(User, on_delete=models.CASCADE, null=True, blank=True,related_name='member')
     ippis = models.IntegerField(unique=True)  # Required and unique
     total_savings = models.DecimalField(max_digits=12, decimal_places=2, blank=True, null=True)
 
@@ -111,8 +112,7 @@ class State(models.Model):
         return self.title
 
 class Address(models.Model):
-    user = models.OneToOneField(Member, on_delete=models.SET_NULL, null=True, blank=True)
-   
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     country = CountryField(blank=True, null=True)
     state_of_origin = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
     local_government_area = models.CharField(max_length=150)
@@ -124,7 +124,7 @@ class Address(models.Model):
         
 
 class NextOfKin(models.Model):
-    user = models.OneToOneField(Member, on_delete=models.SET_NULL, null=True, blank=True)
+    user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     full_names = models.CharField(max_length=50)
     phone_no = models.CharField(max_length=15) 
     address = models.CharField(max_length=150)
