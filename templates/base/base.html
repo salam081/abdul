@@ -109,5 +109,27 @@
                 });
             });
         </script>
+
+
+<!-- Input Popup Modal -->
+<div class="modal fade" id="inputPopupModal" tabindex="-1" aria-labelledby="inputPopupModalLabel" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content">
+      <form method="get" action="{% url 'search_member' %}">
+        <div class="modal-header">
+          <h5 class="modal-title" id="inputPopupModalLabel">Search Member</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <input type="text" name="search_term" class="form-control" placeholder="Enter name or ID..." required>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn btn-primary">Search</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
 </body>
 </html>
