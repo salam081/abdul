@@ -3,7 +3,7 @@
 {% block content %}
 <div class="container mt-4 col-md-6">
     <div class="card">
-        <h5 class="card-header text-primary text-center">Add Single Loan payment </h5>
+        <h5 class="card-header text-primary text-center">Add Loan payment for {{ member.member }} </h5>
         <div class="card-body">
             <form method="POST">
                 {% csrf_token %}

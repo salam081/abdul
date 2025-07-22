@@ -83,21 +83,18 @@
                 <span class="d-none d-lg-inline-flex">{{request.user.first_name}}</span>
 
             </a>
-            <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
-                {% if request.user.member %}
-                <a href="{% url 'member_detail' id=request.user.member.id %}" class="dropdown-item">My Profile</a>
-                <a href="{% url 'complete_profile'%}" class="dropdown-item">Update Profile</a>
-                {% else %}
-                <a href="{% url 'member_detail' id=request.user.id %}" class="dropdown-item">My Profile</a>
-                <a href="{% url 'complete_profile'  %}" class="dropdown-item">Update
-                    Profile</a>
-                {% endif %}
+           <div class="dropdown-menu dropdown-menu-end bg-light border-0 rounded-0 rounded-bottom m-0">
+    {% if request.user.is_authenticated %}
+        {% if request.user.member %}
+            <a href="{% url 'member_detail' id=request.user.member.id %}" class="dropdown-item">My Profile</a>
+        {% endif %}
+        <a href="{% url 'complete_profile' %}" class="dropdown-item">Update Profile</a>
+        <a href="{% url 'change_password' %}" class="dropdown-item">Change Password</a>
+        <a href="#" class="dropdown-item">Settings</a>
+        <a href="{% url 'logout' %}" class="dropdown-item">Log Out</a>
+    {% endif %}
+</div>
 
-
-                <a href="{% url 'change_password' %}" class="dropdown-item">Change Password</a>
-                <a href="#" class="dropdown-item">Settings</a>
-                <a href="{% url 'logout' %}" class="dropdown-item">Log Out</a>
-            </div>
         </div>
     </div>
 </nav>

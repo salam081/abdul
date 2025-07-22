@@ -9,3 +9,5 @@ admin.site.register(UserGroup)
 admin.site.register(Gender)
 admin.site.register(Religion)
 admin.site.register(NextOfKin)
+admin.site.register(MaritalStatus)
+

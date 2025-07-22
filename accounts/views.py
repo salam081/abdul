@@ -10,10 +10,9 @@ from django.core.paginator import Paginator
 import pandas as pd
 from decimal import Decimal
 from django.db import transaction
-from django.shortcuts import render, redirect
 from django.core.files.storage import default_storage
 from django.core.files.base import ContentFile
-from django.shortcuts import redirect, get_object_or_404
+from django.core.exceptions import ValidationError
 from django.conf import settings
 from django.contrib.auth import authenticate, login, logout
 from django.contrib.auth.decorators import login_required
@@ -119,63 +118,6 @@ def upload_users(request):
 
     return render(request, "accounts/upload_users.html")
 
-@login_required
-def complete_profile(request):
-    user = request.user
-
-    if request.method == 'POST':
-        # Update user fields
-        user.first_name = request.POST.get('first_name', user.first_name)
-        user.last_name = request.POST.get('last_name', user.last_name)
-        user.other_name = request.POST.get('other_name', user.other_name)
-        user.date_of_birth = request.POST.get('date_of_birth') or None
-        user.department = request.POST.get('department', user.department)
-        user.group_id = request.POST.get('group') or user.group_id
-        user.save()
-
-        # Create or update address using update_or_create
-        country = request.POST.get("country")
-        state_of_origin_id = request.POST.get("state_of_origin") or None
-        local_government_area = request.POST.get("local_government_area")
-        full_address = request.POST.get("address")
-
-        Address.objects.update_or_create(
-            user=user,
-            defaults={
-                'country': country,
-                'local_government_area': local_government_area,
-                'state_of_origin_id': state_of_origin_id,
-                'address': full_address,
-            }
-        )
-
-        # Create or update next of kin using update_or_create
-        full_names = request.POST.get("kin_full_names")
-        phone_no = request.POST.get("kin_phone_no")
-        kin_address = request.POST.get("kin_address")
-        email = request.POST.get("kin_email")
-
-        NextOfKin.objects.update_or_create(
-            user=user,
-            defaults={
-                'full_names': full_names,
-                'phone_no': phone_no,
-                'address': kin_address,
-                'email': email,
-            }
-        )
-
-        messages.success(request, "Profile completed successfully.")
-        return redirect('member_dashboard')
-
-    context = {
-        'genders': Gender.objects.all(),
-        'marital_statuses': MaritalStatus.objects.all(),
-        'religions': Religion.objects.all(),
-        'user': user,
-    }
-    return render(request, 'accounts/complete_profile.html', context)
-
 
 def user_registration(request):
     if request.method == "POST":
@@ -206,19 +148,9 @@ def user_registration(request):
         gender_instance = Gender.objects.get(id=gender_id) if gender_id else None
 
         user = User.objects.create(
-            first_name=first_name,
-            last_name=last_name,
-            other_name=other_name,
-            username=username,
-            savings=savings,
-            date_of_birth=date_of_birth,
-            department=department,
-            member_number=member_number,
-            unit=unit,
-            group=user_group,
-            is_active=True,
-            passport=passport, 
-            gender=gender_instance  
+            first_name=first_name, last_name=last_name, other_name=other_name, username=username,
+            savings=savings, date_of_birth=date_of_birth,department=department,member_number=member_number,
+            unit=unit,group=user_group,is_active=True,passport=passport, gender=gender_instance  
         )
 
         user.set_password("pass")
@@ -237,6 +169,185 @@ def user_registration(request):
     return render(request, "accounts/user_register.html", {"genders": genders})
 
 
+@login_required
+def complete_profile(request):
+    user = request.user
+    if request.method == 'POST':
+        try:
+            # Update user fields with proper validation
+            user.first_name = request.POST.get('first_name', '').strip()
+            user.last_name = request.POST.get('last_name', '').strip()
+            user.other_name = request.POST.get('other_name', '').strip()
+            
+            # Handle date_of_birth properly
+            date_of_birth = request.POST.get('date_of_birth')
+            if date_of_birth:
+                try:
+                    from datetime import datetime
+                    # Try to parse the date - adjust format as needed
+                    user.date_of_birth = datetime.strptime(date_of_birth, '%Y-%m-%d').date()
+                except ValueError:
+                    messages.error(request, "Invalid date format. Please use YYYY-MM-DD format.")
+                    return render(request, 'accounts/complete_profile.html', {
+                        'genders': Gender.objects.all(),
+                        'marital_statuses': MaritalStatus.objects.all(),
+                        'religions': Religion.objects.all(),
+                        'user': user,
+                    })
+            else:
+                user.date_of_birth = None
+            
+            user.department = request.POST.get('department', '').strip()
+            
+            # Handle group_id properly
+            group_id = request.POST.get('group')
+            if group_id and group_id.isdigit():
+                user.group_id = int(group_id)
+            
+            # Add other fields that might be missing
+            phone1 = request.POST.get('phone1', '').strip()
+            phone2 = request.POST.get('phone2', '').strip()
+            email = request.POST.get('email', '').strip()
+            
+            if phone1:
+                user.phone1 = phone1
+            if phone2:
+                user.phone2 = phone2
+            if email:
+                user.email = email
+            
+            # Handle gender, religion, marital_status if they're foreign keys
+            gender_id = request.POST.get('gender')
+            if gender_id and gender_id.isdigit():
+                try:
+                    gender = Gender.objects.get(id=int(gender_id))
+                    user.gender = gender
+                except Gender.DoesNotExist:
+                    messages.error(request, "Invalid gender selected.")
+                    return render(request, 'accounts/complete_profile.html', {
+                        'genders': Gender.objects.all(),
+                        'marital_statuses': MaritalStatus.objects.all(),
+                        'religions': Religion.objects.all(),
+                        'user': user,
+                    })
+            
+            religion_id = request.POST.get('religion')
+            if religion_id and religion_id.isdigit():
+                try:
+                    religion = Religion.objects.get(id=int(religion_id))
+                    user.religion = religion
+                except Religion.DoesNotExist:
+                    messages.error(request, "Invalid religion selected.")
+                    return render(request, 'accounts/complete_profile.html', {
+                        'genders': Gender.objects.all(),
+                        'marital_statuses': MaritalStatus.objects.all(),
+                        'religions': Religion.objects.all(),
+                        'user': user,
+                    })
+            
+            marital_status_id = request.POST.get('marital_status')
+            if marital_status_id and marital_status_id.isdigit():
+                try:
+                    marital_status = MaritalStatus.objects.get(id=int(marital_status_id))
+                    user.marital_status = marital_status
+                except MaritalStatus.DoesNotExist:
+                    messages.error(request, "Invalid marital status selected.")
+                    return render(request, 'accounts/complete_profile.html', {
+                        'genders': Gender.objects.all(),
+                        'marital_statuses': MaritalStatus.objects.all(),
+                        'religions': Religion.objects.all(),
+                        'user': user,
+                    })
+            
+            # Handle unit field
+            unit = request.POST.get('unit', '').strip()
+            if unit:
+                user.unit = unit
+            
+            # Handle passport/profile picture upload
+            if 'passport' in request.FILES:
+                user.passport = request.FILES['passport']
+            
+            # Save user with validation
+            user.full_clean() 
+            user.save()
+            
+            # Create or update address using update_or_create
+            country = request.POST.get("country", '').strip()
+            state_of_origin_id = request.POST.get("state_of_origin") or None
+            local_government_area = request.POST.get("local_government_area", '').strip()
+            full_address = request.POST.get("address", '').strip()
+            
+            # Only create address if we have some data
+            if any([country, state_of_origin_id, local_government_area, full_address]):
+                # Handle state_of_origin as foreign key if needed
+                state_of_origin = None
+                if state_of_origin_id and state_of_origin_id.isdigit():
+                    try:
+                        state_of_origin = State.objects.get(id=int(state_of_origin_id))
+                    except State.DoesNotExist:
+                        messages.error(request, "Invalid state selected.")
+                        return render(request, 'accounts/complete_profile.html', {
+                            'genders': Gender.objects.all(),
+                            'marital_statuses': MaritalStatus.objects.all(),
+                            'religions': Religion.objects.all(),
+                            'user': user,})
+                
+                Address.objects.update_or_create(
+                    user=user,
+                    defaults={
+                        'country': country,
+                        'local_government_area': local_government_area,
+                        'state_of_origin': state_of_origin,  # Use the object, not ID
+                        'address': full_address,
+                    }
+                )
+            
+            # Create or update next of kin using update_or_create
+            full_names = request.POST.get("kin_full_names", '').strip()
+            phone_no = request.POST.get("kin_phone_no", '').strip()
+            kin_address = request.POST.get("kin_address", '').strip()
+            kin_email = request.POST.get("kin_email", '').strip()
+            
+            # Only create next of kin if we have some data
+            if any([full_names, phone_no, kin_address, kin_email]):
+                next_of_kin_data = {
+                    'full_names': full_names,
+                    'phone_no': phone_no,
+                    'address': kin_address,
+                    'email': kin_email,
+                }
+                
+                # Handle next of kin passport/photo upload
+                if 'kin_passport' in request.FILES:
+                    next_of_kin_data['netofkin_passport'] = request.FILES['kin_passport']
+                
+                NextOfKin.objects.update_or_create(
+                    user=user,
+                    defaults=next_of_kin_data
+                )
+            
+            messages.success(request, "Profile completed successfully.")
+            return redirect('member_dashboard')
+            
+        except ValidationError as e:
+            messages.error(request, f"Validation error: {e}")
+        except Exception as e:
+            messages.error(request, f"An error occurred: {str(e)}")
+            # Log the error for debugging
+            import logging
+            logger = logging.getLogger(__name__)
+            logger.error(f"Profile completion error for user {user.id}: {str(e)}")
+    
+    # GET request or error in POST
+    context = {
+        'genders': Gender.objects.all(),
+        'marital_statuses': MaritalStatus.objects.all(),
+        'religions': Religion.objects.all(),
+        'user': user,
+        'states': State.objects.all(),
+        }
+    return render(request, 'accounts/complete_profile.html', context)
 
 
 def is_profile_complete(user):
@@ -282,30 +393,41 @@ def login_view(request):
     return render(request, 'accounts/login.html')
 
 
-
-
 def logout_view(request):
     logout(request) 
     messages.success(request, "You have been logged out.")
     return redirect('login')
 
-
 def all_members(request):
     members_list = User.objects.all()
     paginator = Paginator(members_list, 150)  # Show 10 members per page
-
     page_number = request.GET.get("page")
     members = paginator.get_page(page_number)
 
     return render(request, "accounts/all_members.html", {"members": members})
 
 
-def member_detail(request, id):
-    member = get_object_or_404(User, id=id)
-    address = getattr(member, 'address', None)
-    next_of_kin = getattr(member, 'nextofkin', None)
 
-    context = {"member": member, "address": address, "next_of_kin": next_of_kin}
+def delete_member(request, id):
+    member = get_object_or_404(User, id=id)
+    
+    # Optional: prevent deleting yourself or superusers
+    if request.user == member:
+        return redirect('all_members')
+    
+    if member.is_superuser:
+        return redirect('all_members')
+    
+    member.delete()
+    return redirect('all_members')
+
+def member_detail(request, id):
+    member = get_object_or_404(Member, id=id)
+    user = member.member  # related User object
+    address = getattr(user, 'address', None)
+    next_of_kin = getattr(user, 'nextofkin', None)
+
+    context = {"user": user, "member": member,"address": address, "next_of_kin": next_of_kin }
     return render(request, "accounts/member_detail.html", context)
 
 
@@ -365,13 +487,21 @@ def changePassword(request):
 
     return render(request, 'accounts/change_password.html')
 
+
 @login_required
-def resetPassword(request,id):
-    user = User.objects.get(id=id)
-    user.set_password("pass")
-    user.save()
-    # PasswordResetLog.objects.create(reset_by=request.user,reset_for=user)
+def reset_password_view(request, id):
+    if request.user.group.title.lower() != 'admin':
+        messages.error(request, "Only admin can reset passwords.")
+        return redirect('all_members')
 
-    messages.success(request, "Password reset successful!")
+    user_to_reset = get_object_or_404(User, id=id)
+
+    if user_to_reset == request.user:
+        messages.error(request, "You cannot reset your own password this way.")
+        return redirect('all_members')
+
+    user_to_reset.set_password("pass")  # You can use a more secure default
+    user_to_reset.save()
+
+    messages.success(request, f"Password for {user_to_reset.username} has been reset.")
     return redirect('all_members')
-

@@ -29,6 +29,8 @@ from datetime import datetime
 
 
 
+
+
 def index(request):
     context = {}
     return render(request, "main/index.html", context)
@@ -89,7 +91,6 @@ def search_member_for_savings(request):
     return render(request, 'main/search_member.html', context)
 
 
-from django.db.models import Sum
 
 def filter_requests(datefrom, dateto):
     filtered_requests = Savings.objects.all()

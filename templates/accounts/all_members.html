@@ -397,6 +397,11 @@
                                             </span>
                                         {% endif %}
                                     </td>
+                                     <td>
+                                        <a class="btn btn-danger  bg-danger" href="{% url 'delete_member' m.member.id %}">
+                                            <i class="fas fa-trash "></i> 
+                                        </a title='delete member'>
+                                    </td>
                                 {% else %}
                                     <td colspan="3">
                                         <span class="no-member">

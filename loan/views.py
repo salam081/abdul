@@ -552,6 +552,7 @@ def add_single_loan_payment(request):
 
     return render(request, "loan/add_single_loan_payment.html")
 
+
 def get_loan_types_for_year(request):
     year = request.GET.get("year")
     if not year:
