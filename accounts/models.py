@@ -13,19 +13,19 @@ class UserGroup(models.Model):
         return self.title
     
 class Gender(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
 
     def __str__(self):
         return self.title
     
 class MaritalStatus(models.Model):
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=150)
 
     def __str__(self):
         return self.title
 
 class Religion(models.Model):
-    title = models.CharField(max_length=20)
+    title = models.CharField(max_length=150)
 
     def __str__(self):
         return self.title
@@ -105,7 +105,7 @@ class Member(models.Model):
    
 
 class State(models.Model):
-    title = models.CharField(max_length=50)
+    title = models.CharField(max_length=150)
     # country = CountryField(blank=True, null=True)
 
     def __str__(self):
@@ -114,8 +114,8 @@ class State(models.Model):
 class Address(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
     country = CountryField(blank=True, null=True)
-    state_of_origin = models.ForeignKey(State, on_delete=models.SET_NULL, null=True, blank=True)
-    local_government_area = models.CharField(max_length=150)
+    state_of_origin = models.ForeignKey('State', on_delete=models.SET_NULL, null=True, blank=True)
+    local_government_area = models.CharField(max_length=250)
     address = models.CharField(max_length=500)
 
 
@@ -125,10 +125,10 @@ class Address(models.Model):
 
 class NextOfKin(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    full_names = models.CharField(max_length=50)
-    phone_no = models.CharField(max_length=15) 
-    address = models.CharField(max_length=150)
-    email = models.EmailField()  
+    full_names = models.CharField(max_length=150)
+    phone_no = models.CharField(max_length=115) 
+    address = models.CharField(max_length=500)  
+    email = models.EmailField()
     netofkin_passport = models.ImageField(upload_to='netofkin_passport', blank=True, null=True)
 
     def __str__(self):

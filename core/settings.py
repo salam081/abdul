@@ -54,10 +54,10 @@ INSTALLED_APPS = [
     'loan',
    
     'financialsummary',
-    "django_countries",
     'memberwidower',
     'report',
     'PurchasedItems',
+    'django_countries',
 
 ]
 
