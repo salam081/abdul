@@ -106,14 +106,14 @@ class Member(models.Model):
 
 class State(models.Model):
     title = models.CharField(max_length=150)
-    # country = CountryField(blank=True, null=True)
+   
 
     def __str__(self):
         return self.title
 
 class Address(models.Model):
     user = models.OneToOneField(User, on_delete=models.SET_NULL, null=True, blank=True)
-    country = CountryField(blank=True, null=True)
+    country = models.CharField(max_length=200, blank=True, null=True)
     state_of_origin = models.ForeignKey('State', on_delete=models.SET_NULL, null=True, blank=True)
     local_government_area = models.CharField(max_length=250)
     address = models.CharField(max_length=500)
