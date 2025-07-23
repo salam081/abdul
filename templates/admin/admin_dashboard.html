@@ -1,4 +1,5 @@
 {% extends 'base/base.html' %}
+{% load humanize %}
 {% block content %}
 
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/3.9.1/chart.min.js"></script>
@@ -504,28 +505,28 @@
                 <div class="cart-item">
                     <div class="cart-item-label">Total Savings</div>
                     <div class="cart-item-value">
-                        <span class="cart-item-currency">₦</span>{{ total_savings|default:0|floatformat:2 }}
+                        <span class="cart-item-currency">₦</span>{{ total_savings|default:0|floatformat:2|intcomma }}
                     </div>
                 </div>
 
                 <div class="cart-item">
                     <div class="cart-item-label">Admin Fee Earned</div>
                     <div class="cart-item-value">
-                        <span class="cart-item-currency">₦</span>{{ total_interest|default:0|floatformat:2 }}
+                        <span class="cart-item-currency">₦</span>{{ total_interest|default:0|floatformat:2|intcomma }}
                     </div>
                 </div>
 
                 <div class="cart-item">
                     <div class="cart-item-label">Loanable Amount</div>
                     <div class="cart-item-value">
-                        <span class="cart-item-currency">₦</span>{{ total_loanable|default:0|floatformat:2 }}
+                        <span class="cart-item-currency">₦</span>{{ total_loanable|default:0|floatformat:2|intcomma }}
                     </div>
                 </div>
 
                 <div class="cart-item">
                     <div class="cart-item-label">Investment Fund</div>
                     <div class="cart-item-value">
-                        <span class="cart-item-currency">₦</span>{{ total_investment|default:0|floatformat:2 }}
+                        <span class="cart-item-currency">₦</span>{{ total_investment|default:0|floatformat:2|intcomma }}
                     </div>
                 </div>
             </div>
@@ -536,7 +537,7 @@
                         <i class="fas fa-chart-line"></i>
                         Investment + Loanable Pool
                     </div>
-                    <div class="investment-value">₦{{ investment_loanable|default:0|floatformat:2 }}</div>
+                    <div class="investment-value">₦{{ investment_loanable|default:0|floatformat:2|intcomma }}</div>
                 </div>
 
                 <div class="action-buttons">
@@ -554,7 +555,7 @@
             <div class="cart-total">
                 <div class="cart-total-label">GRAND TOTAL</div>
                 <a class="text-light" href="{% url 'financial_list' %}">
-                    <div class="cart-total-value">₦{{ grand_total|default:0|floatformat:2 }}</div>
+                    <div class="cart-total-value">₦{{ grand_total|default:0|floatformat:2|intcomma }}</div>
                 </a>
             </div>
         </div>

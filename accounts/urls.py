@@ -14,6 +14,8 @@ urlpatterns = [
     # path("address/<int:id>/", views.create_or_update_address, name="create_or_update_address"),
     # path("next-of-kin/<int:id>/", views.create_or_update_next_of_kin, name="create_or_update_next_of_kin"),
     path("member/<int:id>/", views.member_detail, name="member_detail"),
+    path("admin_members/<int:id>/", views.admin_member_detail, name="admin_member_detail"),
+
     path('reset_password_view/<int:id>/', views.reset_password_view, name='reset_password'),
     path('changePassword', views.changePassword, name='change_password'),
 

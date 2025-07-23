@@ -17,10 +17,10 @@
 
     <!-- Filter Form -->
     <form method="get" class="mb-4 row justify-content-center align-items-center g-2">
-        <div class="col-auto">
+        <div class="col-md-4">
             <input type="month" name="month" value="{{ selected_month }}" class="form-control">
         </div>
-        <div class="col-auto">
+        <div class="col-md-4">
             <select name="loan_type" class="form-select">
                 <option value="">All Loan Types</option>
                 {% for type in loan_types %}
@@ -37,32 +37,48 @@
     </form>
 
     <!-- Summary Cards -->
-    <div class="row text-center mb-4">
-        <div class="col-md-3">
-            <div class="card shadow rounded p-3" style="background: linear-gradient(90deg, #d356dc, #a234d1);">
-                <h5>Total Requests</h5>
-                <h3 class="text-light">{{ monthly_requests }}</h3>
+  <div class="row text-center mb-4">
+    <div class="col-md-3 mt-2">
+        <div class="card border-info shadow rounded p-3" style="border-top: 5px solid rgb(82, 188, 212);">
+            <div class="d-flex align-items-center justify-content-center">
+                <h5 class="me-2 mb-0">Total Requests</h5>
+                <i class="fas fa-piggy-bank text-info fs-3"></i>
             </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded p-3" style="background: linear-gradient(90deg, #b5d76c, #54af7b);">
-                <h5>Approved</h5>
-                <h3 class="text-light">{{ monthly_approvals }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded p-3" style="background: linear-gradient(90deg, #cd975d, #af5492);">
-                <h5>Rejected</h5>
-                <h3 class="text-danger">{{ monthly_rejections }}</h3>
-            </div>
-        </div>
-        <div class="col-md-3">
-            <div class="card shadow rounded p-3" style="background: linear-gradient(90deg, #6ccfd8, #3171b2);">
-                <h6>Total Approved Amount</h6>
-                <h3 class="text-light">₦{{ monthly_approved_amount|intcomma }}</h3>
-            </div>
+            <h3 class="text-info">{{ monthly_requests }}</h3>
         </div>
     </div>
+
+    <div class="col-md-3 mt-2">
+        <div class="card border-primary shadow rounded p-3" style="border-top: 5px solid rgb(36, 68, 199);">
+            <div class="d-flex align-items-center justify-content-center">
+                <h5 class="me-2 mb-0">Approved</h5>
+                <i class="bi bi-check-all text-danger fs-3"></i>
+            </div>
+            <h3 class="text-primary">{{ monthly_approvals }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3 mt-2">
+        <div class="card border-danger shadow rounded p-3" style="border-top: 5px solid rgb(148, 10, 31);">
+            <div class="d-flex align-items-center justify-content-center">
+                <h5 class="me-2 mb-0">Rejected</h5>
+                <i class="bi bi-x-circle text-danger fs-3 "></i>
+            </div>
+            <h3 class="text-danger">{{ monthly_rejections }}</h3>
+        </div>
+    </div>
+
+    <div class="col-md-3 mt-2">
+        <div class="card border-success p-3 shadow rounded" style="border-top: 5px solid green;">
+            <div class="d-flex align-items-center justify-content-center">
+                <h5 class="me-2 mb-0">Approved Amount</h5>
+                <i class="bi bi-check-circle-fill text-success fs-3"></i>
+            </div>
+            <h3 class="text-success">₦{{ monthly_approved_amount|intcomma }}</h3>
+        </div>
+    </div>
+</div>
+
 
     <!-- Repayment Section -->
     <div class="card shadow rounded mb-4">
@@ -83,17 +99,17 @@
             <table class="table table-bordered table-hover">
                 <thead class="table-light">
                     <tr>
-                        <th>Loan Type</th>
-                        <th>Total Requests</th>
-                        <th>Total Approved</th>
-                        <th>Total Approved Amount</th>
+                        <th class="text-nowrap text-truncate" style="max-width: 270px;">Loan Type</th>
+                        <th class="text-nowrap text-truncate" style="max-width: 270px;">Total Requests</th>
+                        <th class="text-nowrap text-truncate" style="max-width: 270px;">Total Approved</th>
+                        <th class="text-nowrap text-truncate" style="max-width: 270px;">Total Approved Amount</th>
                     </tr>
                 </thead>
                 <tbody>
                     {% for type in loan_type_stats %}
                         <tr>
-                            <td>{{ type.name }}</td>
-                            <td>{{ type.total_requests }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 270px;">{{ type.name }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 270px;">{{ type.total_requests }}</td>
                             <td>{{ type.total_approved }}</td>
                             <td>₦{{ type.total_amount|default:0|intcomma }}</td>
                         </tr>

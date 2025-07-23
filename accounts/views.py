@@ -19,6 +19,7 @@ from django.contrib.auth.decorators import login_required
 from datetime import datetime
 from accounts.models import Address, NextOfKin 
 from accounts.models import User, Member, Gender
+from accounts.decorator import group_required
 from django.db import transaction
 import os
 
@@ -45,6 +46,7 @@ def member_check(request):
 
 
 @login_required
+@group_required(['admin', 'staff'])
 def upload_users(request):
     if request.method == 'POST' and request.FILES.get('excel_file'):
         excel_file = request.FILES['excel_file']
@@ -156,11 +158,7 @@ def user_registration(request):
         user.set_password("pass")
         user.save()
 
-        Member.objects.create(
-            member=user,
-            ippis=ippis,
-            total_savings=0
-        )
+        Member.objects.create( member=user,ippis=ippis, total_savings=0)
 
         messages.success(request, "Registration successful! Default password is 'pass'.")
         return redirect('all_members')
@@ -215,6 +213,7 @@ def complete_profile(request):
                 user.phone2 = phone2
             if email:
                 user.email = email
+           
             
             # Handle gender, religion, marital_status if they're foreign keys
             gender_id = request.POST.get('gender')
@@ -319,8 +318,8 @@ def complete_profile(request):
                 }
                 
                 # Handle next of kin passport/photo upload
-                if 'kin_passport' in request.FILES:
-                    next_of_kin_data['netofkin_passport'] = request.FILES['kin_passport']
+                if 'netofkin_passport' in request.FILES:
+                    next_of_kin_data['netofkin_passport'] = request.FILES['netofkin_passport']
                 
                 NextOfKin.objects.update_or_create(
                     user=user,
@@ -421,6 +420,37 @@ def delete_member(request, id):
     member.delete()
     return redirect('all_members')
 
+# Django View (views.py)
+
+
+@login_required
+def admin_member_detail(request, id):
+   
+    member_obj = get_object_or_404(Member, id=id)
+    user = member_obj.member 
+    address = None
+    next_of_kin = None
+
+    try:
+        address = user.address # Access Address linked via a OneToOneField on User
+    except AttributeError:
+        pass # User might not have an associated address
+
+    try:
+        next_of_kin = user.nextofkin # Access NextOfKin linked via a OneToOneField on User
+    except AttributeError:
+        pass # User might not have an associated next of kin
+
+    context = {
+        "user": user,
+        "member": member_obj,
+        "address": address,
+        "next_of_kin": next_of_kin,
+    }
+    return render(request, "accounts/member_detail.html", context)
+
+
+@login_required
 def member_detail(request, id):
     member = get_object_or_404(Member, id=id)
     user = member.member  # related User object

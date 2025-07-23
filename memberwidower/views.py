@@ -9,7 +9,7 @@ from django.views.decorators.csrf import csrf_protect
 from django.db.models import Sum
 from decimal import Decimal
 from main.models import Savings, Investment, Loanable
-
+from accounts.decorator import group_required
 # @staff_member_required
 from django.db.models import Sum
 from decimal import Decimal

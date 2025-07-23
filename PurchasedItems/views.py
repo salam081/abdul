@@ -11,6 +11,7 @@ from django.utils import timezone
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from django.db.models import Sum, F, ExpressionWrapper, DecimalField
 from .models import ConsumablePurchasedRequest, PurchasedItem
+from accounts.decorator import group_required
 from .forms import *
 from  .forms import ProfitCalculatorForm
 from .models import *

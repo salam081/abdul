@@ -5,21 +5,48 @@
     <div class="card">
         <h5 class="card-header text-primary text-center">Add Loan payment for {{ member.member }} </h5>
         <div class="card-body">
-            <form method="POST">
-                {% csrf_token %}
-                <label>IPPIS:</label>
-                <input class="form-control" type="number" name="ippis" required><br>
-              
-                <label>Amount Paid:</label>
-                <input class="form-control" type="number" step="0.01" name="amount_paid" required><br>
-              
-                <label>Month (YYYY-MM-DD):</label>
-                <input class="form-control" type="date" name="month" required><br>
-                <div class="d-grid">
-                <button class="btn btn-primary" type="submit">Submit Payment</button>
-            </div>
-              </form>
-              
+           <form method="POST">
+    {% csrf_token %}
+    <div class="form-group">
+        <label>IPPIS</label>
+        <input type="number" name="ippis" class="form-control" required>
+    </div>
+
+    <div class="form-group">
+        <label>Select Year</label>
+        <select name="selected_year" class="form-control" required>
+            <option value="">-- Select Year --</option>
+            {% for year in year_to_loan_types.keys %}
+                <option value="{{ year }}">{{ year }}</option>
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Loan Type</label>
+        <select name="selected_type" class="form-control" required>
+            <option value="">-- Select Loan Type --</option>
+            {% for year, types in year_to_loan_types.items %}
+                {% for type in types %}
+                    <option value="{{ type }}">{{ type }}</option>
+                {% endfor %}
+            {% endfor %}
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Amount Paid</label>
+        <input type="number" name="amount_paid" class="form-control" step="0.01" required>
+    </div>
+
+    <div class="form-group">
+        <label>Repayment Date</label>
+        <input type="date" name="repayment_date" class="form-control" required>
+    </div>
+
+    <button type="submit" class="btn btn-primary">Submit Payment</button>
+</form>
+
         </div>
     </div>
 </div> 

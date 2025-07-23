@@ -10,6 +10,7 @@ from accounts.models import *
 from main.models import *
 from memberapp.models import *
 from consumable.models import *
+from accounts.decorator import group_required
 from .models import *
 from decimal import Decimal,DecimalException
 from datetime import datetime

@@ -17,7 +17,7 @@ from django.contrib.auth.mixins import LoginRequiredMixin
 from django.views.generic import TemplateView
 import csv
 from loan.models import *
-
+from accounts.decorator import group_required
 # Create your views here.
 
 def admin_loan_reports(request):
@@ -177,8 +177,7 @@ def request_status_report(request):
     # ).distinct().order_by('username')
 
     context = {
-        'requests': page_obj,
-        'summary': summary,
+        'requests': page_obj,'summary': summary,
        
         'months': month_list,
         'filters': {

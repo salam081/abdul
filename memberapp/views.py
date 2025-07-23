@@ -3,6 +3,7 @@ from django.contrib.auth.decorators import login_required
 from django.views.decorators.http import require_POST
 from dateutil.relativedelta import relativedelta  
 from datetime import date
+from accounts.decorator import group_required
 from django.core.exceptions import ValidationError
 from django.db.models import Sum
 from django.db import transaction

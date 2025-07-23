@@ -13,8 +13,6 @@
         --hover-shadow: 0 15px 40px rgba(0, 0, 0, 0.15);
     }
 
-   
-
     .stat-icon.total { background: var(--primary-gradient); }
     .stat-icon.active { background: var(--success-gradient); }
     .stat-icon.inactive { background: var(--danger-gradient); }
@@ -43,138 +41,21 @@
         overflow: hidden;
     }
 
-    .card-header-custom {
-        background: var(--primary-gradient);
-        color: white;
-        padding: 2rem;
-        border: none;
-        display: flex;
-        justify-content: between;
-        align-items: center;
-    }
+   
 
-    .card-title {
-        font-size: 1.5rem;
-        font-weight: 600;
-        margin: 0;
-    }
+    
+    
 
-    .show-all-link {
-        color: rgba(255, 255, 255, 0.9);
-        text-decoration: none;
-        font-weight: 500;
-        transition: all 0.3s ease;
-        padding: 0.5rem 1rem;
-        border-radius: 20px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-    }
 
-    .show-all-link:hover {
-        color: white;
-        background: rgba(255, 255, 255, 0.1);
-        border-color: rgba(255, 255, 255, 0.5);
-    }
-
-    .bulk-actions {
-        background: #f8f9fa;
-        padding: 1.5rem;
-        border-bottom: 1px solid #e9ecef;
-    }
-
-    .bulk-actions h6 {
-        color: #495057;
-        font-weight: 600;
-        margin-bottom: 1rem;
-    }
-
-    .table-container {
-        padding: 0;
-    }
-
-    .table-modern {
-        margin-bottom: 0;
-        font-size: 0.95rem;
-    }
-
-    .table-modern thead th {
-        background: var(--primary-gradient);
-        color: white;
-        border: none;
-        padding: 1.2rem 1rem;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.85rem;
-    }
-
-    .table-modern tbody tr {
-        transition: all 0.3s ease;
-        border-bottom: 1px solid #f8f9fa;
-    }
-
-    .table-modern tbody tr:hover {
-        background: linear-gradient(135deg, #f8f9ff 0%, #f0f8ff 100%);
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.05);
-    }
-
-    .table-modern td {
-        /* padding: 1rem; */
-        /* vertical-align: middle; */
-        border: none;
-    }
-
-    .checkbox-custom {
-        width: 18px;
-        height: 18px;
-        accent-color: #667eea;
-        cursor: pointer;
-    }
-
-    .serial-number {
-        background: var(--primary-gradient);
-        color: white;
-        width: 32px;
-        height: 22px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-weight: 600;
-        font-size: 0.9rem;
-    }
-
-    .user-name {
-        font-weight: 600;
-        color: #2c3e50;
-    }
-
-    .user-code {
-        background: linear-gradient(135deg, #ffeaa7 0%, #fdcb6e 100%);
-        color: #d63031;
-        padding: 0.3rem 0.8rem;
-        border-radius: 15px;
-        font-weight: 600;
-        font-size: 0.85rem;
-    }
-
+   
+   
     .savings-amount {
         font-weight: 700;
         color: #00b894;
         font-size: 1.1rem;
     }
 
-    .btn-modern {
-        /* padding: 0.2rem 1rem; */
-        border-radius: 10px;
-        font-weight: 600;
-        font-size: 0.85rem;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        transition: all 0.3s ease;
-        border: none;
-        margin: 0.2rem;
-    }
+   
 
     .btn-detail {
         background: var(--info-gradient);
@@ -257,17 +138,7 @@
         color: white;
     }
 
-    .empty-state {
-        text-align: center;
-        padding: 4rem 2rem;
-        color: #6c757d;
-    }
-
-    .empty-state .empty-icon {
-        font-size: 4rem;
-        margin-bottom: 1rem;
-        opacity: 0.5;
-    }
+    
 
     @media (max-width: 768px) {
         .page-title {
@@ -287,31 +158,49 @@
             font-size: 0.8rem;
         }
     }
+
+    /* Styles specifically for the modal content */
+    .bg-gradient-primary {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    }
+    
+    .info-item {
+        background: #f8f9fa;
+        padding: 0.75rem;
+        border-radius: 0.5rem;
+        height: 100%;
+    }
+    
+    .info-item small {
+        font-size: 0.7rem;
+        letter-spacing: 0.5px;
+    }
+    
+    .info-item p {
+        font-size: 0.9rem;
+        margin-top: 0.25rem;
+        font-weight: 500;
+    }
+    
+    .border-opacity-25 {
+        --bs-border-opacity: 0.25;
+    }
+    
+    h6 {
+        font-weight: 600;
+        font-size: 0.95rem;
+    }
 </style>
 
 <div class="page-container">
     <div class="container-fluid px-4">
-        <!-- Page Header -->
-        <!-- <div class="page-header">
-            <h1 class="page-title">👥 User Management</h1>
-            <p class="page-subtitle">Manage members and control user access</p>
-        </div> -->
-
-      
-
-        <!-- Main Content Card -->
         <div class="card main-card">
             <div class="card-header-custom d-flex justify-content-between align-items-center">
-                 <h3 class="page-title">👥 User Management</h3>
-                 <!-- <p class="page-subtitle">Manage members and control user access</p> -->
-                <a href="#" class="show-all-link">
-                    <i class="fas fa-external-link-alt"></i>Total Members: {{ members|length }}
-                </a>
+                <h3 class="page-title">👥 User Management</h3>
+                
             </div>
 
-            <!-- Bulk Actions -->
             <div class="bulk-actions">
-               
                 <div class="d-flex flex-wrap align-items-center">
                     <div class="form-check me-4">
                         <input class="form-check-input checkbox-custom" type="checkbox" id="select-all">
@@ -330,10 +219,9 @@
                 </div>
             </div>
 
-            <!-- Table -->
             <div class="table-container">
                 <div class="table-responsive">
-                    <table class="table table-striped">
+                    <table class="table table-striped table-modern">
                         <thead>
                             <tr>
                                 <th width="70">
@@ -341,11 +229,12 @@
                                 </th>
                                 <th width="60">S/N</th>
                                 <th>Full Name</th>
-                                <th>Username</th>
+                                <th>Savings</th>
+                                <th>Phone</th>
+                                <th>D O B</th>
                                 <th>Department</th>
-                                <th>User Code</th>
-                                <!-- <th>Savings</th> -->
-                                <th colspan="3">Actions</th>
+                                <th class="text-nowrap text-truncate" style="max-width: 270px;">User Code</th>
+                                <th colspan="4">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -357,26 +246,27 @@
                                 <td>
                                     <div class="serial-number">{{ forloop.counter }}</div>
                                 </td>
-                                <td >{{ m.first_name }} {{ m.last_name }}</td>
-                                <td>{{ m.username }}</td>
+                                <td class="text-nowrap text-truncate" style="max-width: 270px;"><span class="user-name">{{ m.first_name }} {{ m.last_name }}</span></td>
+                                <td class="savings-amount">₦{{ m.savings|default:"0"|floatformat:2 }}</td> {# Accessing savings via m.member #}
+                                <td>{{ m.phone1 }}</td>
+                                <td class="text-nowrap text-truncate" style="max-width: 270px;">{{ m.date_of_birth }}</td>
                                 <td>{{ m.department|default:"Not Set" }}</td>
                                 <td>
-                                    {% if m.member.ippis %}
+                                    {% if m.member and m.member.ippis %} {# Check if member object exists before accessing ippis #}
                                         <span class="user-code">{{ m.member.ippis }}</span>
                                     {% else %}
                                         <span class="text-muted">--</span>
                                     {% endif %}
                                 </td>
-                                <!-- <td class="savings-amount">₦{{ m.member.total_savings|default:"0"|floatformat:2 }}</td> -->
                                 {% if m.member %}
                                     <td>
-                                        <a class="btn btn-primary" href="{% url 'member_detail' m.member.id %}">
-                                            <i class="fas fa-eye"></i> 
-                                        </a>
+                                        <button type="button" class="btn btn-modern btn-detail" data-bs-toggle="modal" data-bs-target="#memberModal{{ m.id }}" title="View Details">
+                                            <i class="fas fa-eye"></i>
+                                        </button>
                                     </td>
                                     <td>
-                                        <a class="btn btn-modern btn-reset" href="{% url 'reset_password' m.member.id %}">
-                                            <i class="fas fa-key"></i> 
+                                        <a class="btn btn-modern btn-reset" href="{% url 'reset_password' m.member.id %}" title="Reset Password">
+                                            <i class="fas fa-key"></i>
                                         </a>
                                     </td>
                                     <td>
@@ -384,26 +274,23 @@
                                             <form method="post" action="{% url 'activate_users' %}" style="display:inline;">
                                                 {% csrf_token %}
                                                 <input type="hidden" name="user_ids" value="{{ m.id }}">
-                                                <div class="d-flex">
-
-                                                    <button type="submit" class="btn btn-modern btn-activate">
-                                                        <i class="fas fa-user-check"></i>
-                                                    </button>
-                                                </div>
+                                                <button type="submit" class="btn btn-modern btn-activate" title="Activate User">
+                                                    <i class="fas fa-user-check"></i>
+                                                </button>
                                             </form>
                                         {% else %}
-                                            <span class="badge-active">
+                                            <span class="badge-active" title="User is Active">
                                                 <i class="fas fa-check-circle"></i>
                                             </span>
                                         {% endif %}
                                     </td>
-                                     <td>
-                                        <a class="btn btn-danger  bg-danger" href="{% url 'delete_member' m.member.id %}">
-                                            <i class="fas fa-trash "></i> 
-                                        </a title='delete member'>
+                                    <td>
+                                        <a class="btn btn-danger btn-modern" href="{% url 'delete_member' m.member.id %}" title="Delete Member">
+                                            <i class="fas fa-trash"></i>
+                                        </a>
                                     </td>
                                 {% else %}
-                                    <td colspan="3">
+                                    <td colspan="4">
                                         <span class="no-member">
                                             <i class="fas fa-exclamation-triangle"></i> No member record
                                         </span>
@@ -425,42 +312,42 @@
                     </table>
 
                     <div class="d-flex justify-content-center mt-4">
-    <nav aria-label="Page navigation">
-        <ul class="pagination">
-            {% if members.has_previous %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ members.previous_page_number }}" aria-label="Previous">
-                    <span aria-hidden="true">&laquo;</span>
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-hidden="true">&laquo;</span>
-            </li>
-            {% endif %}
+                        <nav aria-label="Page navigation">
+                            <ul class="pagination">
+                                {% if members.has_previous %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ members.previous_page_number }}" aria-label="Previous">
+                                        <span aria-hidden="true">&laquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&laquo;</span>
+                                </li>
+                                {% endif %}
 
-            {% for page_num in members.paginator.page_range %}
-                {% if members.number == page_num %}
-                    <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
-                {% else %}
-                    <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
-                {% endif %}
-            {% endfor %}
+                                {% for page_num in members.paginator.page_range %}
+                                    {% if members.number == page_num %}
+                                        <li class="page-item active"><span class="page-link">{{ page_num }}</span></li>
+                                    {% else %}
+                                        <li class="page-item"><a class="page-link" href="?page={{ page_num }}">{{ page_num }}</a></li>
+                                    {% endif %}
+                                {% endfor %}
 
-            {% if members.has_next %}
-            <li class="page-item">
-                <a class="page-link" href="?page={{ members.next_page_number }}" aria-label="Next">
-                    <span aria-hidden="true">&raquo;</span>
-                </a>
-            </li>
-            {% else %}
-            <li class="page-item disabled">
-                <span class="page-link" aria-hidden="true">&raquo;</span>
-            </li>
-            {% endif %}
-        </ul>
-    </nav>
-</div>
+                                {% if members.has_next %}
+                                <li class="page-item">
+                                    <a class="page-link" href="?page={{ members.next_page_number }}" aria-label="Next">
+                                        <span aria-hidden="true">&raquo;</span>
+                                    </a>
+                                </li>
+                                {% else %}
+                                <li class="page-item disabled">
+                                    <span class="page-link" aria-hidden="true">&raquo;</span>
+                                </li>
+                                {% endif %}
+                            </ul>
+                        </nav>
+                    </div>
 
                 </div>
             </div>
@@ -468,7 +355,169 @@
     </div>
 </div>
 
-<!-- Hidden Forms for Bulk Actions -->
+{% for m in members %}
+<div class="modal fade" id="memberModal{{ m.id }}" tabindex="-1" aria-labelledby="memberModalLabel{{ m.id }}" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-scrollable modal-lg">
+        <div class="modal-content">
+            <div class="modal-header bg-white text-white">
+               
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body p-4">
+                <div class="row g-4">
+                      <div class="card-header bg-gradient-primary text-white py-3">
+                    <div class="row align-items-center">
+                        <div class="col">
+                            <h4 class="mb-0">
+                                <i class="fas fa-user-circle me-2"></i>
+                                {{ m.first_name }} {{ m.last_name }} {{ m.other_name }}
+                            </h4>
+                            <small class="opacity-75">User Profile Details</small>
+                        </div>
+                        <div class="col-auto">
+                            {% if m.passport %}
+                                <img src="{{ m.passport.url }}" class="rounded-circle border border-white border-3 shadow-sm" style="width: 60px; height: 60px; object-fit: cover;" alt="Profile">
+                            {% else %}
+                                <div class="bg-white bg-opacity-25 rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                    <i class="fas fa-user text-white opacity-75"></i>
+                                </div>
+                            {% endif %}
+                        </div>
+                    </div>
+                </div>
+                    <div class="col-12">
+                        <h6 class="text-primary mb-3 border-bottom border-primary border-opacity-25 pb-2">
+                            <i class="fas fa-info-circle me-2"></i>Basic Information
+                          
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Full Name</small>
+                                <p class="mb-2">{{ m.first_name }} {{ m.last_name }} {{ m.other_name|default:"" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Email</small>
+                                <p class="mb-2">{{ m.email|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Phone</small>
+                                <p class="mb-2">{{ m.phone1|default:"N/A" }}{% if m.phone2 %} / {{ m.phone2 }}{% endif %}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Department</small>
+                                <p class="mb-2">{{ m.department|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Unit</small>
+                                <p class="mb-2">{{ m.unit|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Gender</small>
+                                <p class="mb-2">{{ m.gender|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Religion</small>
+                                <p class="mb-2">{{ m.religion|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Marital Status</small>
+                                <p class="mb-2">{{ m.marital_status|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">IPPIS Number</small>
+                                <p class="mb-2 fw-semibold">{{ m.member.ippis|default:"N/A" }}</p>
+                            </div>
+                             <div class="col-md-4 col-sm-6">
+                                <small class="text-muted text-uppercase fw-bold d-block">Total Savings</small>
+                                <p class="mb-2 fw-semibold savings-amount">₦{{ m.member.total_savings|default:"0"|floatformat:2 }}</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    {% if m.address %} {# CORRECTED: Access address directly from User object 'm' #}
+                    <div class="col-12">
+                        <h6 class="text-info mb-3 border-bottom border-info border-opacity-25 pb-2">
+                            <i class="fas fa-map-marker-alt me-2"></i>Address Information
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-4">
+                                <small class="text-muted text-uppercase fw-bold d-block">Country</small>
+                                <p class="mb-2">{{ m.address.country|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted text-uppercase fw-bold d-block">State of Origin</small>
+                                <p class="mb-2">{{ m.address.state_of_origin|default:"N/A" }}</p> {# Accessing State object, might need .title if it's a Foreignkey #}
+                            </div>
+                            <div class="col-md-4">
+                                <small class="text-muted text-uppercase fw-bold d-block">LGA</small>
+                                <p class="mb-2">{{ m.address.local_government_area|default:"N/A" }}</p>
+                            </div>
+                            <div class="col-12">
+                                <small class="text-muted text-uppercase fw-bold d-block">Full Address</small>
+                                <p class="mb-2">{{ m.address.address|default:"N/A" }}</p>
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                    {% if m.nextofkin %} {# CORRECTED: Access nextofkin directly from User object 'm' #}
+                    <div class="col-12">
+                        <h6 class="text-warning mb-3 border-bottom border-warning border-opacity-25 pb-2">
+                            <i class="fas fa-users me-2"></i>Next of Kin
+                        </h6>
+                        <div class="row g-3">
+                            <div class="col-md-8">
+                                <div class="row g-3">
+                                    <div class="col-sm-6">
+                                        <small class="text-muted text-uppercase fw-bold d-block">Full Name</small>
+                                        <p class="mb-2">{{ m.nextofkin.full_names|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="col-sm-6">
+                                        <small class="text-muted text-uppercase fw-bold d-block">Phone</small>
+                                        <p class="mb-2">{{ m.nextofkin.phone_no|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="col-12">
+                                        <small class="text-muted text-uppercase fw-bold d-block">Email</small>
+                                        <p class="mb-2">{{ m.nextofkin.email|default:"N/A" }}</p>
+                                    </div>
+                                    <div class="col-12">
+                                        <small class="text-muted text-uppercase fw-bold d-block">Address</small>
+                                        <p class="mb-2">{{ m.nextofkin.address|default:"N/A" }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4 text-center">
+                                {% if m.nextofkin.netofkin_passport %}
+                                    <img src="{{ m.nextofkin.netofkin_passport.url }}" class="img-fluid rounded border shadow-sm" style="max-width: 120px; max-height: 120px; object-fit: cover;" alt="Next of Kin">
+                                {% else %}
+                                    <div class="bg-light rounded border d-flex align-items-center justify-content-center mx-auto" style="width: 120px; height: 120px;">
+                                        <i class="fas fa-user text-muted fa-2x"></i>
+                                    </div>
+                                    <small class="text-muted mt-2 d-block">No photo</small>
+                                {% endif %}
+                            </div>
+                        </div>
+                    </div>
+                    {% endif %}
+
+                </div>
+            </div>
+
+            <div class="modal-footer bg-light border-0 d-flex justify-content-between align-items-center py-3">
+                <small class="text-muted">
+                    <i class="fas fa-clock me-1"></i>Last updated: {{ m.last_updated|date:"M d, Y"|default:"N/A" }} {# Assuming a 'last_updated' field on User model #}
+                </small>
+                <div class="btn-group">
+                    <a href="{% url 'complete_profile' %}" class="btn btn-outline-primary btn-sm"> {# This link still needs to be dynamic for the specific user #}
+                        <i class="fas fa-edit me-1"></i>Edit Profile
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endfor %}
+
 <form method="post" action="{% url 'deactivate_users' %}" id="bulk-deactivate-form" style="display: none;">
     {% csrf_token %}
     <div id="deactivate-user-inputs"></div>

@@ -1,14 +1,63 @@
 {% extends 'base/base.html' %}
 
 {% block content %}
-<div class="container mt-1 col-md-8">
+<style>
+    /* Custom Styles for Search Results Page (Consider moving to an external CSS file like 'styles.css') */
+    :root {
+        --primary-color: #007bff; /* Bootstrap primary blue */
+        --success-color: #28a745; /* Bootstrap success green */
+        --warning-color: #ffc107; /* Bootstrap warning yellow */
+    }
+
+   
+    /* Header styling */
+    .search-results-header {
+        color: #343a40; /* Dark text */
+        font-weight: 600;
+        border-bottom: 2px solid var(--primary-color);
+        padding-bottom: 0.5rem;
+        display: inline-block; /* Makes border-bottom only as wide as text */
+        font-size: 1.75rem; /* Adjust font size */
+    }
+
+   
+   
+
+    /* Button specific overrides for custom colors/hovers */
+    .btn-add-savings {
+        background-color: var(--success-color);
+        border-color: var(--success-color);
+        color: white;
+    }
+    .btn-add-savings:hover {
+        background-color: #218838; /* Slightly darker green */
+        border-color: #1e7e34;
+        color: white;
+    }
+
+    .btn-reset-password {
+        background-color: var(--warning-color);
+        border-color: var(--warning-color);
+        color: #343a40;
+    }
+    .btn-reset-password:hover {
+        background-color: #e0a800; 
+        border-color: #d39e00;
+        color: #343a40;
+    }
+
+    /* Empty state styling */
+   
+</style>
+
+<div class="container py-4 col-md-10 mx-auto"> {# Using py-4 for vertical padding, mx-auto for centering #}
     {% if results %}
-    <h4 class="mb-4 text-center">Search Results</h4>
-    <div class="card bg-light col-md-12">
-        <div class="card-body">
+    <h4 class="mb-4 text-center search-results-header">Search Results for Members</h4>
+    <div class="card shadow-sm border-0 rounded-3 overflow-hidden"> {# Bootstrap shadows, no border, rounded corners #}
+        <div class="card-body p-4"> {# Bootstrap padding #}
             <div class="table-responsive">
-                <table class="table table-bordered table-hover text-center align-middle">
-                    <thead class="table-success">
+                <table class="table table-striped table-hover">
+                    <thead class="">
                         <tr>
                             <th>Full Name</th>
                             <th>IPPIS</th>
@@ -18,11 +67,17 @@
                     <tbody>
                         {% for member in results %}
                         <tr>
-                            <td>{{ member.member }}</td>
-                            <td>{{ member.ippis }}</td>
+                            <td><span class="fw-bold text-dark">{{ member.member.first_name }} {{ member.member.last_name }}</span></td>
+                            <td><span class="fw-bold text-dark">{{ member.ippis }}</span></td>
                             <td>
-                                <a href="{% url 'add_individual_savings' id=member.id %}" class="btn btn-success"> Add Savings </a>
-                               
+                                <div class="d-flex justify-content-center align-items-center gap-2"> {# Bootstrap flexbox for button spacing #}
+                                    <a href="{% url 'add_individual_savings' id=member.id %}" class="btn btn-sm btn-add-savings" title='Add Savings'>
+                                        <i class="fas fa-plus-circle me-1"></i> 
+                                    </a>
+                                    <a href="{% url 'reset_password' id=member.id %}" class="btn btn-sm btn-reset-password" title='reset password'>
+                                        <i class="fas fa-key me-1"></i> 
+                                    </a>
+                                </div>
                             </td>
                         </tr>
                         {% endfor %}
@@ -30,39 +85,55 @@
                 </table>
             </div>
 
-            <!-- Pagination Controls -->
-            <div class="pagination justify-content-center mt-3">
-                <ul class="pagination">
-                    {% if results.has_previous %}
-                    <li class="page-item">
-                        <a class="page-link" href="?search_term={{ search_term }}&page=1">First</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link"
-                            href="?search_term={{ search_term }}&page={{ results.previous_page_number }}">Previous</a>
-                    </li>
-                    {% endif %}
+            <div class="d-flex justify-content-center mt-4">
+                <nav aria-label="Page navigation for search results">
+                    <ul class="pagination">
+                        {% if results.has_previous %}
+                        <li class="page-item">
+                            <a class="page-link" href="?search_term={{ search_term }}&page=1" aria-label="First">
+                                <span aria-hidden="true">&laquo;&laquo;</span> First
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?search_term={{ search_term }}&page={{ results.previous_page_number }}" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span> Previous
+                            </a>
+                        </li>
+                        {% endif %}
 
-                    <li class="page-item disabled">
-                        <span class="page-link">Page {{ results.number }} of {{ results.paginator.num_pages }}</span>
-                    </li>
+                        <li class="page-item disabled">
+                            <span class="page-link">Page {{ results.number }} of {{ results.paginator.num_pages }}</span>
+                        </li>
 
-                    {% if results.has_next %}
-                    <li class="page-item">
-                        <a class="page-link"
-                            href="?search_term={{ search_term }}&page={{ results.next_page_number }}">Next</a>
-                    </li>
-                    <li class="page-item">
-                        <a class="page-link"
-                            href="?search_term={{ search_term }}&page={{ results.paginator.num_pages }}">Last</a>
-                    </li>
-                    {% endif %}
-                </ul>
+                        {% if results.has_next %}
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?search_term={{ search_term }}&page={{ results.next_page_number }}" aria-label="Next">
+                                Next <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                        <li class="page-item">
+                            <a class="page-link"
+                                href="?search_term={{ search_term }}&page={{ results.paginator.num_pages }}" aria-label="Last">
+                                Last <span aria-hidden="true">&raquo;&raquo;</span>
+                            </a>
+                        </li>
+                        {% endif %}
+                    </ul>
+                </nav>
             </div>
         </div>
     </div>
     {% else %}
-    <p class="text-muted">No members found matching your search criteria.</p>
+    <div class="empty-state">
+        <div class="icon"><i class="fas fa-search"></i></div>
+        <h5 class="fw-bold text-dark">No Members Found</h5>
+        <p class="text-muted">No members were found matching your search criteria. Try a different name or IPPIS number.</p>
+        <a href="{% url 'admin_member_list' %}" class="btn btn-primary mt-3">
+            <i class="fas fa-users me-1"></i> View All Members
+        </a>
+    </div>
     {% endif %}
 </div>
 {% endblock content %}

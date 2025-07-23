@@ -11,10 +11,7 @@ class LoanSettings(models.Model):
     allow_consumable_requests = models.BooleanField(default=True)
     created_by = models.ForeignKey(User,on_delete=models.CASCADE)
     
-    # def __str__(self):
-    #     return f"{self.allow_loan_requests} ({self.allow_consumable_requests})"
-     
-
+  
 class BankName(models.Model):
      name = models.CharField(max_length=100)
      def __str__(self):
@@ -91,19 +88,8 @@ class LoanRepayback(models.Model):
     
 
 
-
-# class LoanRequetsFee(models.Model):
-#     member_ippis = models.IntegerField()
-#     form_fee = models.DecimalField(max_digits=10, decimal_places=2)  
-#     loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
-#     created_by = models.ForeignKey(User,on_delete=models.CASCADE,blank=True,null=True)
-
-
-
-
-
 class LoanRequestFee(models.Model):
-    member = models.ForeignKey(Member, on_delete=models.CASCADE)  # Reference to the Member table
+    member = models.ForeignKey(Member, on_delete=models.CASCADE)  
     form_fee = models.DecimalField(max_digits=10, decimal_places=2)
     loan_amount = models.DecimalField(max_digits=10, decimal_places=2)
     created_by = models.ForeignKey(settings.AUTH_USER_MODEL,on_delete=models.CASCADE, blank=True,null=True)

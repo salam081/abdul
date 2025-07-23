@@ -19,6 +19,7 @@ from django.core.files.base import ContentFile
 from django.db.models import Sum,F
 from django.db.models.functions import ExtractMonth, ExtractYear
 from django.utils.dateparse import parse_date
+from accounts.decorator import group_required
 from .models import * 
 from loan.models import * 
 from accounts.models import * 
@@ -35,6 +36,7 @@ def index(request):
     context = {}
     return render(request, "main/index.html", context)
 
+@group_required(['admin'])
 def loan_fee(request):
     if request.method == 'POST':
         member_ippis = request.POST.get('member_ippis')
