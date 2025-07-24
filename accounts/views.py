@@ -535,3 +535,23 @@ def reset_password_view(request, id):
 
     messages.success(request, f"Password for {user_to_reset.username} has been reset.")
     return redirect('all_members')
+
+
+@login_required
+def add_user_to_group(request, id):
+    # Get the User (not Member)
+    user = get_object_or_404(User, id=id)
+    groups = UserGroup.objects.all().order_by('title')
+
+    if request.method == 'POST':
+        group_id = request.POST.get('group')
+        user.group_id = group_id  
+        user.save()
+        messages.success(request, "User Group Assigned Successfully!")
+        return redirect('admin_dashboard')
+
+    context = {"user": user, "groups": groups}
+    return render(request, 'main/search_member.html', context)
+
+
+

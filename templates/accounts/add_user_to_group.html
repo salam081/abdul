@@ -1,0 +1,40 @@
+{% extends 'base/base.html' %}
+
+{% block content %}
+<div class="container-xxl pt-2 pb-3">
+    <div class="container">
+        <div class="text-center wow fadeInUp" data-wow-delay="0.1s">
+            <h3 class="section-title ff-secondary text-center text-dark font-monospace">Assign User To Group</h3>
+        </div>
+
+        <!-- Centered Card -->
+        <div class="row justify-content-center mt-4">
+            <div class="col-md-6">
+                <div class="bg-white shadow p-4 rounded wow fadeInUp" data-wow-delay="0.2s">
+                    <h3 class="text-center text-dark fw-normal mb-3">{{user.firstname}}
+                        {{user.lastname}} {{user.group.title}}</h3>
+
+                    <form method="POST" action="{% url 'add_user_to_group' user.id %}">
+                        {% csrf_token %}
+                        <div class="mb-3">
+                            <div class="form-floating">
+                                
+                                <select class="form-select" id="group" name="group">
+                                    {% for group in groups %}
+                                   <option value="{{ group.id }}" {% if user.group.id == group.id %}selected{% endif %}>{{ group.title }}</option>
+
+                                    {% endfor %}
+                                </select>
+
+                                <label for="group">Assign Group</label>
+                            </div>
+                        </div>
+
+                        <button class="btn btn-primary w-100 py-3" type="submit">Assign Group</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock content %}

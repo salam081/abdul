@@ -77,9 +77,55 @@
                                     <a href="{% url 'reset_password' id=member.id %}" class="btn btn-sm btn-reset-password" title='reset password'>
                                         <i class="fas fa-key me-1"></i> 
                                     </a>
+                                    <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#staticBackdrop{{ member.id }}" title='Assign User To Group'>
+                                    <i class="fas fa-users"></i>
+                                    </button>
+                                    <!-- <a href="{% url 'add_user_to_group' id=member.id %}" class="btn btn-sm btn-reset-password" title='Assign User To Group'>
+                                        <i class="bi bi-people-fill"></i>
+                                    </a> -->
                                 </div>
                             </td>
                         </tr>
+                       <div class="modal fade" id="staticBackdrop{{member.id}}" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+                            <div class="modal-dialog modal-dialog-centered">
+                                <div class="modal-content">
+                                    <div class="modal-header">
+                                        <h1 class="modal-title fs-5" id="staticBackdropLabel">Assign Group</h1>
+                                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                    </div>
+                                    <div class="modal-body">
+                                        <h5 class="text-center text-dark fw-normal mb-3">
+                                            {{ member.member.first_name }} {{ member.member.last_name }}
+                                            {% if member.member.group %}
+                                                ({{ member.member.group.title }})
+                                            {% else %}
+                                                (No Group Assigned)
+                                            {% endif %}
+                                        </h5>
+
+                                        <form method="POST" action="{% url 'add_user_to_group' member.member.id %}">
+                                            {% csrf_token %}
+                                            <div class="mb-3">
+                                                <div class="form-floating">
+                                                    <select class="form-select" id="group{{ member.id }}" name="group">
+                                                        {% for group in groups %}
+                                                            <option value="{{ group.id }}" {% if member.member.group.id == group.id %}selected{% endif %}>{{ group.title }}</option>
+                                                        {% endfor %}
+                                                    </select>
+                                                    <label for="group{{ member.id }}">Assign Group</label>
+                                                </div>
+                                            </div>
+
+                                            <button class="btn btn-primary w-100 py-2" type="submit">Assign Group</button>
+                                        </form>
+                                    </div>
+                                    <div class="modal-footer">
+                                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
                         {% endfor %}
                     </tbody>
                 </table>
@@ -130,7 +176,7 @@
         <div class="icon"><i class="fas fa-search"></i></div>
         <h5 class="fw-bold text-dark">No Members Found</h5>
         <p class="text-muted">No members were found matching your search criteria. Try a different name or IPPIS number.</p>
-        <a href="{% url 'admin_member_list' %}" class="btn btn-primary mt-3">
+        <a href="{% url 'all_members' %}" class="btn btn-primary mt-3">
             <i class="fas fa-users me-1"></i> View All Members
         </a>
     </div>

@@ -18,6 +18,7 @@ urlpatterns = [
 
     path('reset_password_view/<int:id>/', views.reset_password_view, name='reset_password'),
     path('changePassword', views.changePassword, name='change_password'),
+    path('add_user_to_group/<int:id>/', views.add_user_to_group, name='add_user_to_group'),
 
      path('delete-users/', views.delete_non_superusers),
 

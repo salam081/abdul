@@ -28,10 +28,6 @@ from .forms import *
 from datetime import datetime
 
 
-
-
-
-
 def index(request):
     context = {}
     return render(request, "main/index.html", context)
@@ -70,6 +66,7 @@ def loan_fee(request):
 
 
 def search_member_for_savings(request):
+    groups = UserGroup.objects.all().order_by('title')
     results = []
     search_term = request.GET.get('search_term', '').strip()
     if search_term:
@@ -89,6 +86,7 @@ def search_member_for_savings(request):
     context = {
         'results': page_obj,
         'search_term': search_term,
+        'groups':groups
     }
     return render(request, 'main/search_member.html', context)
 

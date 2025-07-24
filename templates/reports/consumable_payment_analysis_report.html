@@ -27,7 +27,7 @@
         <div class="col-md-3 mt-2">
              <div class="card border-success shadow" style="border-left: 5px solid #22c214;">
                 <div class="card-body">
-                    <h6>Total Payments</h6>
+                    <h6>Total Payments Received</h6>
                     <h4>₦{{ payment_stats.total_payments|default:0|floatformat:2|intcomma }}</h4>
                 </div>
             </div>
@@ -41,7 +41,7 @@
             </div>
         </div>
         <div class="col-md-3 mt-2">
-             <div class="card border-primary shadow" style="border-left: 5px solid #4d4ba0;">
+             <div class="card border-danger shadow" style="border-left: 5px solid #d44127;">
                 <div class="card-body">
                     <h6>Number of Payments</h6>
                     <h4>{{ payment_stats.payment_count }}</h4>
