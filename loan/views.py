@@ -108,6 +108,33 @@ def add_loan_type(request):
     context = {'loan_types': loan_types}
     return render(request, 'loan/add_loan_type.html', context)
 
+@group_required(['admin'])
+def loan_fee(request):
+    if request.method == 'POST':
+        member_ippis = request.POST.get('member_ippis')
+        form_fee = request.POST.get('form_fee')
+        loan_amount = request.POST.get('loan_amount')
+
+        # Get Member instance using IPPIS number
+        member = get_object_or_404(Member, ippis=member_ippis)
+
+        LoanRequestFee.objects.create(
+            member=member,
+            form_fee=form_fee,
+            loan_amount=loan_amount,
+            created_by=request.user
+        )
+        messages.success(request, 'Payment recorded successfully')
+        return redirect('loan_fee')
+
+    # Aggregates
+    loan = LoanRequestFee.objects.aggregate(total=Sum('loan_amount'))['total'] or 0
+    fee = LoanRequestFee.objects.aggregate(total=Sum('form_fee'))['total'] or 0
+    loan_req_form = LoanRequestFee.objects.count()
+
+    context = {"fee": fee,"loan": loan,"loan_req_form": loan_req_form}
+    return render(request, "loan/loan_fee.html", context)
+
 
 #  =========list of Pending Loans and others ==========
 def admin_loan_requests_list(request):
@@ -145,9 +172,7 @@ def admin_loan_requests_list(request):
         .values_list('status', 'total')
     )
 
-    total_repaid = LoanRepayback.objects.filter(
-        loan_request__in=results_queryset
-    ).aggregate(total=Sum('amount_paid'))['total'] or 0
+    total_repaid = LoanRepayback.objects.filter(loan_request__in=results_queryset).aggregate(total=Sum('amount_paid'))['total'] or 0
 
     total_amont_loan_request = totals_by_status.get('approved', 0)
     total_pending = totals_by_status.get('pending', 0)
@@ -168,17 +193,11 @@ def admin_loan_requests_list(request):
     status_choices = LoanRequest._meta.get_field('status').choices
     
     context = {
-        'requests': requests,
-        'loan_types': loan_types,
-        'status_choices': status_choices,
-        'current_status': status_filter,
-        'current_loan_type': loan_type_filter,
-        'search_query': search_query,
-
-        'total_approved': total_amont_loan_request,
-        'total_pending': total_pending,
-        'total_repaid': total_repaid,
-        'total_approved_amount': total_approved_amount,
+        'requests': requests,'loan_types': loan_types,
+        'status_choices': status_choices,'current_status': status_filter,
+        'current_loan_type': loan_type_filter,'search_query': search_query,
+        'total_approved': total_amont_loan_request,'total_pending': total_pending,
+        'total_repaid': total_repaid,'total_approved_amount': total_approved_amount,
     }
     return render(request, 'loan/requests_list.html', context)
 
@@ -652,51 +671,7 @@ def upload_loan_payment(request):
 
 
 
-def filtered_loan_repayments(request):
-    years = LoanRequest.objects.annotate(year=ExtractYear("application_date")) \
-        .values_list("year", flat=True).distinct().order_by("-year")
-    loan_types = LoanRequest.objects.values_list("loan_type__name", flat=True).distinct().order_by("loan_type__name")
 
-    selected_year = request.GET.get("year")
-    selected_type = request.GET.get("loan_type")
-
-    filters = Q()
-    if selected_year:
-        filters &= Q(loan_request__application_date__year=selected_year)
-    if selected_type:
-        filters &= Q(loan_request__loan_type__name=selected_type)
-
-    repayments_qs = LoanRepayback.objects.select_related("loan_request__member", "loan_request__loan_type") \
-        .filter(filters).order_by("-repayment_date")
-    # Sum total repayment amount across all filtered records
-    total_sum_paid = repayments_qs.aggregate(Sum("amount_paid"))["amount_paid__sum"] or 0
-
-    # Enrich each repayment with total paid and balance
-    enriched_repayments = []
-    total_sum_remaining = 0 
-    for repay in repayments_qs:
-        loan = repay.loan_request
-        total_paid = LoanRepayback.objects.filter(loan_request=loan).aggregate(Sum("amount_paid"))["amount_paid__sum"] or 0
-        approved = loan.approved_amount or 0
-        balance = approved - total_paid
-        total_sum_remaining += balance  # <-- Add this
-
-        enriched_repayments.append({
-            "repayment": repay,
-            "total_paid": total_paid,
-            "balance_remaining": balance,
-        })
-
-
-    # Add pagination
-    paginator = Paginator(enriched_repayments, 5)  # Show 10 per page
-    page_number = request.GET.get("page")
-    page_obj = paginator.get_page(page_number)
-
-    context = {"page_obj": page_obj,"years": years, "loan_types": loan_types,
-                "selected_year": selected_year, "selected_type": selected_type,
-                "total_sum_paid": total_sum_paid,"total_sum_remaining": total_sum_remaining,}
-    return render(request, "reports/filtered_loan_repayments.html", context)
 
 
 def admin_repayment_tracking(request):

@@ -1,56 +1,59 @@
 
 from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
-from django.db.models import Sum, Count, Q, Avg
+from django.db.models import Sum, Count, Q, Avg , F ,ExpressionWrapper, DecimalField
+from django.db.models.functions import Coalesce
 from django.db.models.functions import TruncMonth, TruncYear
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.core.paginator import Paginator
 from datetime import datetime, timedelta
 from collections import defaultdict
+from django.db.models.functions import ExtractYear
+from django.db.models.functions import ExtractMonth
+from django.db import transaction
 from decimal import Decimal
-from django.db.models import F, Sum, ExpressionWrapper, DecimalField
 import json
-from consumable.models import ConsumableRequest, ConsumableRequestDetail, PaybackConsumable
+from consumable.models import *
 from accounts.models import User
-from django.contrib.auth.mixins import LoginRequiredMixin
-from django.views.generic import TemplateView
 import csv
 from loan.models import *
 from accounts.decorator import group_required
+
+from datetime import date
+
 # Create your views here.
+
 
 def admin_loan_reports(request):
     # Default to current month
     month = request.GET.get('month', timezone.now().strftime('%Y-%m'))
     year, month_num = month.split('-')
+    
 
-    # Get loan_type filter from query params
+
     loan_type_id = request.GET.get('loan_type')
 
-    # Base queryset
     monthly_requests = LoanRequest.objects.filter(
         application_date__year=year,
-        application_date__month=month_num
+        # application_date__month=month_num
     )
 
-    # Apply loan_type filter if specified
     if loan_type_id:
         monthly_requests = monthly_requests.filter(loan_type_id=loan_type_id)
 
     monthly_approvals = monthly_requests.filter(status='approved')
     monthly_rejections = monthly_requests.filter(status='rejected')
 
-    # Repayments (filter by loan_type if specified)
+    
     monthly_repayments = LoanRepayback.objects.filter(
         repayment_date__year=year,
-        repayment_date__month=month_num
+        # repayment_date__month=month_num
 
     )
     if loan_type_id:
         monthly_repayments = monthly_repayments.filter(loan_request__loan_type_id=loan_type_id)
 
-    # Loan type breakdown (for all types)
     loan_type_stats = LoanType.objects.annotate(
         total_requests=Count('loanrequest'),
         total_approved=Count('loanrequest', filter=Q(loanrequest__status='approved')),
@@ -66,12 +69,145 @@ def admin_loan_reports(request):
         'monthly_approved_amount': monthly_approvals.aggregate(Sum('approved_amount'))['approved_amount__sum'] or 0,
         'monthly_repayments': monthly_repayments.aggregate(Sum('amount_paid'))['amount_paid__sum'] or 0,
         'loan_type_stats': loan_type_stats,
-        'loan_types': LoanType.objects.all(),  # For dropdown in the template
+        'loan_types': LoanType.objects.all(),  
     }
     return render(request, 'reports/reports.html', context)
 
+def loan_request_report(request):
+    # Initialize query set with all loan requests
+    loan_requests = LoanRequest.objects.all().order_by('-date_created')
+
+    # Initialize filters dictionary
+    filters = {
+        'status': request.GET.get('status', 'all'),
+        'date_from': request.GET.get('date_from'),
+        'date_to': request.GET.get('date_to'),
+        'month': request.GET.get('month'),
+        'loan_type': request.GET.get('loan_type'), 
+    }
+
+    # Apply filters
+    if filters['status'] and filters['status'] != 'all':
+        loan_requests = loan_requests.filter(status=filters['status'])
+
+    if filters['date_from']:
+        loan_requests = loan_requests.filter(application_date__gte=filters['date_from'])
+
+    if filters['date_to']:
+        loan_requests = loan_requests.filter(application_date__lte=filters['date_to'])
+
+    if filters['month']:
+        try:
+            year, month = map(int, filters['month'].split('-'))
+            loan_requests = loan_requests.filter(
+                application_date__year=year,
+                application_date__month=month
+            )
+        except ValueError:
+            # Handle invalid month format if necessary
+            pass
+
+    # Apply loan_type filter
+    if filters['loan_type']: # If a loan type is selected
+        loan_requests = loan_requests.filter(loan_type__name=filters['loan_type'])
 
 
+    # Annotate loan requests with total paid and balance
+    # Coalesce handles cases where there are no repayments yet (sum would be None)
+    loan_requests = loan_requests.annotate(
+        total_paid=Coalesce(Sum('repaybacks__amount_paid'), 0.00, output_field=DecimalField()),
+        balance=ExpressionWrapper(
+            F('approved_amount') - Coalesce(Sum('repaybacks__amount_paid'), 0.00),
+            output_field=DecimalField()
+        ),
+        total_price=Coalesce(F('approved_amount'), F('amount'), output_field=DecimalField())
+    )
+
+    # Calculate summary statistics
+    summary = {
+        'total_requests': loan_requests.count(),
+        'total_value': loan_requests.aggregate(total_approved=Coalesce(Sum('approved_amount'), 0.00, output_field=DecimalField()))['total_approved'],
+        'total_paid': loan_requests.aggregate(total_repaid=Coalesce(Sum('repaybacks__amount_paid'), 0.00, output_field=DecimalField()))['total_repaid'],
+        'total_balance': loan_requests.aggregate(total_outstanding=Coalesce(Sum('balance'), 0.00, output_field=DecimalField()))['total_outstanding'],
+        'pending_count': loan_requests.filter(status='pending').count(),
+        'approved_count': loan_requests.filter(status='approved').count(),
+        'paid_count': loan_requests.filter(status='paid').count(),
+        'declined_count': loan_requests.filter(status='rejected').count(),
+    }
+
+    # Determine status choices for the filter dropdown
+    status_choices = [('all', 'All Statuses')] + list(LoanRequest.status.field.choices)
+
+    # Get unique months from existing loan requests for the "Filter by Month" dropdown
+    distinct_application_dates = LoanRequest.objects.dates('application_date', 'month', order='DESC')
+    months = [d for d in distinct_application_dates]
+
+    # Get unique loan types for the "Filter by Loan Type" dropdown
+    # Ensure LoanType model is imported as it's more direct to query LoanType itself
+    # rather than LoanRequest.objects.values_list, which can miss loan types with no requests.
+    # However, if you only want types that HAVE requests, your original line is fine.
+    # Using LoanType.objects.all() to get all available loan types is generally more robust
+    # for a filter dropdown.
+    loan_types_qs = LoanType.objects.all().order_by("name")
+
+    # Pagination
+    page_number = request.GET.get('page')
+    paginator = Paginator(loan_requests, 100) 
+    page_obj = paginator.get_page(page_number)
+
+    context = {
+        'requests': page_obj,
+        'summary': summary,
+        'filters': filters,
+        'status_choices': status_choices,
+        'months': months,
+        'loan_types': loan_types_qs, 
+    }
+    return render(request, 'reports/loan_request_report.html', context)
+
+
+
+def filtered_loan_repayments(request):
+    years = LoanRequest.objects.annotate(year=ExtractYear("application_date")) \
+        .values_list("year", flat=True).distinct().order_by("-year")
+    loan_types = LoanRequest.objects.values_list("loan_type__name", flat=True).distinct().order_by("loan_type__name")
+
+    selected_year = request.GET.get("year")
+    selected_type = request.GET.get("loan_type")
+
+    filters = Q()
+    if selected_year:
+        filters &= Q(loan_request__application_date__year=selected_year)
+    if selected_type:
+        filters &= Q(loan_request__loan_type__name=selected_type)
+
+    repayments_qs = LoanRepayback.objects.select_related("loan_request__member", "loan_request__loan_type") \
+        .filter(filters).order_by("-repayment_date")
+    # Sum total repayment amount across all filtered records
+    total_sum_paid = repayments_qs.aggregate(Sum("amount_paid"))["amount_paid__sum"] or 0
+
+    # Enrich each repayment with total paid and balance
+    enriched_repayments = []
+    total_sum_remaining = 0 
+    for repay in repayments_qs:
+        loan = repay.loan_request
+        total_paid = LoanRepayback.objects.filter(loan_request=loan).aggregate(Sum("amount_paid"))["amount_paid__sum"] or 0
+        approved = loan.approved_amount or 0
+        balance = approved - total_paid
+        total_sum_remaining += balance  
+
+        enriched_repayments.append({
+            "repayment": repay,"total_paid": total_paid,"balance_remaining": balance,})
+        
+    # Add pagination
+    paginator = Paginator(enriched_repayments, 100) 
+    page_number = request.GET.get("page")
+    page_obj = paginator.get_page(page_number)
+
+    context = {"page_obj": page_obj,"years": years, "loan_types": loan_types,
+                "selected_year": selected_year, "selected_type": selected_type,
+                "total_sum_paid": total_sum_paid,"total_sum_remaining": total_sum_remaining,}
+    return render(request, "reports/filtered_loan_repayments.html", context)
 
 @login_required
 def request_status_report(request):
@@ -299,15 +435,7 @@ def item_popularity_report(request):
     return render(request, 'reports/item_popularity_report.html', context)
 
 
-from datetime import datetime, timedelta
-from django.db.models import Q, Sum, Avg, Count, Min, Max
-from django.db.models.functions import TruncMonth, TruncWeek
-from django.utils import timezone
-from django.contrib import messages
-from django.contrib.auth.decorators import login_required
-from django.shortcuts import render
-# from consumables.models import PaybackConsumable, ConsumableRequest
-from accounts.models import User
+
 
 
 @login_required
@@ -339,12 +467,8 @@ def payment_analysis_report(request):
         parsed_date_from = parsed_date_to = None
 
     # Base queryset with optimized select_related
-    queryset = PaybackConsumable.objects.select_related(
-        'consumable_request__user',
-        'consumable_request'
-    ).prefetch_related(
-        'consumable_request__details__item'  # ✅ fixed reverse relation
-    )
+    queryset = PaybackConsumable.objects.select_related('consumable_request__user','consumable_request'
+    ).prefetch_related('consumable_request__details__item')
 
     # Apply filters
     if parsed_date_from:
@@ -392,8 +516,8 @@ def payment_analysis_report(request):
     outstanding_requests = ConsumableRequest.objects.filter(
         outstanding_filter
     ).select_related('user').prefetch_related(
-        'details__item',            # ✅ corrected reverse relation
-        'repayments'     # ✅ paybacks related to this request
+        'details__item',           
+        'repayments'    
     )
 
     outstanding_data = []
@@ -470,17 +594,11 @@ def payment_analysis_report(request):
     ).distinct().order_by('user__username')
 
     context = {
-        'payment_stats': payment_stats,
-        'monthly_payments': list(monthly_payments),
-        'weekly_payments': list(weekly_payments),
-        'outstanding_data': outstanding_data,
-        'outstanding_summary': outstanding_summary,
-        'payment_methods': payment_methods,
-        'top_users': top_users,
-        'recent_payments': recent_payments,
-        'months': month_list,
-        'users_list': users_list,
-        'total_outstanding': total_outstanding,
+        'payment_stats': payment_stats,'monthly_payments': list(monthly_payments),
+        'weekly_payments': list(weekly_payments),'outstanding_data': outstanding_data,
+        'outstanding_summary': outstanding_summary,'payment_methods': payment_methods,
+        'top_users': top_users,'recent_payments': recent_payments,
+        'months': month_list,'users_list': users_list,'total_outstanding': total_outstanding,
         'filters': {
             'date_from': date_from,
             'date_to': date_to,

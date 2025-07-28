@@ -5,6 +5,8 @@ from .import views
 
 urlpatterns = [
    path('loan/reports/', views.admin_loan_reports, name='admin_loan_reports'),
+   path('loan_request_report', views.loan_request_report, name='loan_request_report'),
+   path("loan-repayments/", views.filtered_loan_repayments, name="filtered_loan_repayments"),
     
     # path('consumable_report_dashboard/', ReportingDashboardView.as_view(), name='consumable_report_dashboard'),
     path('request_status_report',views.request_status_report,name='request_status_report'),

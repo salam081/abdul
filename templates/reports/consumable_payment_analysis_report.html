@@ -17,8 +17,11 @@
             <label for="date_to">Date To</label>
             <input type="date" id="date_to" name="date_to" class="form-control" value="{{ filters.date_to }}">
         </div>
-        <div class="col-md-4">
+        <div class="col-md-2">
             <button type="submit" class="btn btn-primary w-100">🔍 Filter</button>
+        </div>
+        <div class="col-md-2">
+            <a href="{% url 'payment_analysis_report' %}" class="btn btn-outline-danger"><i class="fas fa-times"></i>Clear Filters</a>
         </div>
     </form>
 

@@ -1,0 +1,703 @@
+{% extends "base/base.html" %}
+{% load humanize %}
+
+{% block title %}Consumable Request Status Report{% endblock %}
+
+{% block content %}
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+<style>
+    :root {
+        --primary-color: #2563eb;
+        --secondary-color: #64748b;
+        --success-color: #10b981;
+        --warning-color: #f59e0b;
+        --danger-color: #ef4444;
+        --info-color: #06b6d4;
+        --light-bg: #f8fafc;
+        --dark-text: #1e293b;
+        --border-color: #e2e8f0;
+        --card-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
+        --hover-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1);
+    }
+
+    .main-container {
+        background: white;
+        border-radius: 20px;
+        box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+        margin: 2rem auto;
+        max-width: 1400px;
+        overflow: hidden;
+    }
+
+    .header-section {
+        /* background: linear-gradient(135deg, var(--primary-color), #3b82f6); */
+        color: rgb(0, 0, 0);
+        /* padding: 2rem; */
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+
+    .header-section::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        right: 0;
+        width: 100%;
+        height: 100%;
+        background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grid" width="10" height="10" patternUnits="userSpaceOnUse"><path d="M 10 0 L 0 0 0 10" fill="none" stroke="rgba(255,255,255,0.1)" stroke-width="1"/></pattern></defs><rect width="100" height="100" fill="url(%23grid)"/></svg>');
+        opacity: 0.3;
+    }
+
+    .header-content {
+        position: relative;
+        z-index: 1;
+    }
+
+    .page-title {
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+
+    .page-subtitle {
+        opacity: 0.9;
+        font-size: 1.1rem;
+        margin-bottom: 0;
+    }
+
+    .content-section {
+        padding: 2rem;
+    }
+
+    .filter-card {
+        background: var(--light-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 15px;
+        padding: 2rem;
+        margin-bottom: 2rem;
+        box-shadow: var(--card-shadow);
+    }
+
+    .filter-card h5 {
+        color: var(--dark-text);
+        font-weight: 600;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .report-form-label {
+        font-weight: 600;
+        color: var(--dark-text);
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+
+    .report-form-select, .report-form-control {
+        border-radius: 10px;
+        border: 2px solid var(--border-color);
+        padding: 0.75rem 1rem;
+        transition: all 0.3s ease;
+        width: 100%;
+        font-size: 1rem;
+    }
+
+    .report-form-select:focus, .report-form-control:focus {
+        border-color: var(--primary-color);
+        box-shadow: 0 0 0 0.2rem rgba(37, 99, 235, 0.25);
+        outline: none;
+    }
+
+    .btn-filter {
+        background: linear-gradient(135deg, var(--primary-color), #3b82f6);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-filter:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 20px -5px rgba(0, 0, 0, 0.2);
+        background: linear-gradient(135deg, #1d4ed8, var(--primary-color));
+        color: white;
+        text-decoration: none;
+    }
+
+    .btn-clear {
+        background-color: var(--secondary-color);
+        border: none;
+        border-radius: 12px;
+        padding: 0.75rem 2rem;
+        font-weight: 600;
+        color: white;
+        transition: all 0.3s ease;
+        box-shadow: var(--card-shadow);
+        cursor: pointer;
+        font-size: 1rem;
+        text-decoration: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .btn-clear:hover {
+        background-color: #475569;
+        transform: translateY(-2px);
+        color: white;
+        text-decoration: none;
+    }
+
+    .summary-cards {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1.5rem;
+        margin-bottom: 2rem;
+    }
+
+    .summary-card {
+        background: white;
+        border-radius: 15px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+
+    .summary-card::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 4px;
+        background: var(--card-color, var(--primary-color));
+    }
+
+    .summary-card:hover {
+        transform: translateY(-5px);
+        box-shadow: var(--hover-shadow);
+    }
+
+    .summary-card.total { --card-color: var(--primary-color); }
+    .summary-card.value { --card-color: var(--success-color); }
+    .summary-card.paid { --card-color: var(--info-color); }
+    .summary-card.pending { --card-color: var(--warning-color); }
+    .summary-card.approved { --card-color: var(--primary-color); }
+    .summary-card.paid-count { --card-color: var(--success-color); }
+    .summary-card.declined { --card-color: var(--danger-color); }
+
+    .summary-card .icon {
+        font-size: 2.5rem;
+        margin-bottom: 0.5rem;
+        color: var(--card-color);
+    }
+
+    .summary-card h6 {
+        color: var(--secondary-color);
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        text-transform: uppercase;
+        font-size: 0.8rem;
+        letter-spacing: 0.5px;
+    }
+
+    .summary-card .value {
+        font-size: 1.8rem;
+        font-weight: 700;
+        color: var(--dark-text);
+        margin: 0;
+    }
+
+    .table-container {
+        background: white;
+        border-radius: 15px;
+        box-shadow: var(--card-shadow);
+        border: 1px solid var(--border-color);
+        overflow: hidden;
+    }
+
+    .report-table {
+        width: 100%;
+        margin: 0;
+        border-collapse: separate;
+        border-spacing: 0;
+    }
+
+    .report-table thead th {
+        background: linear-gradient(135deg, var(--dark-text), #374151);
+        color: white;
+        font-weight: 600;
+        padding: 1rem;
+        border: none;
+        text-transform: uppercase;
+        font-size: 0.85rem;
+        letter-spacing: 0.5px;
+    }
+
+    .report-table tbody tr {
+        transition: all 0.3s ease;
+    }
+
+    .report-table tbody tr:hover {
+        background: rgba(37, 99, 235, 0.05);
+    }
+
+    .report-table tbody td {
+        padding: 1rem;
+        border-bottom: 1px solid var(--border-color);
+        vertical-align: middle;
+    }
+
+    .report-table tbody tr:nth-child(even) {
+        background: rgba(0, 0, 0, 0.02);
+    }
+
+    .status-badge {
+        padding: 0.5rem 1rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        display: inline-block;
+    }
+
+    .status-pending { background: rgba(245, 158, 11, 0.1); color: var(--warning-color); }
+    .status-approved { background: rgba(37, 99, 235, 0.1); color: var(--primary-color); }
+    .status-paid { background: rgba(16, 185, 129, 0.1); color: var(--success-color); }
+    .status-declined { background: rgba(239, 68, 68, 0.1); color: var(--danger-color); }
+
+    .pagination {
+        margin-top: 2rem;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 0.5rem;
+    }
+
+    .pagination ul {
+        display: flex;
+        gap: 0.5rem;
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+
+    .page-link {
+        display: block;
+        padding: 0.5rem 1rem;
+        border-radius: 10px;
+        border: 2px solid var(--border-color);
+        color: var(--primary-color);
+        text-decoration: none;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+
+    .page-link:hover {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+        transform: translateY(-2px);
+        text-decoration: none;
+    }
+
+    .page-item.active .page-link {
+        background: var(--primary-color);
+        border-color: var(--primary-color);
+        color: white;
+    }
+
+    .empty-state {
+        text-align: center;
+        padding: 3rem;
+        color: var(--secondary-color);
+    }
+
+    .empty-state i {
+        font-size: 4rem;
+        margin-bottom: 1rem;
+        opacity: 0.5;
+    }
+
+    .filter-row {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        align-items: end;
+    }
+
+    .filter-actions {
+        display: flex;
+        gap: 1rem;
+        margin-top: 1rem;
+        flex-wrap: wrap;
+    }
+
+    .table-responsive {
+        overflow-x: auto;
+    }
+
+    .loading-overlay {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: rgba(255, 255, 255, 0.8);
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        z-index: 9999;
+        display: none;
+    }
+
+    .loading-spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid var(--primary-color);
+        border-radius: 50%;
+        width: 40px;
+        height: 40px;
+        animation: spin 1s linear infinite;
+    }
+
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    @media (max-width: 768px) {
+        .main-container {
+            margin: 1rem;
+            border-radius: 15px;
+        }
+        
+        .page-title {
+            font-size: 2rem;
+        }
+        
+        .summary-cards {
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+        
+        .filter-row {
+            grid-template-columns: 1fr;
+        }
+
+        .filter-actions {
+            flex-direction: column;
+        }
+
+        .filter-actions > * {
+            width: 100%;
+        }
+    }
+
+    .animate-fade-in {
+        animation: fadeIn 0.6s ease-out;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: translateY(20px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+</style>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+</div>
+
+<div class="main-container animate-fade-in">
+    <!-- Header Section -->
+    <div class="header-section">
+        <div class="header-content">
+            <h1 class="page-title">
+                <i class="fas fa-clipboard-list me-3"></i>
+                loan Request Report
+            </h1>
+            <h6 class="page-subtitle text-primary">Monitor and track all Loan requests across your organization</h6>
+        </div>
+    </div>
+
+    <!-- Content Section -->
+    <div class="content-section">
+        <!-- Filter Form -->
+        <div class="filter-card">
+            <h5>
+                <i class="fas fa-filter"></i>
+                Filter Options
+            </h5>
+
+            <form method="get" id="filterForm">
+                <div class="filter-row">
+                    <div>
+                        <label class="report-form-label" for="status">Status</label>
+                        <select class="report-form-select" name="status" id="status">
+                            {% for value, label in status_choices %}
+                                <option value="{{ value }}" {% if filters.status == value %}selected{% endif %}>
+                                    {{ label }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                    <div>
+                        <label class="report-form-label" for="date_from">Date From</label>
+                        <input type="date" class="report-form-control" name="date_from" id="date_from" value="{{ filters.date_from }}">
+                    </div>
+                    <div>
+                        <label class="report-form-label" for="date_to">Date To</label>
+                        <input type="date" class="report-form-control" name="date_to" id="date_to" value="{{ filters.date_to }}">
+                    </div>
+                   
+                    <div>
+                        <label class="report-form-label" for="month">Filter by Month</label>
+                        <select name="month" id="month" class="report-form-select">
+                            <option value="">All Months</option>
+                            {% for m in months %}
+                                <option value="{{ m|date:"Y-m" }}" {% if filters.month == m|date:"Y-m" %}selected{% endif %}>
+                                    {{ m|date:"F Y" }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+
+                <div class="filter-actions">
+                    <button type="submit" class="btn-filter">
+                        <i class="fas fa-search"></i>
+                        Apply Filters
+                    </button>
+                    <a href="{% url 'request_status_report' %}" class="btn-clear">
+                        <i class="fas fa-times"></i>
+                        Clear Filters
+                    </a>
+                </div>
+            </form>
+        </div>
+
+        <!-- Summary Cards -->
+        <div class="summary-cards">
+            <div class="summary-card total">
+                <div class="icon">
+                    <!-- <i class="fas fa-list-ul"></i> -->
+                </div>
+                <h6>Total Requests</h6>
+                <p class="value">{{ summary.total_requests }}</p>
+            </div>
+            <div class="summary-card value">
+                <div class="icon">
+                    <!-- <i class="fas fa-money-bill-wave"></i> -->
+                </div>
+                <h6>Total Value</h6>
+                <p class="value">₦{{ summary.total_value|floatformat:2|intcomma }}</p>
+            </div>
+            <div class="summary-card paid">
+                <div class="icon">
+                    <!-- <i class="fas fa-check-circle"></i> -->
+                </div>
+                <h6>Total Paid</h6>
+                <p class="value">₦{{ summary.total_paid|floatformat:2|intcomma }}</p>
+            </div>
+            <div class="summary-card pending">
+                <div class="icon">
+                    <!-- <i class="fas fa-clock"></i> -->
+                </div>
+                <h6>Balance Remaining</h6>
+                <p class="value">₦{{ summary.total_balance|floatformat:2|intcomma }}</p>
+            </div>
+            <div class="summary-card pending">
+                <div class="icon">
+                    <!-- <i class="fas fa-hourglass-half"></i> -->
+                </div>
+                <h6>Pending</h6>
+                <p class="value">{{ summary.pending_count }}</p>
+            </div>
+            <div class="summary-card approved">
+                <div class="icon">
+                    <!-- <i class="fas fa-thumbs-up"></i> -->
+                </div>
+                <h6>Approved</h6>
+                <p class="value">{{ summary.approved_count }}</p>
+            </div>
+            <div class="summary-card paid-count">
+                <div class="icon">
+                    <!-- <i class="fas fa-wallet"></i> -->
+                </div>
+                <h6>Paid</h6>
+                <p class="value">{{ summary.paid_count }}</p>
+            </div>
+            <div class="summary-card declined">
+                <div class="icon">
+                    <!-- <i class="fas fa-times-circle"></i> -->
+                </div>
+                <h6>Declined</h6>
+                <p class="value">{{ summary.declined_count }}</p>
+            </div>
+        </div>
+
+        <!-- Data Table -->
+        <div class="table-container">
+            <div class="table-responsive">
+                <table class="report-table">
+                    <thead>
+                        <tr>
+                            <th>ID</th>
+                            <th>Member</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Date Created</th>
+                            <th>Status</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Total Price</th>
+                            <th class="text-nowrap text-truncate" style="max-width: 250px;">Total Paid</th>
+                            <th>Balance</th>
+                            <th>Items</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requests %}
+                        <tr>
+                            <td><strong>#{{ req.id }}</strong></td>
+                            <td>{{ req.user }}</td>
+                            <td class="text-nowrap text-truncate" style="max-width: 250px;">{{ req.date_created|date:"Y-m-d H:i" }}</td>
+                            <td>
+                                <span class="status-badge status-{{ req.status|lower }}">
+                                    {{ req.status }}
+                                </span>
+                            </td>
+                            <td>₦{{ req.total_price|floatformat:2|intcomma }}</td>
+                            <td>₦{{ req.total_paid|floatformat:2|intcomma }}</td>
+                            <td>₦{{ req.balance|floatformat:2|intcomma }}</td>
+                            <td>
+                                <span class="badge bg-secondary">{{ req.items_count }}</span>
+                            </td>
+                        </tr>
+                        {% empty %}
+                        <tr>
+                            <td colspan="8">
+                                <div class="empty-state">
+                                    <i class="fas fa-search"></i>
+                                    <h5>No Records Found</h5>
+                                    <p>No records found for the selected criteria. Try adjusting your filters.</p>
+                                </div>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Pagination -->
+        {% if requests.has_other_pages %}
+        <div class="pagination">
+            <ul>
+                {% if requests.has_previous %}
+                <li>
+                    <a class="page-link" href="?page={{ requests.previous_page_number }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">
+                        <i class="fas fa-chevron-left"></i>
+                    </a>
+                </li>
+                {% endif %}
+
+                {% for num in requests.paginator.page_range %}
+                    {% if requests.number == num %}
+                        <li class="page-item active">
+                            <span class="page-link">{{ num }}</span>
+                        </li>
+                    {% elif num > requests.number|add:'-3' and num < requests.number|add:'3' %}
+                        <li class="page-item">
+                            <a class="page-link" href="?page={{ num }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">{{ num }}</a>
+                        </li>
+                    {% endif %}
+                {% endfor %}
+
+                {% if requests.has_next %}
+                <li>
+                    <a class="page-link" href="?page={{ requests.next_page_number }}{% if filters.status != 'all' %}&status={{ filters.status }}{% endif %}{% if filters.date_from %}&date_from={{ filters.date_from }}{% endif %}{% if filters.date_to %}&date_to={{ filters.date_to }}{% endif %}{% if filters.user %}&user={{ filters.user }}{% endif %}{% if filters.month %}&month={{ filters.month }}{% endif %}">
+                        <i class="fas fa-chevron-right"></i>
+                    </a>
+                </li>
+                {% endif %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const filterForm = document.getElementById('filterForm');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    
+    // Show loading overlay on form submission
+    if (filterForm) {
+        filterForm.addEventListener('submit', function() {
+            loadingOverlay.style.display = 'flex';
+        });
+    }
+    
+    // Hide loading overlay when page loads
+    window.addEventListener('load', function() {
+        loadingOverlay.style.display = 'none';
+    });
+    
+    // Add smooth hover effects to table rows
+    const tableRows = document.querySelectorAll('.report-table tbody tr');
+    tableRows.forEach(row => {
+        if (!row.querySelector('.empty-state')) {
+            row.addEventListener('mouseenter', function() {
+                this.style.transform = 'translateX(5px)';
+            });
+            row.addEventListener('mouseleave', function() {
+                this.style.transform = 'translateX(0)';
+            });
+        }
+    });
+    
+    // Auto-submit form when filters change (optional)
+    const autoSubmitElements = document.querySelectorAll('.report-form-select');
+    autoSubmitElements.forEach(element => {
+        element.addEventListener('change', function() {
+            // Uncomment the line below to enable auto-submit
+            // filterForm.submit();
+        });
+    });
+    
+    // Date validation
+    const dateFrom = document.getElementById('date_from');
+    const dateTo = document.getElementById('date_to');
+    
+    if (dateFrom && dateTo) {
+        dateFrom.addEventListener('change', function() {
+            dateTo.min = this.value;
+        });
+        
+        dateTo.addEventListener('change', function() {
+            dateFrom.max = this.value;
+        });
+    }
+    
+    // Add animation to summary cards
+    const summaryCards = document.querySelectorAll('.summary-card');
+    summaryCards.forEach((card, index) => {
+        card.style.animationDelay = `${index * 0.1}s`;
+        card.classList.add('animate-fade-in');
+    });
+});
+</script>
+{% endblock %}

@@ -32,36 +32,7 @@ def index(request):
     context = {}
     return render(request, "main/index.html", context)
 
-@group_required(['admin'])
-def loan_fee(request):
-    if request.method == 'POST':
-        member_ippis = request.POST.get('member_ippis')
-        form_fee = request.POST.get('form_fee')
-        loan_amount = request.POST.get('loan_amount')
 
-        # Get Member instance using IPPIS number
-        member = get_object_or_404(Member, ippis=member_ippis)
-
-        LoanRequestFee.objects.create(
-            member=member,
-            form_fee=form_fee,
-            loan_amount=loan_amount,
-            created_by=request.user
-        )
-        messages.success(request, 'Payment recorded successfully')
-        return redirect('loan_fee')
-
-    # Aggregates
-    loan = LoanRequestFee.objects.aggregate(total=Sum('loan_amount'))['total'] or 0
-    fee = LoanRequestFee.objects.aggregate(total=Sum('form_fee'))['total'] or 0
-    loan_req_form = LoanRequestFee.objects.count()
-
-    context = {
-        "fee": fee,
-        "loan": loan,
-        "loan_req_form": loan_req_form
-    }
-    return render(request, "main/loan_fee.html", context)
 
 
 
