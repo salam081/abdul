@@ -3,7 +3,7 @@ from django.shortcuts import render, get_object_or_404
 from django.contrib.auth.decorators import login_required
 from django.db.models import Sum,Min, Max, Count, Q, Avg , F ,ExpressionWrapper, DecimalField
 from django.db.models.functions import Coalesce
-from django.db.models.functions import TruncMonth, TruncYear
+from django.db.models.functions import TruncMonth, TruncYear,TruncWeek
 from django.http import JsonResponse, HttpResponse
 from django.utils import timezone
 from django.core.paginator import Paginator
@@ -614,71 +614,6 @@ def payment_analysis_report(request):
     }
 
     return render(request, 'reports/consumable_payment_analysis_report.html', context)
-
-
-# @login_required
-# def payment_analysis_report(request):
-#     """Detailed payment analysis and trends"""
-    
-#     date_from = request.GET.get('date_from')
-#     date_to = request.GET.get('date_to')
-    
-#     # Base queryset
-#     queryset = PaybackConsumable.objects.select_related('consumable_request__user')
-    
-#     # Apply date filters
-#     if date_from:
-#         queryset = queryset.filter(repayment_date__gte=date_from)
-#     if date_to:
-#         queryset = queryset.filter(repayment_date__lte=date_to)
-    
-#     # Payment statistics
-#     payment_stats = queryset.aggregate(
-#         total_payments=Sum('amount_paid'),
-#         avg_payment=Avg('amount_paid'),
-#         payment_count=Count('id')
-#     )
-    
-#     # Monthly payment trends
-#     monthly_payments = queryset.annotate(
-#         month=TruncMonth('repayment_date')
-#     ).values('month').annotate(
-#         total_paid=Sum('amount_paid'),
-#         payment_count=Count('id')
-#     ).order_by('month')
-    
-#     # Outstanding balances
-#     outstanding_requests = ConsumableRequest.objects.exclude(status='Paid').select_related('user')
-
-#     outstanding_data = []
-#     for req in outstanding_requests:
-#         total_price = req.calculate_total_price()
-#         total_paid = req.total_paid()
-#         balance = total_price - total_paid
-
-#         if balance > 0:
-#             outstanding_data.append({
-#                 'request': req,
-#                 'total_price': total_price,
-#                 'total_paid': total_paid,
-#                 'balance': balance,
-#                 'days_outstanding': (timezone.now().date() - req.date_created.date()).days
-#             })
-
-#         # Sort by balance (highest first)
-#         outstanding_data.sort(key=lambda x: x['balance'], reverse=True)
-#     month_list = ConsumableRequest.objects.dates('date_created', 'month', order='DESC')    
-#     context = {
-#         'payment_stats': payment_stats,
-#         'monthly_payments': monthly_payments,
-#         'outstanding_data': outstanding_data,
-#          'months': month_list,
-#         'total_outstanding': sum(item['balance'] for item in outstanding_data),
-#         'filters': {
-#             'date_from': date_from,'date_to': date_to}
-#     }
-    
-#     return render(request, 'reports/consumable_payment_analysis_report.html', context)
 
 
 @login_required
