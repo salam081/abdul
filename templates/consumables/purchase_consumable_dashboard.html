@@ -15,7 +15,7 @@
 <!-- Statistics Cards -->
 <div class="row mb-4">
     <div class="col-md-3">
-        <div class="card text-white bg-primary">
+        <div class="card text-dark border-primary shadow" style="border-top: 5px solid blue;">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -31,7 +31,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-white bg-warning">
+        <div class="card text-dark border-warning shadow" style="border-top: 5px solid rgb(220, 220, 23);">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -47,7 +47,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-white bg-info">
+        <div class="card text-dark border-info shadow" style="border-top: 5px solid rgb(36, 170, 183);">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -63,7 +63,7 @@
     </div>
     
     <div class="col-md-3">
-        <div class="card text-white bg-success">
+        <div class="card text-dark border-success shadow" style="border-top: 5px solid rgb(12, 131, 42);">
             <div class="card-body">
                 <div class="d-flex justify-content-between">
                     <div>
@@ -82,7 +82,7 @@
 <!-- Financial Summary -->
 <div class="row mb-12">
     <div class="col-md-4">
-        <div class="card">
+        <div class="card text-dark border-success shadow" style="border-left: 5px solid rgb(12, 131, 42);">
             <div class="card-header">
                 <h5 class="mb-0">
                     <i class="fas fa-money-bill-wave"></i> Financial Requested
@@ -90,29 +90,29 @@
             </div>
             <div class="card-body">
                 <p class="text-muted">Total Amount Requested</p>
-                <h3 class="text-primary">₦{{ total_requested|floatformat:2 }}</h3>
+                <h4 class="text-success">₦{{ total_requested|floatformat:2 }}</h4>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card">
+        <div class="card text-dark border-danger shadow" style="border-left: 5px solid rgb(131, 25, 25);">
             <div class="card-header">
                 <i class="fas fa-money-bill-wave"></i> Financial Spent
             </div>
             <div class="card-body">
                 <p class="text-muted">Total Amount Spent</p>
-                <h3 class="text-primary">₦{{ total_spent|floatformat:2 }}</h3>
+                <h4 class="text-danger">₦{{ total_spent|floatformat:2 }}</h4>
             </div>
         </div>
     </div>
     <div class="col-md-4">
-        <div class="card">
+         <div class="card text-dark border-primary shadow" style="border-left: 5px solid rgb(14, 11, 186);">
             <div class="card-header">
                 <i class="fas fa-money-bill-wave"></i> Financial Spent Remaining Balance
             </div>
             <div class="card-body">
                 <p class="text-muted">Total Balance Remaining:</p>
-                <h3 class="text-primary"> ₦{{ balance_remaining|floatformat:2 }}</h3>
+                <h4 class="text-primary"> ₦{{ balance_remaining|floatformat:2 }}</h4>
             </div>
         </div>
     </div>

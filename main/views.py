@@ -32,10 +32,6 @@ def index(request):
     context = {}
     return render(request, "main/index.html", context)
 
-
-
-
-
 def search_member_for_savings(request):
     groups = UserGroup.objects.all().order_by('title')
     results = []
@@ -62,15 +58,13 @@ def search_member_for_savings(request):
     return render(request, 'main/search_member.html', context)
 
 
-
 def filter_requests(datefrom, dateto):
-    filtered_requests = Savings.objects.all()
-
+    filtered_requests = Savings.objects.all().order_by('-date_created')
+    
     if datefrom:
         filtered_requests = filtered_requests.filter(month__gte=datefrom)
     if dateto:
         filtered_requests = filtered_requests.filter(month__lte=dateto)
-
     return filtered_requests
 
 
@@ -101,16 +95,9 @@ def all_member_saving_search(request):
 
         total_deductions = filtered.aggregate(deduct=Sum('original_amount'))['deduct'] or 0
         print(total_deductions)
-    context = {
-        'member': member,
-        'datefrom': datefrom,
-        'dateto': dateto,
-        'page_total': page_total,
-        'grand_total': grand_total,
-        'total_savings': total_savings,
-        'total_deductions': total_deductions,
-      
-    }
+    context = {'member': member,'datefrom': datefrom,'dateto': dateto,
+        'page_total': page_total,'grand_total': grand_total,
+        'total_savings': total_savings,'total_deductions': total_deductions,}
 
     return render(request, 'main/all_member_saving_search.html', context)
 
@@ -139,8 +126,6 @@ def add_individual_member_savings(request, id):
 
     context = {'member': member,}
     return render(request, 'main/add_individual_savings.html', context)
-
-
 
 def upload_savings(request):
     if request.method == "POST" and request.FILES.get("excel_file"):
@@ -278,7 +263,7 @@ def get_upload_savings(request):
 
 def get_upload_details(request, month):
     savings_list = Savings.objects.filter(month__month=month)
-    paginator = Paginator(savings_list, 100)  # Show 100 items per page
+    paginator = Paginator(savings_list, 100) 
     page_number = request.GET.get("page")
     page_obj = paginator.get_page(page_number)
     return render(request,"main/get_upload_savings_details.html",{"page_obj": page_obj})
@@ -299,7 +284,6 @@ def delete_saving(request, month):
 
 def interest_form_view(request):
     return render(request, 'main/deduct_interest_form.html')
-
 
 def deduct_monthly_interest(request):
     if request.method == 'POST':

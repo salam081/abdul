@@ -10,6 +10,12 @@ from financialsummary.models import FinancialSummary
 from main.models import Savings, Interest, Loanable, Investment
 
 
+# from main.models import Savings, Loanable, Investment
+# from django.utils import timezone
+
+# from django.utils import timezone
+# from django.db import transaction
+
 class Withdrawal(models.Model):
     STATUS_CHOICES = [ ('Pending', 'Pending'),('Approved', 'Approved'), ('Declined', 'Declined'),]
     member = models.ForeignKey(Member, on_delete=models.CASCADE, related_name='withdrawal_requests')
@@ -30,8 +36,7 @@ class Withdrawal(models.Model):
     
    
     def approve(self, admin_user):
-        from main.models import Savings, Loanable, Investment
-        from django.utils import timezone
+        
 
         with transaction.atomic():
             # Get total savings
@@ -74,8 +79,7 @@ class Withdrawal(models.Model):
 
 
     def decline(self, admin_user, reason=None):
-        from django.utils import timezone
-        from django.db import transaction
+        
 
         with transaction.atomic():
             self.status = "Declined"

@@ -7,20 +7,20 @@
 <style>
   
    .card1{
-      background: linear-gradient(135deg, #d260da 0%, #643b90 100%);
-      color: white;
+     border-radius: 15px;
+     border-top: 5px solid blue;
    }
    .card2{
-      background: linear-gradient(135deg, #bee790 0%, #59d2d6 100%);
-      color: white;
+      border-radius: 15px;
+      border-top: 5px solid yellow;
    }
    .card3{
-      background: linear-gradient(135deg, #855bc5 0%, #7cbbe4 100%);
-      color: white;
+      border-radius: 15px;
+      border-top: 5px solid rgb(7, 124, 25);
    }
    .card4{
-      background: linear-gradient(135deg, #d260da 0%, #c5e47e 100%);
-      color: white;
+      border-radius: 15px;
+      border-top: 5px solid red;
    }
     th,
     td {
@@ -33,7 +33,7 @@
     <!-- Summary Cards -->
     <div class="row row-cols-2 row-cols-md-4 g-3 mb-4">
     <div class="col">
-        <div class="card card1 border-primary text-light shadow-sm">
+        <div class="card card1 border-primary text-light shadow">
             <div class="card-body text-center">
                 <h6 class="card-title">Total Requests</h6>
                 <h4 class="text-primary">{{ stats.total_requests }}</h4>
@@ -41,7 +41,7 @@
         </div>
     </div>
     <div class="col">
-        <div class="card card2 border-warning shadow-sm">
+        <div class="card card2 border-warning shadow">
             <div class="card-body text-center">
                 <h6 class="card-title">Pending</h6>
                 <h4 class="text-warning">{{ stats.pending_requests }}</h4>
@@ -49,7 +49,7 @@
         </div>
     </div>
     <div class="col">
-        <div class="card card3 border-success shadow-sm">
+        <div class="card card3 border-success shadow">
             <div class="card-body text-center">
                 <h6 class="card-title">Approved</h6>
                 <h4 class="text-success">{{ stats.approved_requests }}</h4>
@@ -57,7 +57,7 @@
         </div>
     </div>
     <div class="col">
-        <div class="card card4 border-danger shadow-sm">
+        <div class="card card4 border-danger shadow">
             <div class="card-body text-center">
                 <h6 class="card-title">Declined</h6>
                 <h4 class="text-danger">{{ stats.declined_requests }}</h4>
@@ -94,7 +94,7 @@
                 {% for req in requests %}
                 <tr>
                     <td class="text-center">{{ forloop.counter }}</td>
-                    <td>{{ req.member }}</td>
+                    <td>{{ req.member.member.first_name }} {{ req.member.member.last_name }}{{ req.member.ippis }}</td>
                     <td class="text-center">{{ req.date_requested|date:"M d, Y H:i" }}</td>
                     <td class="text-center">
                         {% if req.status == "Pending" %}
