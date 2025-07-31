@@ -9,39 +9,44 @@
    
 
     <!-- Filter Form Section -->
-    <div class="row mb-5">
-        <div class="col-12">
-            <div class="card border-0 shadow-sm">
-                <div class="card-header bg-light border-0">
-                 
-                        <h3 class="text-center">Income Dashboard</h3>
-                </div>
-                <div class="card-body">
-                    <form method="get">
+ <div class="row mb-5">
+    <div class="col-12">
+        <div class="card border-0 shadow-sm">
+            <div class="card-header bg-light border-0">
+                <h3 class="text-center">Income Dashboard</h3>
+            </div>
+            <div class="card-body">
+                <!-- Center the form -->
+                <div class="d-flex justify-content-center">
+                    <form method="get" class="w-100" style="max-width: 800px;">
                         <div class="row g-3 align-items-end">
                             <div class="col-md-3">
                                 <label for="date_from" class="form-label fw-semibold">From Date</label>
-                                <input type="date" id="date_from" name="date_from" class="form-control form-control" value="{{ date_from }}">
+                                <input type="date" id="date_from" name="date_from" class="form-control" value="{{ date_from }}">
                             </div>
                             <div class="col-md-3">
                                 <label for="date_to" class="form-label fw-semibold">To Date</label>
-                                <input type="date" id="date_to" name="date_to" class="form-control form-control" value="{{ date_to }}">
+                                <input type="date" id="date_to" name="date_to" class="form-control" value="{{ date_to }}">
                             </div>
-                            <div class="col-md-4">
-                                <div class="d-grid d-flex gap-4">
+                            <div class="col-md-6">
+                                <div class="d-grid d-flex gap-3">
                                     <button type="submit" class="btn btn-primary">
                                         <i class="bi bi-search me-2"></i>Apply Filter
                                     </button>
-                                      <a href="{% url 'index' %}" class="btn btn-outline-danger">Clear</a>
+                                    <a href="{% url 'all_income' %}" class="btn btn-outline-danger">
+                                        <i class="bi bi-x-circle"></i> Clear Filter
+                                    </a>
                                 </div>
                             </div>
-                           
                         </div>
                     </form>
                 </div>
+                <!-- End form center -->
             </div>
         </div>
     </div>
+</div>
+
 
     <!-- Statistics Cards Section -->
     <div class="row g-4 mb-5">

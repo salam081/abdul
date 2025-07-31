@@ -9,7 +9,7 @@ from decimal import Decimal,DecimalException
 from datetime import datetime
 from django.db import transaction
 from datetime import timedelta
-from django.db.models import Q
+from django.db.models import Q, Sum
 from django.core.paginator import Paginator
 from django.utils import timezone
 from django.conf import settings
@@ -23,6 +23,7 @@ from accounts.decorator import group_required
 from .models import * 
 from loan.models import * 
 from accounts.models import * 
+from consumable.models import * 
 from financialsummary.models import *
 from .forms import *
 from datetime import datetime

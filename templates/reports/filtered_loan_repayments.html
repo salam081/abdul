@@ -155,7 +155,7 @@
        
     </div>
     <form method="get" class="row g-3 mb-3">
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label>Year</label>
             <select name="year" class="form-control">
                 <option value="">All Years</option>
@@ -165,7 +165,7 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-4">
+        <div class="col-md-3">
             <label>Loan Type</label>
             <select name="loan_type" class="form-control">
                 <option value="">All Types</option>
@@ -177,10 +177,14 @@
                 {% endfor %}
             </select>
         </div>
-        <div class="col-md-4 d-flex align-items-end">
-            <button type="submit" class="btn btn-primary w-100">Filter</button>
+        <div class="col-md-3 d-flex align-items-end">
+            <button type="submit" class="btn btn-outline-primary w-100">Filter</button>
+        </div>
+        <div class="col-md-3 d-flex align-items-end">
+            <a href="{% url 'filtered_loan_repayments' %}"  class="btn btn-outline-danger w-100">clear Filter</a>
         </div>
     </form>
+
   
     <div class="table-responsive">
     <table class="table table-bordered table-striped">

@@ -24,6 +24,61 @@ from accounts.decorator import group_required
 from datetime import date
 
 # Create your views here.
+def all_income(request):
+    # Get filter parameters from GET request
+  
+    date_from = request.GET.get('date_from')
+    date_to = request.GET.get('date_to')
+
+    # Build Q objects for filtering
+    savings_filter = Q()
+    loanrepayback_filter = Q()
+    consumable_payback_filter = Q()
+    loan_fee_filter = Q()
+    interest_filter = Q()
+
+    # Filter by year and month
+  
+    if date_from:
+        savings_filter &= Q(month__gte=date_from)
+        loanrepayback_filter &= Q(repayment_date__gte=date_from)
+        consumable_payback_filter &= Q(repayment_date__gte=date_from)
+        loan_fee_filter &= Q(created_at__gte=date_from)  # fixed
+        interest_filter &= Q(month__gte=date_from)
+
+    if date_to:
+        savings_filter &= Q(month__lte=date_to)
+        loanrepayback_filter &= Q(repayment_date__lte=date_to)
+        consumable_payback_filter &= Q(repayment_date__lte=date_to)
+        loan_fee_filter &= Q(created_at__lte=date_to)  # fixed
+        interest_filter &= Q(month__lte=date_to)
+
+
+    # Aggregations with filters
+    total_loans_fee = LoanRequestFee.objects.filter(loan_fee_filter).aggregate(total=Sum('form_fee'))['total'] or 0
+    total_savings = Savings.objects.filter(savings_filter).aggregate(total_savings=Sum('month_saving'))['total_savings'] or 0
+    deducted_amount = Interest.objects.filter(interest_filter).aggregate(total_savings=Sum('amount_deducted'))['total_savings'] or 0
+    payback_loans = LoanRepayback.objects.filter(loanrepayback_filter).aggregate(total=Sum('amount_paid'))['total'] or 0
+    total_consumable_payback = PaybackConsumable.objects.filter(consumable_payback_filter).aggregate(total=Sum('amount_paid'))['total'] or 0
+
+    income = sum([total_loans_fee,total_savings,deducted_amount, payback_loans, total_consumable_payback])
+    
+
+    filters_applied = any([ date_from, date_to])
+    context = {
+        'total_loans_fee': total_loans_fee,
+        'total_savings': total_savings,
+        'payback_loans': payback_loans,
+        'deducted_amount': deducted_amount,
+        'total_consumable_payback': total_consumable_payback,
+        'income': income,
+        'date_from': date_from,
+        'date_to': date_to,
+        'filters_applied':filters_applied
+    }
+    return render(request, "reports/all_income.html", context)
+
+
 
 
 def admin_loan_reports(request):
