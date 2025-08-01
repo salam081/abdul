@@ -165,7 +165,8 @@
                                 <i class="fas fa-trash"></i> Delete Request
                             </a>
                         {% endif %}
-                        {% if user.is_staff %}
+                        
+                        {% if user.is_authenticated and user.group.title == 'admin' %}
                             <a href="{% url 'consumable_purchase_request_approve' consumable_request.pk  %}" class="btn btn-success">
                                 <i class="fas fa-check"></i> Approve Request
                             </a>
@@ -178,11 +179,11 @@
                             <i class="fas fa-check-double"></i> Mark as Accounted
                         </a>
                         {% endif %}
-                       {% if consumable_request.status == 'approved' or consumable_request.status == 'accounted' %}
+                       {% comment %} {% if consumable_request.status == 'approved' or consumable_request.status == 'accounted' %}
                             <a href="{% url 'selling_plan_create'  consumable_request.pk %}" class="btn btn-warning">
                                 <i class="fas fa-plus"></i> Create Selling Plan
                             </a>
-                        {% endif %}
+                        {% endif %} {% endcomment %}
                 </div>
             </div>
         </div>

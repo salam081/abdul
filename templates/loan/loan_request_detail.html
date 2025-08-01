@@ -19,10 +19,10 @@
         } */
 
         .page-header {
-            /* background: var(--primary-gradient); */
+           
             color: rgb(0, 0, 0);
             padding: 1rem 0;
-            margin-bottom: 2rem;
+            margin-bottom: 1rem;
             border-radius: 0 0 20px 20px;
         }
 
@@ -41,7 +41,7 @@
         }
 
         .status-badge {
-            padding: 0.5rem 1rem;
+            padding: 0.2rem 1rem;
             border-radius: 25px;
             font-weight: 600;
             font-size: 0.9rem;
@@ -84,8 +84,8 @@
         }
 
         .amount-display {
-            font-size: 2rem;
-            font-weight: 700;
+            font-size: 1rem;
+            font-weight: 600;
             background: var(--primary-gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
@@ -260,13 +260,9 @@
     <div class="page-header">
         <div class="container">
             <div class="row align-items-center">
-                <div class="col">
-                    <h1 class="mb-0">
-                        <i class="fas fa-file-contract me-3"></i>
-                        <!-- {{ title }} -->
-                    </h1>
-                    <p class="mb-0 mt-2 opacity-75">Complete loan request details and repayment history</p>
-                </div>
+                {% comment %} <div class="col">
+                    <p class="mb-0 mt-1 opacity-75">Complete loan request details and repayment history</p>
+                </div> {% endcomment %}
                 <div class="col-auto">
                     <a href="{% url 'admin_loan_requests' %}" class="btn btn-light btn-action">
                         <i class="fas fa-arrow-left me-2"></i>Back to List
@@ -278,10 +274,10 @@
 
     <div class="container">
         <!-- Quick Status Overview -->
-        <div class="row mb-4">
+        <div class="row ">
             <div class="col-12">
                 <div class="custom-card animate-fade-in">
-                    <div class="card-body p-4">
+                    <div class="card-body p-1">
                         <div class="row align-items-center">
                             <div class="col-md-6">
                                 <div class="d-flex align-items-center">
@@ -289,7 +285,7 @@
                                         <i class="fas fa-dollar-sign"></i>
                                     </div>
                                     <div>
-                                        <h3 class="amount-display mb-0">₦{{ loan_request.amount|floatformat:2 }}</h3>
+                                        <h6 class="amount-display mb-0">₦{{ loan_request.amount|floatformat:2 }}</h6>
                                         <small class="text-muted">Requested Amount</small>
                                     </div>
                                 </div>
@@ -299,7 +295,7 @@
                                     <i class="fas fa-circle me-2"></i>{{ loan_request.get_status_display }}
                                 </span>
                             </div>
-                            <div class="col-md-3 text-end">
+                            <div class="col-md-3 mt-1 text-end">
                                 <div class="dropdown">
                                     <button class="btn btn-outline-primary dropdown-toggle btn-action" type="button" data-bs-toggle="dropdown">
                                         <i class="fas fa-cog me-2"></i>Actions
@@ -360,7 +356,7 @@
                             <div class="col-md-6">
                                 <div class="info-item">
                                     <strong>Email:</strong> {{ loan_request.member.email|default:"Not provided" }}<br>
-                                    <strong>Phone:</strong> {{ loan_request.user.phone1|default:"Not provided" }}
+                                    <strong>Phone:</strong> {{ loan_request.member.member.phone1|default:"Not provided" }}
                                 </div>
                             </div>
                         </div>
@@ -380,7 +376,7 @@
                             <div class="col-md-4">
                                 <div class="info-item text-center">
                                     <i class="fas fa-hand-holding-usd fa-2x mb-2" style="color: #667eea;"></i>
-                                    <h4 class="amount-display">₦{{ loan_request.amount|floatformat:2 }}</h4>
+                                    <h6 class="amount-display">₦{{ loan_request.amount|floatformat:2 }}</h6>
                                     <small class="text-muted">Requested Amount</small>
                                 </div>
                             </div>
@@ -482,7 +478,7 @@
                             <div class="col-md-4">
                                 <div class="info-item">
                                     <strong>Phone:</strong><br>
-                                    <span class="fs-6">{{ loan_request.guarantor_phone }}</span>
+                                    <span class="fs-6">{{ loan_request.guarantor.member.phone1 }}</span>
                                 </div>
                             </div>
                         </div>

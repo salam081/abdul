@@ -49,7 +49,7 @@
                 </div>
             </div>
 
-            <div class="card mt-4">
+           <div class="card mt-4">
                 <div class="card-header">
                     <h5 class="mb-0">Selling Plan Details</h5>
                 </div>
@@ -93,7 +93,7 @@
                     <small class="fs-8 mt-2 text-dark">
                        <p>Unit Cost Of Purchase: <strong>₦{{ selling_plan.purchased_item.unit_price|floatformat:2 }} </strong></p>  
                        <p>Expenditure: <strong>₦{{ selling_plan.purchased_item.expenditure_amount|floatformat:2 }}</strong> </p> 
-                       <p>Purchase Cost: <strong> Purchase Cost: ₦{{ total_purchase_cost|floatformat:2 }}</strong> </p> 
+                       <p>Purchase Cost: ₦ <strong> {{ total_purchase_cost|floatformat:2 }}</strong> </p> 
                        <p>Selling Price: <strong>₦{{ selling_plan.selling_price_per_unit|floatformat:2 }}</strong> </p> 
                        <p>Total Expected Revenue: <strong> ₦{{ selling_plan.total_sale_value|floatformat:2 }}</strong></p> 
                     </small>

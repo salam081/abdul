@@ -314,7 +314,7 @@ def edit_requested_loan(request, id):
             loan_type_id=loan_type,
             amount=amount,
             loan_term_months=loan_term_months,
-            approved_amount=amount,
+            approved_amount=0,
         )
         return redirect('admin_loan_requests')
 

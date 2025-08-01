@@ -38,6 +38,7 @@
                             <button type="submit" class="btn btn-primary">
                                 <i class="fas fa-search me-1"></i>Filter
                             </button>
+                            <a href="{% url 'admin_loan_requests' %}">Clear Filter</a>
                         </div>
                     </div>
                 </form>
@@ -91,19 +92,23 @@
                                     {% endif %}
                                 </td>
                                 <td>
-                                    {% if request.status == 'pending' %}
-                        <span class="badge  text-warning">
-                            <i class="fas fa-clock me-1"></i>Pending
-                          </span>
-                            {% elif request.status == 'approved' %}
-                                <span class="badge bg-success">
-                                    <i class="fas fa-check me-1"></i>Approved
-                                </span>
-                            {% elif request.status == 'rejected' %}
-                                <span class="badge bg-danger">
-                                    <i class="fas fa-times me-1"></i>Rejected
-                                </span>
-                            {% endif %}
+                                {% if request.status == 'pending' %}
+                                    <span class="badge  text-warning">
+                                        <i class="fas fa-clock me-1"></i>Pending
+                                    </span>
+                                        {% elif request.status == 'approved' %}
+                                            <span class="badge bg-primary">
+                                                <i class="fas fa-check me-1"></i>Approved
+                                            </span>
+                                        {% elif request.status == 'rejected' %}
+                                            <span class="badge bg-danger">
+                                                <i class="fas fa-times me-1"></i>Rejected
+                                            </span>
+                                        {% elif request.status == 'paid' %}
+                                            <span class="badge bg-success">
+                                                <i class="fas fa-check me-1"></i>Paid
+                                            </span>
+                                        {% endif %}
 
                                 </td>
                                 <!-- <td>
@@ -113,26 +118,36 @@
                               <td>
                                
                                     <div class="btn-group" role="group">
-                                        <a href="{% url 'loan_request_detail' request.id %}" class="btn btn-sm btn-outline-info" title="View Details">
-                                            <i class="fas fa-book "></i>
-                                        </a>
-                                        {% if request.status == 'approved' %}
+                                      
                                        
-                                        
+                                        {% if request.status == 'approved' %}   
+                                         <a href="{% url 'loan_request_detail' request.id %}" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-book "></i>
+                                        </a>   
                                             <a href="{% url 'add_single_loan_payment' %}" class="btn btn-sm btn-outline-success" title="Add Repayment">
                                                 <i class="fas fa-money-bill "></i>
                                             </a>
-                                            {% else %}
-                                              <a href="{% url 'approve_loan_request' request.id %}" class="btn btn-sm btn-outline-primary" title="View Approve">
-                                            <i class="fas fa-check "></i>
-                                        </a>
-                                                <a href="{% url 'edit_requested_loan' request.id %}" class="btn btn-sm btn-outline-warning" title="View Details">
-                                            <i class="fas fa-pen "></i>
-                                        </a>
-                                        <a href="{% url 'reject_loan_request' request.id %}" class="btn btn-sm btn-outline-danger" title="View Details">
-                                            <i class="fas fa-times "></i>
-                                        </a>
+                                            
+                                              {% elif  request.status == 'pending' %} 
                                        
+                                       
+                                             <a href="{% url 'loan_request_detail' request.id %}" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-book "></i>
+                                            </a>  
+                                              <a href="{% url 'approve_loan_request' request.id %}" class="btn btn-sm btn-outline-primary" title="Approve Requests">
+                                                <i class="fas fa-check "></i>
+                                             </a>
+                                                <a href="{% url 'edit_requested_loan' request.id %}" class="btn btn-sm btn-outline-warning" title="Edit Requests">
+                                                 <i class="fas fa-pen "></i>
+                                            </a>
+                                            <a href="{% url 'reject_loan_request' request.id %}" class="btn btn-sm btn-outline-danger" title="Rejecte Requests">
+                                                <i class="fas fa-times "></i>
+                                            </a>
+                                           {% elif  request.status == 'paid' %} 
+                                                <a href="{% url 'loan_request_detail' request.id %}" class="btn btn-sm btn-outline-info" title="View Details">
+                                            <i class="fas fa-book "></i>
+                                            </a> 
+
                                         {% endif %}
 
                                     </div>

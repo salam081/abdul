@@ -63,11 +63,11 @@
                         {% else %}
                         <div class="d-flex flex-wrap gap-1">
                              <a href="{% url 'loan_request_detail' loan.id%}"class="btn btn-warning btn-sm" title="View Details"> <i class="bi bi-book"></i></a>
-                            <a href="{% url 'approve_loan_request' loan.id %}" class="btn btn-success btn-sm"><i
+                            <a href="{% url 'approve_loan_request' loan.id %}" class="btn btn-success btn-sm " title="Approved Request"><i
                                     class="bi bi-check"></i></a>
-                            <a href="{% url 'edit_requested_loan' loan.id %}" class="btn btn-info btn-sm"><i
+                            <a href="{% url 'edit_requested_loan' loan.id %}" class="btn btn-info btn-sm" title="Edit Request"><i
                                     class="bi bi-pencil-fill"></i></a>
-                            <a href="{% url 'reject_loan_request' loan.id %}" class="btn btn-danger btn-sm"><i
+                            <a href="{% url 'reject_loan_request' loan.id %}" class="btn btn-danger btn-sm" title="Rejecte Request"><i
                                     class="bi bi-backspace-reverse"></i></a>
                         </div>
                         {% endif %}

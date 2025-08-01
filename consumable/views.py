@@ -206,41 +206,6 @@ def approve_consumable_request(request, request_id):
 
 
 
-# def approve_consumable_request(request, request_id):
-#     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
-
-#     if consumable_request.status != 'Pending':
-#         messages.warning(request, 'This request is already processed.')
-#     else:
-#         consumable_request.status = 'Approved'
-#         consumable_request.save()
-
-#         # Carry forward previous balance
-#         previous = ConsumableRequest.objects.filter(
-#             user=consumable_request.user, 
-#             status='Approved'
-#         ).exclude(id=consumable_request.id).order_by('-date_created').first()
-
-#         previous_balance = 0
-#         if previous:
-#             previous_total = previous.calculate_total_price()
-#             previous_paid = previous.total_paid()
-#             previous_balance = previous_total - previous_paid
-
-#         new_total = consumable_request.calculate_total_price()
-#         final_total = new_total + previous_balance
-
-#         PaybackConsumable.objects.create(
-#             consumable_request=consumable_request,
-#             amount_paid=0,
-#             repayment_date=date.today(), 
-#             balance_remaining=final_total
-#         )
-
-#         messages.success(request, 'The request has been approved and previous balance carried forward.')
-#     return redirect('consumable_requests_list')
-
-
 def decline_consumable_request(request, request_id):
     consumable_request = get_object_or_404(ConsumableRequest, id=request_id)
     

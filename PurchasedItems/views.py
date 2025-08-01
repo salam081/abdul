@@ -24,7 +24,7 @@ from .models import *
 
 @login_required
 def purchase_consumable_dashboard(request):
-    if request.user.is_staff:
+    if  request.user.is_staff:
         requests = ConsumablePurchasedRequest.objects.all()
     else:
         requests = ConsumablePurchasedRequest.objects.filter(requested_by=request.user)
@@ -124,7 +124,7 @@ def purchase_request_list(request):
         requests = requests.filter(status=status_filter)
     
     # Filter by user (for non-staff users, show only their requests)
-    if not request.user.is_staff:
+    if not request.user.is_staff :
         requests = requests.filter(requested_by=request.user)
     
     # Search functionality
@@ -393,7 +393,7 @@ def selling_plan_list(request):
 def selling_plan_create(request, pk):
     consumable_request = get_object_or_404(PurchasedItem, pk=pk)
     
-    if ( not (request.user.group and request.user.group.title == 'admin')
+    if ( not (request.user.group and request.user.group.title == 'admin' or request.user.group.title == 'staff')
             and consumable_request.requested_by != request.user):
    
         messages.error(request, "You don't have permission to create this selling plan.")
@@ -462,7 +462,7 @@ def selling_plan_update(request, pk):
     consumable_request = purchased_item.consumable_purchased_request
 
     # Permissions: only admin or request owner can edit
-    if (not (request.user.group and request.user.group.title == 'admin') and
+    if (not (request.user.group and request.user.group.title == 'admin' or request.user.group.title == 'staff') and
         consumable_request.requested_by != request.user):
         messages.error(request, "You don't have permission to edit this selling plan.")
         return redirect('selling_plan_detail', pk=pk)
@@ -504,7 +504,7 @@ def selling_plan_delete(request, pk):
     consumable_request = purchased_item.consumable_purchased_request
 
     # Permission check: only admin or request owner can delete
-    if (not (request.user.group and request.user.group.title == 'admin') and consumable_request.requested_by != request.user):
+    if (not (request.user.group and request.user.group.title == 'admin' or request.user.group.title == 'staff') and consumable_request.requested_by != request.user):
         messages.error(request, "You don't have permission to delete this selling plan.")
         return redirect('selling_plan_detail', pk=selling_plan.pk)
 

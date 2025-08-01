@@ -16,7 +16,7 @@
         </div> -->
         <div class="navbar-nav w-100">
             
-            {% if user.is_authenticated and user.group.title == 'admin' %}
+            {% if user.is_authenticated and user.group.title == 'admin' or user.group.title == 'staff' %}
             <a href="{% url 'admin_dashboard' %}" class="nav-item nav-link "><i class="fas fa-tachometer-alt me-2"></i>Dashboard</a>
            
             <a href="{% url 'list_withdrawal_requests' %}" class="nav-item nav-link "><i class="fas fa-money-bill-alt me-2"></i>Withdrawal List</a>
@@ -25,12 +25,20 @@
         <i class="fas fa-chart-line me-2"></i>Investment
     </a>
     <div class="dropdown-menu bg-transparent border-0">
+        {% if user.is_authenticated and user.group.title == 'admin' %}
         {% url 'purchase_consumable_dashboard' as purchase_url %}
         <a href="{{ purchase_url }}" 
            class="dropdown-item {% if request.path == purchase_url %}active{% endif %}">
            <i class="fas fa-boxes me-2"></i>Items Purchase Request
         </a>
-
+        {% endif %}
+         {% if user.is_authenticated and user.group.title == 'staff' %}
+        {% url 'purchase_request_list' as purchase_request_list %}
+        <a href="{{ purchase_request_list }}" 
+           class="dropdown-item {% if request.path == purchase_request_list %}active{% endif %}">
+           <i class="fas fa-boxes me-2"></i>Make Request 
+        </a>
+        {% endif %}
         {% url 'selling_plan_list' as selling_url %}
         <a href="{{ selling_url }}" 
            class="dropdown-item {% if request.path == selling_url %}active{% endif %}">
